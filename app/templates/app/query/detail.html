@@ -1,0 +1,15 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ query.type.name }} | {{ query.place_id }}
+{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'query_type_list' %}">Мои запросы</a></li>
+    <li class="breadcrumb-item"><a href="{{ query.type.get_absolute_url }}">{{ query.type.name }}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ query.place_id }}</li>
+  </ol>
+</nav>
+{% endblock %}

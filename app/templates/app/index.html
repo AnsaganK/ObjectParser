@@ -1,0 +1,16 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    Главная
+{% endblock %}
+
+{% block content %}
+    <div class="statistic_text">
+        <h3>Статистика по аккаунту</h3>
+        <p>Пользователь: {{ user.last_name }} {{ user.first_name }}</p>
+        <p>На сайте с: {{ user.date_joined }}</p>
+        <p>Всего запросов: {{ query_types.count }}</p>
+        <p>Всего данных: {{ queries.count }}</p>
+    </div>
+
+{% endblock %}

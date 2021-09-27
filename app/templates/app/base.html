@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Главная{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    {% block style %}
+    
+    {% endblock %}
+    <style>
+        html, body{
+            height: 100%;
+        }
+        body{
+            padding: 0px;
+            margin: 0px;
+            display: flex;
+            flex-direction: column;
+        }
+        .wrapper{
+            flex: 1 0 auto;
+        }
+        ul{
+            padding: 0px;
+            margin: 0px;
+            list-style-type: none;
+        }
+        a{
+            text-decoration: none;
+            color: inherit;
+        }
+        .header{
+            height: 60px;
+            background-color: #5588ac;
+            box-shadow: 0px 0px 5px 2px #9c9c9c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo{
+            color:white;
+            font-family: "Roboto", "Lucida Grande", "DejaVu Sans", "Bitstream Vera Sans", Verdana, Arial, sans-serif;
+            font-size: 32px;
+        }
+        .sidebar{
+            background-color: #719fc0;
+            display: flex;
+            justify-content: center;
+            color: white;
+            align-items: center;
+        }
+        .menu{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .menu li a{
+            display: flex;
+            padding: 10px;
+            height: 40px;
+            margin: auto 10px;
+            justify-content: center;
+            align-items: center;
+            transition: all .2s linear;
+        }
+        .menu li a:hover, .active_link{
+            background-color: #5588ac;
+            color: white;
+        }
+        .content{
+            padding: 5px 15px;
+        }
+        .footer{
+            height: 100px;
+            background-color: #5588ac;
+            flex-shrink: 0;
+        }
+        .pagination{
+            display: block;
+            margin: 10px auto;
+            width: fit-content;
+        }
+        .button_add{
+            position: absolute;
+            right: 20px;
+            background-color: #70bff7;
+            border-color: #99b7e4;
+        }
+        .statistic_text{
+            text-align: center;
+            color: grey;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="header">
+            <span class="logo">
+                GoogleParser
+            </span>
+        </div>
+        <div class="sidebar">
+            <ul class="menu">
+                <li><a href="{% url 'index' %}">Главная</a></li>
+                <li><a href="{% url 'query_type_list' %}">Мои запросы</a></li>
+                <li><a href="{% url 'profile' %}">Кабинет</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            {% block content %}
+
+            {% endblock %}
+        </div>
+    </div>
+    <div class="footer">
+
+    </div>
+{% block script %}
+
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+</body>
+</html>

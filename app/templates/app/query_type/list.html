@@ -1,0 +1,28 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    Список моих запросов
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'query_type_add' %}" class="btn btn-primary button_add">Добавить</a>
+    <table class="table caption-top">
+        <caption>Список запросов</caption>
+        <thead class="table-light">
+            <tr>
+                <td>Название</td>
+                <td>Страниц</td>
+                <td>Время</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for query_type in query_types %}
+            <tr>
+                <td><a href="{{ query_type.get_absolute_url }}">{{ query_type.name }}</a></td>
+                <td>{{ query_type.page }}</td>
+                <td>{{ query_type.date_create }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

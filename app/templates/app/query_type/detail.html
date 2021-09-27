@@ -1,0 +1,30 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ query_type.name }}
+{% endblock %}
+
+{% block content %}
+    <table class="table caption-top">
+        <caption>{{ query_type.name }}</caption>
+        <thead>
+            <tr>
+                <td>Идентификатор</td>
+                <td>Название</td>
+                <td>Рейтинг</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for query in queries %}
+                <tr>
+                    <td><a href="{{ query.get_absolute_url }}">{{ query.place_id }}</a></td>
+                    <td>{{ query.data.name }}</td>
+                    <td>{{ query.data.rating }}</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+    {% include 'app/include/pagination.html' with page=queries %}
+{% endblock %}

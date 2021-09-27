@@ -1,0 +1,140 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% block title %}doc.navistar-asia.com{% endblock %}</title>
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'materialize/css/materialize.min.css' %}">
+    <link rel="icon" href="{% static 'css/new.css' %}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <style>
+
+    	.background{
+    		background-image: url("{% static 'img/back.jpg' %}");
+    		background-size: cover;
+    	}
+        body{
+    		background:#f3f3f3;
+    	}
+        .toastError{
+            background-color: red;
+        }
+    </style>
+    {% block style %}
+
+    {% endblock %}
+    <script
+	  src="https://code.jquery.com/jquery-3.6.0.min.js"
+	  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+	  crossorigin="anonymous"></script>
+</head>
+<body>
+	<nav>
+	  <div class="nav-wrapper" style="background-color:white ">
+	    <a href="#" class="brand-logo center" style="height:64px;"><img src="{% static 'img/new_logo.png' %}" height="64spx"></a>
+
+
+	  </div>
+	</nav>
+  <div class="content" style="
+    width: 500px;
+    margin: 50px auto;
+    text-align: center;">
+        <div class="content_login">
+            <h4 class="content_title">Авторизация</h4>
+            <form action="{% url 'login' %}" class="form_box" method="post">
+                {% csrf_token %}
+                <div class="form_item">
+                    <label for="">Логин</label>
+                    <input type="text" name="username">
+                </div>
+                <div class="form_item">
+                    <label for="">Пароль</label>
+                    <input type="password" name="password">
+                </div>
+                <button type="submit" style="margin-top:30px;" class="form_button btn">Войти</button>
+            </form>
+        </div>
+
+
+  </div>
+    <script src="{% static 'materialize/js/materialize.min.js' %}"></script>
+    <script>
+        {% if form.errors %}
+            M.toast({html: 'Ошибка', classes: "toastError"})
+        {% endif %}
+    </script>
+   <!-- <script>
+
+    let form = document.querySelector("form.form_box");
+    form.onsubmit = function(evt){
+        evt.preventDefault();
+        let formData = new FormData(form);
+        createNoteAPI(formData)
+    }
+
+    async function createNoteAPI(userData){
+        url = '/fetch/user/auth';
+        await fetch(url, {
+            method: "POST",
+            body: userData,
+        }).then(async response => {
+                if (response.status === 200) {
+                    successCreateToast();
+                    updateData();
+                }else{
+                    errorMessage(await response.json());
+                }
+            }
+        ).catch(error=>{
+            errorConnectionToast();
+            console.log(error);
+        })
+    }
+
+    function errorMessage(data){
+        if (data.messages != null){
+            data.messages.forEach(
+                elem => {
+                    M.toast({html: `${elem.message}`, classes: "toastError"})
+                }
+            )
+        }else{
+            M.toast({html: 'Ошибка', classes: "toastError"})
+            M.toast({html: 'Проверьте правильность данных', classes: "toastError"})
+        }
+    }
+
+    function updateData(){
+        let status;
+        let tabs = document.getElementsByClassName("tabs")[0];
+        for (var i=0; i<tabs.children.length; ++i){
+            console.log(tabs.children[i]);
+            if (tabs.children[i].children[0].classList.contains('active')){
+                console.log(tabs.children[i]);
+                status = tabs.children[i].getAttribute("data-status");
+                console.log(status)
+                break;
+            }
+        }
+        loadNotesList(q=status);
+    }
+
+    function successCreateToast(){
+        M.toast({html: 'Вы вошли', classes: "toastSuccess"})
+    }
+
+
+    /*Ошибка при отсутсвии интернета и серверных ошибках(редактирование, удаление, создание)*/
+    function errorConnectionToast(){
+        M.toast({html: 'Нет соединения', classes: "toastError"})
+    }
+</script>-->
+
+
+
+</body>
+</html>
