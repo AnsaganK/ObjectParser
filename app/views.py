@@ -8,6 +8,12 @@ from app.models import QueryType, Query
 from app.parser import searchQuery
 from django.contrib import messages
 
+
+def show_form_errors(request, errors):
+    for error in errors:
+        messages.error(request, errors[error])
+
+
 def index(request):
     user = request.user
     if user.is_authenticated:
@@ -44,7 +50,7 @@ def query_type_add(request):
                     query.save()
             return redirect('/')
         else:
-            print(form.errors)
+            show_form_errors(request, form.errors)
             #Тут надо сделать message
             return render(request, 'app/query_type/add.html')
     return render(request, 'app/query_type/add.html')
@@ -83,8 +89,7 @@ def profile(request):
         if form.is_valid():
             form.save()
         else:
-            for error in form.errors:
-                messages.error(request, form.errors[error])
+            show_form_errors(request, form.errors)
         return redirect(reverse('profile'))
     return render(request, 'app/user/profile.html', {'user': user})
 
@@ -97,7 +102,5 @@ def registration(request):
             login(request, user)
             return redirect(reverse('profile'))
         else:
-            for error in form.errors:
-                messages.error(request, form.errors[error])
-
+            show_form_errors(request, form.errors)
     return render(request, 'app/user/add.html')

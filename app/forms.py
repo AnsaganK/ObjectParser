@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class QueryTypeForm(forms.Form):
     name = forms.CharField(max_length=1000)
     page = forms.IntegerField(min_value=1, max_value=100)
-    detail = forms.BooleanField()
+    detail = forms.BooleanField(required=False)
 
 
 class UserCreateForm(UserCreationForm):

@@ -24,7 +24,7 @@
                     <td>{{ query.data.name }}</td>
                     <td>{{ query.data.formatted_address }}</td>
                     <td>{{ query.data.rating }}</td>
-                    <td>{% if query.detail_data %} Есть {% endif %}</td>
+                    <td>{% if query.detail_data %} Есть {% else %} Нет {% endif %}</td>
                 </tr>
             {% endfor %}
 
