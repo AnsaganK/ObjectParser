@@ -1,0 +1,38 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    Регистрация
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" class="custom_form">
+          <span class="form_title">Регистрация</span>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Логин</label>
+            <input type="text" required class="form-control" name="username">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Фамилия</label>
+            <input type="text" class="form-control" name="last_name">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Имя</label>
+            <input type="text" class="form-control" name="first_name">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Почта</label>
+            <input type="email" required class="form-control" name="email">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Пароль</label>
+            <input type="password" required class="form-control" name="password1">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Повторите пароль</label>
+            <input type="password" required class="form-control" name="password2">
+          </div>
+        <button type="submit" class="btn btn-outline-secondary centered">Зарегистрироваться</button>
+        <a href="{% url 'login' %}" class="centered_link">Вход</a>
+    </form>
+{% endblock %}

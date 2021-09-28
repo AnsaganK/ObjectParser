@@ -2,6 +2,10 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.shortcuts import reverse
+
 
 class QueryType(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='query_types', verbose_name='Пользователь')
@@ -27,8 +31,9 @@ class QueryType(models.Model):
 
 class Query(models.Model):
     place_id = models.TextField(verbose_name='Идентификатор в гугл картах')
-    data = models.JSONField(verbose_name='Данные JSON')
-    type = models.ForeignKey(QueryType, on_delete=models.CASCADE, related_name='queries', verbose_name='Запрос')
+    data = models.JSONField(null=True, blank=True, verbose_name='Данные JSON')
+    detail_data = models.JSONField(null=True, blank=True, verbose_name='Детальные данные JSON')
+    type = models.ForeignKey(QueryType, null=True, blank=True, on_delete=models.CASCADE, related_name='queries', verbose_name='Запрос')
 
     def __str__(self):
         return self.place_id
@@ -40,3 +45,15 @@ class Query(models.Model):
 
     def get_absolute_url(self):
         return reverse('query_detail', args=[self.id])
+
+
+#
+# @receiver(post_save, sender=User)
+# def create_user_profile(sender, instance, created, **kwargs):
+#     if created:
+#         Profile.objects.create(user=instance)
+#
+#
+# @receiver(post_save, sender=User)
+# def save_user_profile(sender, instance, **kwargs):
+#     instance.profile.save()

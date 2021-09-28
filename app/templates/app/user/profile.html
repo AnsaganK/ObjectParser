@@ -6,7 +6,27 @@
 
 
 {% block content %}
-    <p>{{ user.first_name }}</p>
-    <p>{{ user.last_name }}</p>
-    <p>{{ user.username }}</p>
+    <form action="" class="custom_form" method="post">
+            {% csrf_token %}
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Логин</label>
+            <input type="text" required class="form-control" name="username" value="{{ user.username }}">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Фамилия</label>
+            <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Имя</label>
+            <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Почта</label>
+            <input type="email" class="form-control" name="email" value="{{ user.email }}">
+          </div>
+        <div class="centered centered_flex">
+            <button type="submit" class="btn btn-warning">Изменить</button>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Выход</a>
+        </div>
+    </form>
 {% endblock %}

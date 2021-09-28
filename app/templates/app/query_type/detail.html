@@ -11,7 +11,9 @@
             <tr>
                 <td>Идентификатор</td>
                 <td>Название</td>
+                <td>Адрес</td>
                 <td>Рейтинг</td>
+                <td>Детальная информация</td>
             </tr>
         </thead>
         <tbody>
@@ -20,7 +22,9 @@
                 <tr>
                     <td><a href="{{ query.get_absolute_url }}">{{ query.place_id }}</a></td>
                     <td>{{ query.data.name }}</td>
+                    <td>{{ query.data.formatted_address }}</td>
                     <td>{{ query.data.rating }}</td>
+                    <td>{% if query.detail_data %} Есть {% endif %}</td>
                 </tr>
             {% endfor %}
 

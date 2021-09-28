@@ -91,6 +91,68 @@
             color: grey;
             margin: 20px auto;
         }
+        .custom_form{
+            max-width: 400px;
+            margin: 10px auto;
+            width: 90%;
+        }
+        .centered{
+            margin: 1px auto;
+            display: block;
+        }
+        .welcome_text{
+            margin: 20px auto;
+            text-align: center;
+            color: #5a5a5a;
+            font-size: 19px;
+        }
+        .welcome_text a{
+            color: #6f9fcc;
+        }
+        .centered_link{
+            text-align: center;
+            margin: 10px auto;
+            display: block;
+            width: fit-content;
+        }
+        .centered_flex{
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+        .msg{
+            margin: 5px auto;
+            padding: 10px;
+            width: 230px;
+            display: block;
+            color: white;
+            background-color: #9c9c9c;
+            border-radius: 2px;
+            box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
+        }
+        .messages{
+            display: flex;
+            position: absolute;
+            right: 20px;
+            flex-direction: column;
+        }
+        .msg-error{
+            background-color: orangered;
+        }
+        .msg-success{
+            background-color: lightgreen;
+        }
+        .msg-warning{
+            background-color: orange;
+        }
+        .form_title{
+            border-bottom: 1px solid #719fc0;
+            display: block;
+            padding: 6px;
+            text-align: right;
+            color: grey;
+            margin: 10px auto;
+        }
     </style>
 </head>
 <body>
@@ -100,11 +162,24 @@
                 GoogleParser
             </span>
         </div>
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <span class="msg msg-{{ message.tags }}">{{ message|safe }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
         <div class="sidebar">
             <ul class="menu">
+
+            {% if request.user.is_authenticated %}
                 <li><a href="{% url 'index' %}">Главная</a></li>
                 <li><a href="{% url 'query_type_list' %}">Мои запросы</a></li>
                 <li><a href="{% url 'profile' %}">Кабинет</a></li>
+            {% else %}
+                <li><a href="{% url 'index' %}">Главная</a></li>
+                <li><a href="{% url 'login' %}">Войти</a></li>
+            {% endif %}
             </ul>
         </div>
         <div class="content">
