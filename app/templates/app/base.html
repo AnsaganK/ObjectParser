@@ -68,6 +68,7 @@
             color: white;
         }
         .content{
+            margin: 10px auto;
             padding: 5px 15px;
         }
         .footer{
@@ -152,6 +153,43 @@
             text-align: right;
             color: grey;
             margin: 10px auto;
+        }
+        .empty{
+            color: grey;
+        }
+        .reviews{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .review{
+            border:1px solid grey;
+            margin: 10px;
+            border-radius: 3px;
+            padding: 5px;
+            background-color: aliceblue;
+            transition: background-color .4s linear;
+        }
+        .review .author{
+            display: block;
+            width: fit-content;
+            border-bottom: 1px solid black;
+        }
+        .review .text{
+            transition: color .4s linear;
+            color: grey;
+        }
+        .review:hover{
+            background-color: white;
+        }
+        .review:hover .text{
+            color: #000;
+        }
+        .accordion_flex{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 95%;
         }
     </style>
 </head>

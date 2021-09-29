@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, reverse
 
 from app.forms import QueryTypeForm, UserForm, UserCreateForm
 from app.models import QueryType, Query
-from app.parser import searchQuery
+from app.parser import searchQuery, updateDetail
 from django.contrib import messages
 
 
@@ -80,6 +80,13 @@ def query_type_detail(request, pk):
 def query_detail(request, pk):
     query = Query.objects.filter(pk=pk).first()
     return render(request, 'app/query/detail.html', {'query': query})
+
+@login_required()
+def query_update(request, pk):
+    query = Query.objects.filter(pk=pk).first()
+    updateDetail(query.pk)
+    return redirect(query.get_absolute_url())
+
 
 @login_required()
 def profile(request):

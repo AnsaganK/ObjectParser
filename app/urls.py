@@ -10,6 +10,7 @@ urlpatterns = [
     path('query_type/<int:pk>', views.query_type_detail, name="query_type_detail"),
 
     path('query/<int:pk>', views.query_detail, name="query_detail"),
+    path('query/update/<int:pk>', views.query_update, name="query_update"),
 
     path('profile/', views.profile, name="profile"),
     path('registration/', views.registration, name="registration")

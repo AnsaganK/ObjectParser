@@ -8,6 +8,7 @@ from app.models import Query, QueryType
 KEY = 'AIzaSyAbOkxUWUw9z54up8AiMSCMX7rO7-8hqv8'
 gmaps = googlemaps.Client(key=KEY)
 detail_url = 'https://www.google.com/maps/place/?q=place_id:'
+photo_url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth={0}&photo_reference={1}&key={2}'
 detail_url_for_api = 'https://maps.googleapis.com/maps/api/place/details/json?place_id={0}&key={1}'
 
 
@@ -23,6 +24,16 @@ def searchDetail(place_id, query_type):
     detail_data = requests.get(url_api)
     query = Query.objects.create(place_id=place_id, type=query_type, detail_data=detail_data.json()['result'])
     query.save()
+
+
+def updateDetail(pk):
+    query = Query.objects.filter(pk=pk).first()
+    place_id = query.place_id
+    url_api = detail_url_for_api.format(place_id, KEY)
+    detail_data = requests.get(url_api)
+    query.detail_data = detail_data.json()['result']
+    query.save()
+
 
 def searchQuery(name, page_token='', page=1, detail=False, query_type_id=None):
     result_list = []

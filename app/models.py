@@ -34,6 +34,8 @@ class Query(models.Model):
     data = models.JSONField(null=True, blank=True, verbose_name='Данные JSON')
     detail_data = models.JSONField(null=True, blank=True, verbose_name='Детальные данные JSON')
     type = models.ForeignKey(QueryType, null=True, blank=True, on_delete=models.CASCADE, related_name='queries', verbose_name='Запрос')
+    date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    date_update = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return self.place_id
