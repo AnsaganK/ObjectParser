@@ -1,4 +1,8 @@
+import csv
+
 from celery import shared_task
+from django.http import StreamingHttpResponse
+
 
 @shared_task
 def add_task(x, y):
@@ -90,3 +94,61 @@ def searchQuery(name, page_token='', page=1, detail=False, query_type_id=None):
         print(e)
         return []
 
+
+def get_headers():
+    return {
+        'place_id': 'place_id',
+        'name': 'name',
+        'formatted_address': 'formatted_address',
+        'rating': 'rating',
+    }
+
+def get_data(query):
+    return {
+        'place_id': query.place_id,
+        'name': query.data['name'] if 'name' in query.data else '-',
+        'formatted_address': query.data['formatted_address'] if 'formatted_address' in query.data else '-',
+        'rating': query.data['rating'] if 'rating' in query.data else '-',
+    }
+
+
+class Echo(object):
+    def write(self, value):
+        return value
+
+def iter_items(items, pseudo_buffer):
+    writer = csv.DictWriter(pseudo_buffer, fieldnames=get_headers())
+    yield writer.writerow(get_headers())
+
+    for item in items:
+        yield writer.writerow(get_data(item))
+
+def get_response(queryset):
+    response = StreamingHttpResponse(
+        streaming_content=(iter_items(queryset, Echo())),
+        content_type='text/csv',
+    )
+    response['Content-Disposition'] = 'attachment;filename=items.csv'
+    return response
+
+def generate_file(file_name, queries):
+    response = StreamingHttpResponse(
+        streaming_content=(iter_items(queries, Echo())),
+        content_type='text/csv',
+    )
+    response['Content-Disposition'] = 'attachment;filename=items.csv'
+    return response
+    response = StreamingHttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="data.csv"'
+
+    writer = csv.writer(response, delimiter=',', lineterminator="\r")
+    query_list = [['place_id', 'name', 'formatted_address', 'rating']]
+    for query in queries:
+        query_object = []
+        query_object.append(query.place_id)
+        query_object.append(query.data['name'] if 'name' in query.data else '-')
+        query_object.append(query.data['formatted_address'] if 'formatted_address' in query.data else '-')
+        query_object.append(query.data['rating'] if 'rating' in query.data else '-')
+        query_list.append(query_object)
+    writer.writerows(query_list)
+    return response

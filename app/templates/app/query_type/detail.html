@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block content %}
+    <a href="{% url 'query_type_file' query_type.pk %}" class="btn btn-primary button_add">Сгенерировать файл</a>
     <select class="form-select form-select-sm custom_form" onchange="window.location.href = '{{ request.get_path }}?sorted='+this.value">
         <option value="">По умолчанию</option>
         <option value="rating_gt" {% if sort_type == 'rating_gt' %}selected{% endif %}>По возрастанию рейтинга</option>

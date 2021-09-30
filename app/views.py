@@ -9,12 +9,13 @@ from app.parser import searchQuery, updateDetail
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
-from app.tasks import celery_parser
+from app.tasks import celery_parser, generate_file
 
 
 def show_form_errors(request, errors):
     for error in errors:
         messages.error(request, errors[error])
+
 
 
 def index(request):
@@ -99,6 +100,17 @@ def query_type_detail(request, pk):
     except EmptyPage:
         queries = paginator.page(paginator.num_pages)
     return render(request, 'app/query_type/detail.html', {'query_type': query_type, 'queries': queries, 'sort_type': sort_type})
+
+
+@login_required()
+def query_type_file_generate(request, pk):
+    query_type = QueryType.objects.filter(pk=pk).first()
+    if not query_type:
+        return redirect(query_type.get_absolute_url)
+    queries = query_type.queries.all()
+    name = query_type.name
+    file = generate_file(name, queries)
+    return file
 
 
 @login_required()
