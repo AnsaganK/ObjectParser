@@ -101,6 +101,14 @@ def query_type_detail(request, pk):
         queries = paginator.page(paginator.num_pages)
     return render(request, 'app/query_type/detail.html', {'query_type': query_type, 'queries': queries, 'sort_type': sort_type})
 
+@login_required()
+def query_type_delete(request, pk):
+    query_type = QueryType.objects.filter(pk=pk).first()
+    if query_type and query_type.user == request.user:
+        query_type.delete()
+        messages.success(request, f'Запрос "{query_type.name}" успешно удален')
+    return redirect('query_type_list')
+
 
 @login_required()
 def query_type_file_generate(request, pk):

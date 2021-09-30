@@ -37,4 +37,5 @@
         </tbody>
     </table>
     {% include 'app/include/pagination.html' with page=queries %}
+    <a href="{% url 'query_type_delete' query_type.pk %}" class="btn btn-danger aligned right">Удалить данный запрос</a>
 {% endblock %}
