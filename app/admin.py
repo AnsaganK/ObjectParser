@@ -5,6 +5,7 @@ from .models import Query, QueryType
 class QueryTypeAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'query_count']
     list_display_links = ['id', 'name']
+    list_filter = ['user']
 
 
 @admin.register(Query)

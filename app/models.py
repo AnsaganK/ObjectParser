@@ -12,6 +12,13 @@ class QueryType(models.Model):
     name = models.CharField(max_length=1000, verbose_name='Название')
     page = models.IntegerField(null=True, blank=True)
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    status_choices = (
+        ('wait', 'wait'),
+        ('success', 'success'),
+        ('warning', 'warning'),
+        ('error', 'error'),
+    )
+    status = models.CharField(choices=status_choices, default='success', max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -36,6 +43,13 @@ class Query(models.Model):
     type = models.ForeignKey(QueryType, null=True, blank=True, on_delete=models.CASCADE, related_name='queries', verbose_name='Запрос')
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     date_update = models.DateTimeField(auto_now=True, null=True, blank=True)
+    # rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
+
+    @property
+    def get_rating(self):
+        return self.data['rating'] if self.data and 'rating' in self.data else 0
+
+
 
     def __str__(self):
         return self.place_id

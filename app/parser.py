@@ -42,7 +42,7 @@ def searchQuery(name, page_token='', page=1, detail=False, query_type_id=None):
         response = gmaps.places(query=name, page_token=page_token)
         results = response['results']
         searchDetailList(results, detail, query_type_id)
-        if page > 1:
+        if page > 1 and 'next_page_token' in response:
             if response['next_page_token']:
                 page_token = response['next_page_token']
             page -= 1

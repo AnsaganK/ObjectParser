@@ -48,9 +48,18 @@
                         <p><span>Рейтинг:</span> <span>{{ query.detail_data.rating }}</span></p>
                         <p><span>Пользователей оценило:</span> <span>{{ query.detail_data.user_ratings_total }}</span></p>
                         <p><span>Тип:</span> <span>{% for type in query.detail_data.types %}{{ type }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></p>
-                        <p><span>Ссылка GoogleMaps:</span> <span><a href="{{ query.detail_data.url }}" target="_blank">{{ query.detail_data.url }}</a></span></p>
+                        <p><span>Ссылка GoogleMaps 1:</span> <span><a href="{{ query.detail_data.url }}" target="_blank">{{ query.detail_data.url }}</a></span></p>
+                        <p><span>Ссылка GoogleMaps 2:</span> <span><a href="https://www.google.com/maps/place/?q=place_id:{{ query.place_id }}" target="_blank">https://www.google.com/maps/place/?q=place_id:{{ query.place_id }}</a></span></p>
                         <p><span>Ссылка на сайт:</span> <span><a href="{{ query.detail_data.website }}" target="_blank">{{ query.detail_data.website }}</a></span></p>
                         <p><span>Телефон:</span> <span>{{ query.detail_data.formatted_phone_number }}</span></p>
+                        <p><span>График:</span> <span>
+                            {% for day in query.detail_data.opening_hours.weekday_text %}
+                                <p class="weekday_text">{{ day }}</p>
+                                {% empty %}
+                                Не указан
+                            {% endfor %}
+                        </span>
+                        </p>
                         <h4>Отзывы</h4>
                         <div class="reviews">
                         {% for review in query.detail_data.reviews %}

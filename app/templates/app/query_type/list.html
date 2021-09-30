@@ -1,5 +1,5 @@
 {% extends 'app/base.html' %}
-
+{% load static %}
 {% block title %}
     Список моих запросов
 {% endblock %}
@@ -21,7 +21,16 @@
         <tbody>
         {% for query_type in query_types %}
             <tr>
-                <td><a href="{{ query_type.get_absolute_url }}">{{ query_type.name }}</a></td>
+                <td class="td_flex">
+                    <img src="
+                    {% if query_type.status == 'success' %}{% static 'img/success.svg' %}{% endif %}
+                    {% if query_type.status == 'warning' %}{% static 'img/warning.svg' %}{% endif %}
+                    {% if query_type.status == 'wait' %}{% static 'img/wait.svg' %}{% endif %}
+                    {% if query_type.status == 'error' %}{% static 'img/error.svg' %}{% endif %}
+                    " alt="" width="20px" height="20px">
+
+                    <a href="{{ query_type.get_absolute_url }}">{{ query_type.name }}</a>
+                </td>
                 <td>{{ query_type.page }}</td>
                 <td>{{ query_type.date_create }}</td>
                 <td>{{ query_type.queries.count }}</td>
@@ -29,6 +38,7 @@
         {% endfor %}
         </tbody>
     </table>
+        {% include 'app/include/pagination.html' with page=query_types %}
     {% else %}
         <p class="centered_link">Вы еще не составляли запросов</p>
     {% endif %}

@@ -1,15 +1,15 @@
 <div class="btn-toolbar pagination" role="toolbar" aria-label="Toolbar with button groups">
   <div class="btn-group me-2" role="group" aria-label="First group">
       {% if page.has_previous %}
-          <a href="?page=1" type="button" class="btn btn-outline-secondary"><<</a>
-          <a href="?page={{ page.previous_page_number }}" type="button" class="btn btn-outline-secondary">{{ page.previous_page_number }}</a>
+          <a href="?{% if sort_type %}sorted={{ sort_type }}{% endif %}&page=1" type="button" class="btn btn-outline-secondary"><<</a>
+          <a href="?{% if sort_type %}sorted={{ sort_type }}{% endif %}&page={{ page.previous_page_number }}" type="button" class="btn btn-outline-secondary">{{ page.previous_page_number }}</a>
       {% endif %}
 
         <a type="button" class="btn btn-secondary ">{{ page.number }}</a>
 
         {% if page.has_next %}
-            <a href="?page={{ page.next_page_number }}" type="button" class="btn btn-outline-secondary">{{ page.next_page_number }}</a>
-            <a href="?page={{ page.paginator.num_pages }}" type="button" class="btn btn-outline-secondary">>></a>
+            <a href="?{% if sort_type %}sorted={{ sort_type }}{% endif %}&page={{ page.next_page_number }}" type="button" class="btn btn-outline-secondary">{{ page.next_page_number }}</a>
+            <a href="?{% if sort_type %}sorted={{ sort_type }}{% endif %}&page={{ page.paginator.num_pages }}" type="button" class="btn btn-outline-secondary">>></a>
         {% endif %}
   </div>
 </div>

@@ -8,6 +8,9 @@ from app.models import QueryType, Query
 from app.parser import searchQuery, updateDetail
 from django.contrib import messages
 
+from app.parser_selenium import selenium_query_detail
+from app.tasks import celery_parser
+
 
 def show_form_errors(request, errors):
     for error in errors:
@@ -31,23 +34,23 @@ def query_type_add(request):
             query_type_name = cd['name']
             query_type_page = cd['page']
             detail = cd['detail']
-            query_type = QueryType(user=request.user, name=query_type_name, page=query_type_page)
+            query_type = QueryType(user=request.user, name=query_type_name, page=query_type_page, status='wait')
             query_type.save()
             query_type_id = query_type.id
 
-            queries = searchQuery(name=query_type_name, page=query_type_page, detail=detail, query_type_id=query_type_id)
-            for q in queries:
-                if detail:
-                    query = Query.objects.filter(place_id=q['place_id']).first()
-                    if query:
-                        query.data = q
-                        query.save()
-                    else:
-                        query = Query(place_id=q['place_id'], type=query_type, data=q)
-                        query.save()
-                else:
-                    query = Query(place_id=q['place_id'], type=query_type, data=q)
-                    query.save()
+            celery_parser.delay(name=query_type_name, page=query_type_page, detail=detail, query_type_id=query_type_id)
+            # for q in queries:
+            #     if detail:
+            #         query = Query.objects.filter(place_id=q['place_id']).first()
+            #         if query:
+            #             query.data = q
+            #             query.save()
+            #         else:
+            #             query = Query(place_id=q['place_id'], type=query_type, data=q)
+            #             query.save()
+            #     else:
+            #         query = Query(place_id=q['place_id'], type=query_type, data=q)
+            #         query.save()
             return redirect('/')
         else:
             show_form_errors(request, form.errors)
@@ -60,12 +63,30 @@ def query_type_add(request):
 def query_type_list(request):
     user = request.user
     query_types = QueryType.objects.filter(user=user)
+    paginator = Paginator(query_types, 20)
+    page = request.GET.get('page')
+    try:
+        query_types = paginator.page(page)
+    except PageNotAnInteger:
+        query_types = paginator.page(1)
+    except EmptyPage:
+        query_types = paginator.page(paginator.num_pages)
     return render(request, 'app/query_type/list.html', {'query_types': query_types})
+
+def rating_sorted(query):
+    return query.get_rating
 
 @login_required()
 def query_type_detail(request, pk):
     query_type = QueryType.objects.filter(pk=pk).first()
     queries = query_type.queries.all()
+    sort_type = None
+    if request.GET:
+        sort_type = request.GET.get('sorted')
+        if sort_type == 'rating_gt':
+            queries = sorted(queries, key=rating_sorted)
+        elif sort_type == 'rating_lt':
+            queries = sorted(queries, key=rating_sorted, reverse=True)
     paginator = Paginator(queries, 20)
     page = request.GET.get('page')
     try:
@@ -74,16 +95,19 @@ def query_type_detail(request, pk):
         queries = paginator.page(1)
     except EmptyPage:
         queries = paginator.page(paginator.num_pages)
-    return render(request, 'app/query_type/detail.html', {'query_type': query_type, 'queries': queries})
+    return render(request, 'app/query_type/detail.html', {'query_type': query_type, 'queries': queries, 'sort_type': sort_type})
+
 
 @login_required()
 def query_detail(request, pk):
     query = Query.objects.filter(pk=pk).first()
     return render(request, 'app/query/detail.html', {'query': query})
 
+
 @login_required()
 def query_update(request, pk):
     query = Query.objects.filter(pk=pk).first()
+    #selenium_query_detail(place_id=query.place_id)
     updateDetail(query.pk)
     return redirect(query.get_absolute_url())
 
