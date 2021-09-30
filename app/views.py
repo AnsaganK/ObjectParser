@@ -37,8 +37,11 @@ def query_type_add(request):
             query_type = QueryType(user=request.user, name=query_type_name, page=query_type_page, status='wait')
             query_type.save()
             query_type_id = query_type.id
-
-            celery_parser.delay(name=query_type_name, page=query_type_page, detail=detail, query_type_id=query_type_id)
+            try:
+                celery_parser.delay(name=query_type_name, page=query_type_page, detail=detail, query_type_id=query_type_id)
+            except:
+                query_type.status = 'error'
+                query_type.save()
             # for q in queries:
             #     if detail:
             #         query = Query.objects.filter(place_id=q['place_id']).first()
