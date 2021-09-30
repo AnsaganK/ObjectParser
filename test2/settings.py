@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from constants import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST
 
@@ -27,7 +27,11 @@ SECRET_KEY = 'django-insecure-)u2ol6=b4+c$x8at8o$fyb1=6)=+c87k^3!m%v^*ypt+_q2zx=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '185.237.165.243',
+    '127.0.0.1',
+    'localhost'
+]
 
 
 # Application definition
@@ -125,14 +129,9 @@ USE_L10N = True
 USE_TZ = True
 
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
