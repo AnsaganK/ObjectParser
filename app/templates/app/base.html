@@ -58,10 +58,13 @@
             display: flex;
             padding: 10px;
             height: 40px;
-            margin: auto 10px;
-            justify-content: center;
             align-items: center;
             transition: all .2s linear;
+        }
+        .menu>li>a{
+            margin: auto 10px;
+            color: whitesmoke;
+            justify-content: center;
         }
         .menu li a:hover, .active_link{
             background-color: #5588ac;
@@ -119,6 +122,11 @@
         .centered_flex{
             display: flex;
             justify-content: space-evenly;
+            align-items: center;
+        }
+        .between_flex{
+            display: flex;
+            justify-content: space-between;
             align-items: center;
         }
         .td_flex{
@@ -204,6 +212,9 @@
             padding: 0px 20px;
             color: #9c9c9c;
         }
+        .group_item{
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -224,13 +235,28 @@
             <ul class="menu">
 
             {% if request.user.is_authenticated %}
-                <li><a href="{% url 'index' %}">Главная</a></li>
-                <li><a href="{% url 'query_type_list' %}">Мои запросы</a></li>
-                <li><a href="{% url 'profile' %}">Кабинет</a></li>
+                <li><a href="{% url 'app:index' %}">Главная</a></li>
+                <li><a href="{% url 'app:query_type_list' %}">Мои запросы</a></li>
+                <li><a href="{% url 'app:profile' %}">Кабинет</a></li>
             {% else %}
-                <li><a href="{% url 'index' %}">Главная</a></li>
+                <li><a href="{% url 'app:index' %}">Главная</a></li>
                 <li><a href="{% url 'login' %}">Войти</a></li>
             {% endif %}
+            {% if request.user.is_superuser %}
+                <li class="nav-item dropdown">
+                  <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Админка
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <li><a class="dropdown-item" href="{% url 'app:admin_dashboard' %}">Панель управления</a></li>
+                    <li><a class="dropdown-item" href="{% url 'app:group_list' %}">Роли</a></li>
+                    <li><a class="dropdown-item" href="{% url 'app:user_list' %}">Пользователи</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Настройки</a></li>
+                  </ul>
+                </li>
+            {% endif %}
+
             </ul>
         </div>
         <div class="content">

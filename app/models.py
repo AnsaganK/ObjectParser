@@ -6,6 +6,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.shortcuts import reverse
 
+# class Role(models.Model):
+#     name = models.CharField(max_length=128, verbose_name='Название')
+#
+#     def __str__(self):
+#         return self.name
 
 class QueryType(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='query_types', verbose_name='Пользователь')
@@ -29,11 +34,19 @@ class QueryType(models.Model):
         ordering = ['-pk']
 
     def get_absolute_url(self):
-        return reverse('query_type_detail', args=[self.id])
+        return reverse('app:query_type_detail', args=[self.id])
 
     @property
     def query_count(self):
         return self.queries.count()
+
+
+# class QueryPlace(models.Model):
+#     type = models.ManyToManyField(QueryType)
+#     query = models.ManyToManyField('Query')
+#
+#     def __str__(self):
+#         return self.pk
 
 
 class Query(models.Model):
@@ -49,8 +62,6 @@ class Query(models.Model):
     def get_rating(self):
         return self.data['rating'] if self.data and 'rating' in self.data else 0
 
-
-
     def __str__(self):
         return self.place_id
 
@@ -60,11 +71,11 @@ class Query(models.Model):
         ordering = ['-pk']
 
     def get_absolute_url(self):
-        return reverse('query_detail', args=[self.id])
+        return reverse('app:query_detail', args=[self.id])
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
 
 @receiver(post_save, sender=User)

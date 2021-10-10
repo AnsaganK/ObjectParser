@@ -7,7 +7,7 @@
 {% block content %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'query_type_list' %}">Мои запросы</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'app:query_type_list' %}">Мои запросы</a></li>
     <li class="breadcrumb-item"><a href="{{ query.type.get_absolute_url }}">{{ query.type.name }}</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ query.place_id }}</li>
   </ol>
@@ -40,7 +40,7 @@
         </h2>
         <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo">
           <div class="accordion-body">
-                <a href="{% url 'query_update' query.pk %}" class="button_add btn btn-secondary">{% if query.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
+                <a href="{% url 'app:query_update' query.pk %}" class="button_add btn btn-secondary">{% if query.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
 
                   {% if query.detail_data %}
                         <p><span>Название:</span> <span>{{ query.detail_data.name }}</span></p>

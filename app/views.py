@@ -1,9 +1,12 @@
+from email.headerregistry import Group
+
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group, User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, reverse
 
-from app.forms import QueryTypeForm, UserForm, UserCreateForm
+from app.forms import QueryTypeForm, UserForm, UserCreateForm, UserDetailForm
 from app.models import QueryType, Query
 from app.parser import searchQuery, updateDetail
 from django.contrib import messages
@@ -158,3 +161,62 @@ def registration(request):
         else:
             show_form_errors(request, form.errors)
     return render(request, 'app/user/add.html')
+
+
+@login_required()
+def group_list(request):
+    groups = Group.objects.all()
+    groups_not_count = User.objects.filter(groups=None).count()
+    return render(request, 'app/admin_dashboard/group/list.html', {'groups': groups, 'groups_not_count': groups_not_count})
+
+
+@login_required()
+def group_detail(request, pk):
+    group = Group.objects.filter(pk=pk).first()
+    if group:
+        return render(request, 'app/admin_dashboard/group/detail.html', {'group': group})
+    return redirect('group_list')
+
+
+@login_required()
+def group_not(request):
+    users = User.objects.filter(groups=None)
+    return render(request, 'app/admin_dashboard/group/not.html', {'users': users})
+
+
+@login_required()
+def admin_dashboard(request):
+    user = request.user
+    if user.is_superuser:
+        return render(request, 'app/admin_dashboard/dashboard.html')
+    return redirect('/')
+
+
+@login_required()
+def user_list(request):
+    users = User.objects.all().order_by('-pk')
+    return render(request, 'app/user/list.html', {'users': users})
+
+
+@login_required()
+def user_detail(request, pk):
+    user = User.objects.filter(pk=pk).first()
+    if request.method == 'POST':
+        form = UserDetailForm(request.POST, instance=user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            cd = form.cleaned_data
+            group_id = cd['groups']
+            group = Group.objects.filter(id__in=group_id).first()
+            if group:
+                user.groups.clear()
+                user.groups.add(group)
+            user.save()
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:user_detail', args=[user.id]))
+
+    groups = Group.objects.all()
+    if user:
+        return render(request, 'app/user/detail.html', {'user': user, 'groups': groups})
+    return redirect('/')

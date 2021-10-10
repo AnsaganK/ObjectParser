@@ -117,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LOGIN_REDIRECT_URL = "index"
+LOGIN_REDIRECT_URL = "app:index"
 LOGOUT_REDIRECT_URL = "login"
 
 LANGUAGE_CODE = 'ru'

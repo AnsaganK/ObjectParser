@@ -1,0 +1,42 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ user.last_name }} {{ user.first_name }}
+{% endblock %}
+
+{% block content %}
+    {{ user.groups.all }}
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'app:admin_dashboard' %}">Админ панель</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'app:user_list' %}">Пользователи</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ user.last_name }} {{ user.first_name }}</li>
+      </ol>
+    <form action="" class="custom_form" method="post">
+    {% csrf_token %}
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Логин</label>
+            <input type="text" required class="form-control" name="username" value="{{ user.username }}">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Фамилия</label>
+            <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Имя</label>
+            <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+          </div>
+          <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Почта</label>
+            <input type="email" class="form-control" name="email" value="{{ user.email }}">
+          </div>
+    <div class="mb-3">
+        <select class="form-select form-select-sm" name="groups">
+            <option value="" {% if user.groups.count == 0 %}selected{% endif %}>Без роли</option>
+            {% for group in groups %}
+                <option value="{{ group.pk }}" {% if group in user.groups.all %}selected{% endif %}>{{ group.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+        <button type="submit" class="btn btn-warning">Изменить</button>
+    </form>
+{% endblock %}

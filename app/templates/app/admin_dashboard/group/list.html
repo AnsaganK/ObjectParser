@@ -1,0 +1,20 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    Группы
+{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'app:admin_dashboard' %}">Админ панель</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Роли</li>
+  </ol>
+</nav>
+    <ul class="list-group">
+    {% for group in groups %}
+        <li class="list-group-item between_flex"><a href="{% url 'app:group_detail' group.pk %}" class="group_item">{{ group.name }}</a><span>{{ group.user_set.all.count }}</span></li>
+    {% endfor %}
+        <li class="list-group-item list-group-item-danger between_flex"><a href="{% url 'app:group_not' %}">Пользователи без роли</a><span>{{ groups_not_count }}</span></li>
+    </ul>
+{% endblock %}

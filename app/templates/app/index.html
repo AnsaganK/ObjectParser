@@ -14,7 +14,7 @@
             <p>Всего данных: {{ queries.count }}</p>
         </div>
     {% else %}
-        <p class="welcome_text">Сайт предназначенный для парсинга, <a href="{% url 'login' %}">войдите</a> либо <a href="{% url 'registration' %}">зарегистрируйтесь</a> чтобы продолжить</p>
+        <p class="welcome_text">Сайт предназначенный для парсинга, <a href="{% url 'login' %}">войдите</a> либо <a href="{% url 'app:registration' %}">зарегистрируйтесь</a> чтобы продолжить</p>
     {% endif %}
 
 {% endblock %}

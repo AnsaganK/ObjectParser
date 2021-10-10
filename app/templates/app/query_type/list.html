@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'query_type_add' %}" class="btn btn-primary button_add">Добавить</a>
+    <a href="{% url 'app:query_type_add' %}" class="btn btn-primary button_add">Добавить</a>
     {% if query_types %}
 
     <table class="table caption-top">

@@ -6,8 +6,8 @@ from django.contrib.auth import views as acc
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('api.urls')),
-    path('', include('app.urls')),
+    path('api/v1/', include('api.urls', namespace='api')),
+    path('', include('app.urls', namespace='app')),
 ]
 
 urlpatterns += [

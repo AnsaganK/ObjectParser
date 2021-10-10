@@ -1,6 +1,8 @@
 from . import views
 from django.urls import path
 
+app_name = 'api'
+
 urlpatterns = [
     path('query_type/<int:user_id>', views.QueryTypeAPI.as_view(), name='query_type'),
     path('query_type/<int:pk>/queries', views.QueryAPI.as_view(), name='query_type_queries'),

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+app_name = 'app'
 
 urlpatterns = [
     path('', views.index, name="index"),
@@ -15,5 +16,14 @@ urlpatterns = [
     path('query/update/<int:pk>', views.query_update, name="query_update"),
 
     path('profile/', views.profile, name="profile"),
-    path('registration/', views.registration, name="registration")
+    path('registration/', views.registration, name="registration"),
+
+    path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
+
+    path('admin_dashboard/groups/', views.group_list, name="group_list"),
+    path('admin_dashboard/groups/not', views.group_not, name="group_not"),
+    path('admin_dashboard/groups/<int:pk>', views.group_detail, name="group_detail"),
+
+    path('admin_dashboard/users/', views.user_list, name="user_list"),
+    path('admin_dashboard/users/<int:pk>', views.user_detail, name="user_detail"),
 ]

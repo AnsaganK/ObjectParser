@@ -1,0 +1,18 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ group.name }}
+{% endblock %}
+
+{% block content %}
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'app:admin_dashboard' %}">Админ панель</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'app:group_list' %}">Роли</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ group.name }}</li>
+  </ol>
+    <ul class="list-group">
+    {% for user in group.user_set.all %}
+          <li class="list-group-item"><a href="{% url 'app:user_detail' user.pk %}">{{ user.username }}</a></li>
+    {% endfor %}
+    </ul>
+{% endblock %}
