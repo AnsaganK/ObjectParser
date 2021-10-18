@@ -1,89 +1,41 @@
 {% extends 'app/base.html' %}
-{% load app_tags %}
+
 {% block title %}
-    {{ query.type.name }} | {{ query.place_id }}
+    {{ query.name }}
 {% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'app:query_type_list' %}">Мои запросы</a></li>
-    <li class="breadcrumb-item"><a href="{{ query.type.get_absolute_url }}">{{ query.type.name }}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ query.place_id }}</li>
-  </ol>
-</nav>
-    <h4 class="centered_link">{{ query.data.name }}</h4>
-    <div class="accordion" id="accordionExample">
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingOne">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-            <div class="accordion_flex"><span>Данные взятые при первом парсинге</span> <span>{{ query.date_create}}</span></div>
-          </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
-          <div class="accordion-body">
+    <a href="{% url 'app:query_file' query.pk %}" class="btn btn-primary button_add">Сгенерировать файл</a>
+    <select class="form-select form-select-sm custom_form" onchange="window.location.href = '{{ request.get_path }}?sorted='+this.value">
+        <option value="">По умолчанию</option>
+        <option value="rating_gt" {% if sort_type == 'rating_gt' %}selected{% endif %}>По возрастанию рейтинга</option>
+        <option value="rating_lt" {% if sort_type == 'rating_lt' %}selected{% endif %}>По убыванию рейтинга</option>
+    </select>
+    <table class="table caption-top">
+        <caption>{{ query.name }}</caption>
+        <thead>
+            <tr>
+                <td>Идентификатор</td>
+                <td>Название</td>
+                <td>Адрес</td>
+                <td>Рейтинг</td>
+                <td>Детальный</td>
+            </tr>
+        </thead>
+        <tbody>
 
-                <p><span>Название:</span> <span>{{ query.data.name }}</span></p>
-                <p><span>Адрес:</span> <span>{{ query.data.formatted_address }}</span></p>
-                <p><span>Рейтинг:</span> <span>{{ query.data.rating }}</span></p>
-                <p><span>Пользователей оценило:</span> <span>{{ query.data.user_ratings_total }}</span></p>
-                <p><span>Тип:</span> <span>{% for type in query.data.types %}{{ type }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></p>
+            {% for place in places %}
+                <tr>
+                    <td><a href="{{ place.get_absolute_url }}">{{ place.place_id }}</a></td>
+                    <td>{{ place.data.name }}</td>
+                    <td>{{ place.data.formatted_address }}</td>
+                    <td>{{ place.get_rating }}</td>
+                    <td>{% if place.detail_data %} Есть {% else %} Нет {% endif %}</td>
+                </tr>
+            {% endfor %}
 
-          </div>
-        </div>
-      </div>
-    <div class="accordion-item">
-        <h2 class="accordion-header" id="headingTwo">
-          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-            <div class="accordion_flex"><span>Данные взятые при детальном парсинге</span> <span>{{ query.date_update}}</span></div>
-          </button>
-        </h2>
-        <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo">
-          <div class="accordion-body">
-                <a href="{% url 'app:query_update' query.pk %}" class="button_add btn btn-secondary">{% if query.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
-
-                  {% if query.detail_data %}
-                        <p><span>Название:</span> <span>{{ query.detail_data.name }}</span></p>
-                        <p><span>Адрес:</span> <span>{{ query.detail_data.formatted_address }}</span></p>
-                        <p><span>Рейтинг:</span> <span>{{ query.detail_data.rating }}</span></p>
-                        <p><span>Пользователей оценило:</span> <span>{{ query.detail_data.user_ratings_total }}</span></p>
-                        <p><span>Тип:</span> <span>{% for type in query.detail_data.types %}{{ type }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></p>
-                        <p><span>Ссылка GoogleMaps 1:</span> <span><a href="{{ query.detail_data.url }}" target="_blank">{{ query.detail_data.url }}</a></span></p>
-                        <p><span>Ссылка GoogleMaps 2:</span> <span><a href="https://www.google.com/maps/place/?q=place_id:{{ query.place_id }}" target="_blank">https://www.google.com/maps/place/?q=place_id:{{ query.place_id }}</a></span></p>
-                        <p><span>Ссылка на сайт:</span> <span><a href="{{ query.detail_data.website }}" target="_blank">{{ query.detail_data.website }}</a></span></p>
-                        <p><span>Телефон:</span> <span>{{ query.detail_data.formatted_phone_number }}</span></p>
-                        <p><span>График:</span> <span>
-                            {% for day in query.detail_data.opening_hours.weekday_text %}
-                                <p class="weekday_text">{{ day }}</p>
-                                {% empty %}
-                                Не указан
-                            {% endfor %}
-                        </span>
-                        </p>
-                        <h4>Отзывы</h4>
-                        <div class="reviews">
-                        {% for review in query.detail_data.reviews %}
-                        <div class="review">
-                            <span class="author">{{ review.author_name }}</span>
-                            <span class="text">{{ review.text }}</span>
-                        </div>
-
-                            {% empty %}
-                            <p class="empty">Пока никто не оставил отзывов</p>
-                        {% endfor %}
-                        </div>
-                      {% else %}
-                      <br>
-                      <p class="empty">Данных детального парсинга не найдено</p>
-                      <br>
-                    {% endif %}
-          </div>
-        </div>
-      </div>
-    </div>
-
-
-{% endblock %}
-
-{% block script %}
+        </tbody>
+    </table>
+    {% include 'app/include/pagination.html' with page=places %}
+    <a href="{% url 'app:query_delete' query.pk %}" class="btn btn-danger aligned right">Удалить данный запрос</a>
 {% endblock %}

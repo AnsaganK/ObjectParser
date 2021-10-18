@@ -6,9 +6,9 @@ from django.contrib.auth.models import Group, User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, reverse
 
-from app.forms import QueryTypeForm, UserForm, UserCreateForm, UserDetailForm
-from app.models import QueryType, Query
-from app.parser import searchQuery, updateDetail
+from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm
+from app.models import Query, Place, Review
+from app.tasks import searchQuery, updateDetail
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
@@ -24,76 +24,52 @@ def show_form_errors(request, errors):
 def index(request):
     user = request.user
     if user.is_authenticated:
-        query_types = QueryType.objects.filter(user=user)
-        quesries = Query.objects.filter(type__user = user)
-        return render(request, 'app/index.html', {'user': user, 'query_types': query_types, 'queries': quesries})
+        queries = Query.objects.filter(user=user)
+        places = Place.objects.filter(queries__query__user=user)
+        return render(request, 'app/index.html', {'user': user, 'queries': queries, 'places': places})
     return render(request, 'app/index.html')
 
 @login_required()
-def query_type_add(request):
+def query_add(request):
     if request.method == 'POST':
-        form = QueryTypeForm(request.POST)
+        form = QueryForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            query_type_name = cd['name']
-            query_type_page = cd['page']
+            query_name = cd['name']
+            query_page = cd['page']
             detail = cd['detail']
-            query_type = QueryType(user=request.user, name=query_type_name, page=query_type_page, status='wait')
-            query_type.save()
-            query_type_id = query_type.id
+            query = Query(user=request.user, name=query_name, page=query_page, status='wait')
+            query.save()
+            query_id = query.id
             try:
-                celery_parser.delay(name=query_type_name, page=query_type_page, detail=detail, query_type_id=query_type_id)
+                celery_parser.delay(name=query_name, page=query_page, detail=detail, query_id=query_id)
             except:
-                query_type.status = 'error'
-                query_type.save()
+                query.status = 'error'
+                query.save()
             # for q in queries:
             #     if detail:
-            #         query = Query.objects.filter(place_id=q['place_id']).first()
-            #         if query:
-            #             query.data = q
-            #             query.save()
+            #         place = Query.objects.filter(place_id=q['place_id']).first()
+            #         if place:
+            #             place.data = q
+            #             place.save()
             #         else:
-            #             query = Query(place_id=q['place_id'], type=query_type, data=q)
-            #             query.save()
+            #             place = Query(place_id=q['place_id'], type=query, data=q)
+            #             place.save()
             #     else:
-            #         query = Query(place_id=q['place_id'], type=query_type, data=q)
-            #         query.save()
+            #         place = Query(place_id=q['place_id'], type=query, data=q)
+            #         place.save()
             return redirect('/')
         else:
             show_form_errors(request, form.errors)
             #Тут надо сделать message
-            return render(request, 'app/query_type/add.html')
-    return render(request, 'app/query_type/add.html')
+            return render(request, 'app/query/add.html')
+    return render(request, 'app/query/add.html')
 
 
 @login_required()
-def query_type_list(request):
+def query_list(request):
     user = request.user
-    query_types = QueryType.objects.filter(user=user)
-    paginator = Paginator(query_types, 20)
-    page = request.GET.get('page')
-    try:
-        query_types = paginator.page(page)
-    except PageNotAnInteger:
-        query_types = paginator.page(1)
-    except EmptyPage:
-        query_types = paginator.page(paginator.num_pages)
-    return render(request, 'app/query_type/list.html', {'query_types': query_types})
-
-def rating_sorted(query):
-    return query.get_rating
-
-@login_required()
-def query_type_detail(request, pk):
-    query_type = QueryType.objects.filter(pk=pk).first()
-    queries = query_type.queries.all()
-    sort_type = None
-    if request.GET:
-        sort_type = request.GET.get('sorted')
-        if sort_type == 'rating_gt':
-            queries = sorted(queries, key=rating_sorted)
-        elif sort_type == 'rating_lt':
-            queries = sorted(queries, key=rating_sorted, reverse=True)
+    queries = Query.objects.filter(user=user)
     paginator = Paginator(queries, 20)
     page = request.GET.get('page')
     try:
@@ -102,40 +78,84 @@ def query_type_detail(request, pk):
         queries = paginator.page(1)
     except EmptyPage:
         queries = paginator.page(paginator.num_pages)
-    return render(request, 'app/query_type/detail.html', {'query_type': query_type, 'queries': queries, 'sort_type': sort_type})
+    return render(request, 'app/query/list.html', {'queries': queries})
 
-@login_required()
-def query_type_delete(request, pk):
-    query_type = QueryType.objects.filter(pk=pk).first()
-    if query_type and query_type.user == request.user:
-        query_type.delete()
-        messages.success(request, f'Запрос "{query_type.name}" успешно удален')
-    return redirect('query_type_list')
-
-
-@login_required()
-def query_type_file_generate(request, pk):
-    query_type = QueryType.objects.filter(pk=pk).first()
-    if not query_type:
-        return redirect(query_type.get_absolute_url)
-    queries = query_type.queries.all()
-    name = query_type.name
-    file = generate_file(name, queries)
-    return file
-
+def rating_sorted(query):
+    return query.get_rating
 
 @login_required()
 def query_detail(request, pk):
     query = Query.objects.filter(pk=pk).first()
-    return render(request, 'app/query/detail.html', {'query': query})
+    # places = query.places.all()
+    places = Place.objects.filter(queries__query=query).all()
+    # print(places)
+    sort_type = None
+    if request.GET:
+        sort_type = request.GET.get('sorted')
+        if sort_type == 'rating_gt':
+            places = sorted(places, key=rating_sorted)
+        elif sort_type == 'rating_lt':
+            places = sorted(places, key=rating_sorted, reverse=True)
+    paginator = Paginator(places, 20)
+    page = request.GET.get('page')
+    try:
+        places = paginator.page(page)
+    except PageNotAnInteger:
+        places = paginator.page(1)
+    except EmptyPage:
+        places = paginator.page(paginator.num_pages)
+    return render(request, 'app/query/detail.html', {'query': query, 'places': places, 'sort_type': sort_type})
+
+@login_required()
+def query_delete(request, pk):
+    query = Query.objects.filter(pk=pk).first()
+    if query and query.user == request.user:
+        query.delete()
+        messages.success(request, f'Запрос "{query.name}" успешно удален')
+    return redirect('app:query_list')
 
 
 @login_required()
-def query_update(request, pk):
+def query_file_generate(request, pk):
     query = Query.objects.filter(pk=pk).first()
-    #selenium_query_detail(place_id=query.place_id)
-    updateDetail(query.pk)
-    return redirect(query.get_absolute_url())
+    if not query:
+        return redirect(query.get_absolute_url)
+    # places = query.places.all()
+    places = Place.objects.filter(queries__query=query).all()
+    name = query.name
+    file = generate_file(name, places)
+    return file
+
+
+@login_required()
+def place_detail(request, place_id):
+    place = Place.objects.filter(place_id=place_id).first()
+    return render(request, 'app/place/detail.html', {'place': place})
+
+@login_required()
+def review_add(request, place_id):
+    place = Place.objects.filter(place_id=place_id).first()
+    if not place:
+        return render(request, '404.html')
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.place = place
+            review.save()
+            messages.success(request, 'Ваш отзыв сохранен')
+        else:
+            show_form_errors(request, form.errors)
+    return redirect(place.get_absolute_url())
+
+
+@login_required()
+def place_update(request, pk):
+    place = Place.objects.filter(pk=pk).first()
+    #selenium_query_detail(place_id=place.place_id)
+    updateDetail(place.pk)
+    return redirect(place.get_absolute_url())
 
 
 @login_required()
@@ -144,11 +164,35 @@ def profile(request):
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
         if form.is_valid():
+            messages.success(request, 'Данные успешно изменены')
             form.save()
         else:
             show_form_errors(request, form.errors)
-        return redirect(reverse('profile'))
+        return redirect(reverse('app:profile'))
     return render(request, 'app/user/profile.html', {'user': user})
+
+@login_required()
+def my_reviews(request):
+    user = request.user
+    reviews = user.reviews.all()
+    return render(request, 'app/user/reviews.html', {'reviews': reviews})
+
+
+@login_required()
+def my_review_edit(request, pk):
+    review = Review.objects.filter(pk=pk).first()
+    if not review or request.user != review.user:
+        return redirect('app:my_reviews')
+    if request.method == 'POST':
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            messages.success(request, 'Отзыв успешно отредактирован')
+            form.save()
+        else:
+            show_form_errors(request, form.errors)
+        return redirect('app:my_reviews')
+    return render(request, 'app/user/review_edit.html', {'review': review})
+
 
 
 def registration(request):
@@ -157,7 +201,7 @@ def registration(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect(reverse('profile'))
+            return redirect(reverse('app:profile'))
         else:
             show_form_errors(request, form.errors)
     return render(request, 'app/user/add.html')

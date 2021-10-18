@@ -1,0 +1,45 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}
+    Список моих запросов
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'app:query_add' %}" class="btn btn-primary button_add">Добавить</a>
+    {% if queries %}
+
+    <table class="table caption-top">
+        <caption>Список запросов</caption>
+        <thead class="table-light">
+            <tr>
+                <td>Название</td>
+                <td>Страниц</td>
+                <td>Время</td>
+                <td>Количество</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for query in queries %}
+            <tr>
+                <td class="td_flex">
+                    <img src="
+                    {% if query.status == 'success' %}{% static 'img/success.svg' %}{% endif %}
+                    {% if query.status == 'warning' %}{% static 'img/warning.svg' %}{% endif %}
+                    {% if query.status == 'wait' %}{% static 'img/wait.svg' %}{% endif %}
+                    {% if query.status == 'error' %}{% static 'img/error.svg' %}{% endif %}
+                    " alt="" width="20px" height="20px">
+
+                    <a href="{{ query.get_absolute_url }}">{{ query.name }}</a>
+                </td>
+                <td>{{ query.page }}</td>
+                <td>{{ query.date_create }}</td>
+                <td>{{ query.places_count }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+        {% include 'app/include/pagination.html' with page=queries %}
+    {% else %}
+        <p class="centered_link">Вы еще не составляли запросов</p>
+    {% endif %}
+{% endblock %}

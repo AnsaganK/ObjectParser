@@ -180,11 +180,11 @@
             flex-direction: column;
         }
         .review{
-            border:1px solid grey;
             margin: 10px;
             border-radius: 3px;
-            padding: 5px;
-            background-color: aliceblue;
+            box-shadow: 0px 0px 3px 1px #bfbfbf;
+            padding: 5px 10px;
+            background-color: white;
             transition: background-color .4s linear;
         }
         .review .author{
@@ -215,6 +215,46 @@
         .group_item{
             display: block;
         }
+        .rating-area {
+	overflow: hidden;
+	width: 265px;
+	margin: 0 auto;
+    }
+    .rating-area:not(:checked) > input {
+        display: none;
+    }
+    .rating-area:not(:checked) > label {
+        float: right;
+        width: 42px;
+        padding: 0;
+        cursor: pointer;
+        font-size: 32px;
+        line-height: 32px;
+        color: lightgrey;
+        text-shadow: 1px 1px #bbb;
+    }
+    .rating-area:not(:checked) > label:before {
+        content: '★';
+    }
+    .rating-area > input:checked ~ label {
+        color: gold;
+        text-shadow: 1px 1px #c60;
+    }
+    .rating-area:not(:checked) > label:hover,
+    .rating-area:not(:checked) > label:hover ~ label {
+        color: #fff1a8;
+    }
+    .rating-area > input:checked + label:hover,
+    .rating-area > input:checked + label:hover ~ label,
+    .rating-area > input:checked ~ label:hover,
+    .rating-area > input:checked ~ label:hover ~ label,
+    .rating-area > label:hover ~ input:checked ~ label {
+        color: gold;
+        text-shadow: 1px 1px goldenrod;
+    }
+    .rate-area > label:active {
+        position: relative;
+    }
     </style>
 </head>
 <body>
@@ -236,7 +276,7 @@
 
             {% if request.user.is_authenticated %}
                 <li><a href="{% url 'app:index' %}">Главная</a></li>
-                <li><a href="{% url 'app:query_type_list' %}">Мои запросы</a></li>
+                <li><a href="{% url 'app:query_list' %}">Мои запросы</a></li>
                 <li><a href="{% url 'app:profile' %}">Кабинет</a></li>
             {% else %}
                 <li><a href="{% url 'app:index' %}">Главная</a></li>

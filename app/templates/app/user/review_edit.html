@@ -1,0 +1,23 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ review.text|truncatechars:20 }}
+{% endblock %}
+
+{% block content %}
+    {{ review.text }}
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="rating-area">
+            {% for i in '12345'|make_list %}
+                <input type="radio" id="star-{{ i }}" name="rating" value="{{ i }}" {% if review.rating == forloop.counter %} checked {% endif %}>
+                <label for="star-{{ i }}" title="Оценка «{{ i }}»"></label>
+            {% endfor %}
+        </div>
+        <i class="fa fa-star-o"></i>
+        <textarea name="text" id="" cols="" rows="">
+            {{ review.text }}
+        </textarea>
+        <button type="submit">Изменить</button>
+    </form>
+{% endblock %}

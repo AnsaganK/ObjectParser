@@ -6,16 +6,19 @@ app_name = 'app'
 urlpatterns = [
     path('', views.index, name="index"),
 
-    path('query_type/add', views.query_type_add, name="query_type_add"),
-    path('query_type/', views.query_type_list, name="query_type_list"),
-    path('query_type/file/<int:pk>', views.query_type_file_generate, name="query_type_file"),
-    path('query_type/delete/<int:pk>', views.query_type_delete, name="query_type_delete"),
-    path('query_type/<int:pk>', views.query_type_detail, name="query_type_detail"),
-
+    path('query/add', views.query_add, name="query_add"),
+    path('query/', views.query_list, name="query_list"),
+    path('query/file/<int:pk>', views.query_file_generate, name="query_file"),
+    path('query/delete/<int:pk>', views.query_delete, name="query_delete"),
     path('query/<int:pk>', views.query_detail, name="query_detail"),
-    path('query/update/<int:pk>', views.query_update, name="query_update"),
+
+    path('place/<str:place_id>/review/add', views.review_add, name="review_add"),
+    path('place/<str:place_id>', views.place_detail, name="place_detail"),
+    path('place/update/<int:pk>', views.place_update, name="place_update"),
 
     path('profile/', views.profile, name="profile"),
+    path('my/reviews', views.my_reviews, name="my_reviews"),
+    path('my/reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
     path('registration/', views.registration, name="registration"),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),

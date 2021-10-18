@@ -10,8 +10,8 @@
             <h3>Статистика по аккаунту</h3>
             <p>Пользователь: {{ user.last_name }} {{ user.first_name }}</p>
             <p>На сайте с: {{ user.date_joined }}</p>
-            <p>Всего запросов: {{ query_types.count }}</p>
-            <p>Всего данных: {{ queries.count }}</p>
+            <p>Всего запросов: {{ queries.count }}</p>
+            <p>Всего данных: {{ places.distinct.count }}</p>
         </div>
     {% else %}
         <p class="welcome_text">Сайт предназначенный для парсинга, <a href="{% url 'login' %}">войдите</a> либо <a href="{% url 'app:registration' %}">зарегистрируйтесь</a> чтобы продолжить</p>

@@ -2,11 +2,19 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
+from app.models import Review
 
-class QueryTypeForm(forms.Form):
+
+class QueryForm(forms.Form):
     name = forms.CharField(max_length=1000)
     page = forms.IntegerField(min_value=1, max_value=100)
     detail = forms.BooleanField(required=False)
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['text', 'rating']
 
 
 class UserCreateForm(UserCreationForm):

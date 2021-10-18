@@ -3,30 +3,15 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from app.models import QueryType, Query
-from api.serializers import QueryTypeSerializer, QuerySerializer, UserSerializer
-
-
-class QueryTypeAPI(APIView):
-    def get(self, request, user_id, format=None):
-        query_types = QueryType.objects.all(user__id=user_id)
-        serializer = QueryTypeSerializer(query_types, many=True)
-        return Response(serializer.data)
-
-
-class QueryTypeDetailAPI(APIView):
-    def get(self, request, pk, format=None):
-        query_type = QueryType.objects.filter(pk=pk).first()
-        if query_type:
-            serializer = QueryTypeSerializer(query_type)
-            return Response(serializer.data)
-        return Response({'message': 'Не найдено'}, status=status.HTTP_404_NOT_FOUND)
+from app.models import Query, Place
+from api.serializers import QuerySerializer, PlaceSerializer, UserSerializer
 
 
 class QueryAPI(APIView):
-    def get(self, request, type_id, format=None):
-        queries  = Query.objects.filter(type__id=type_id)
+    def get(self, request, user_id, format=None):
+        queries = Query.objects.all(user__id=user_id)
         serializer = QuerySerializer(queries, many=True)
         return Response(serializer.data)
 
@@ -36,6 +21,23 @@ class QueryDetailAPI(APIView):
         query = Query.objects.filter(pk=pk).first()
         if query:
             serializer = QuerySerializer(query)
+            return Response(serializer.data)
+        return Response({'message': 'Не найдено'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class PlaceAPI(APIView):
+    def get(self, request, type_id, format=None):
+        places = Place.objects.filter(type__id=type_id)
+        serializer = PlaceSerializer(places, many=True)
+        return Response(serializer.data)
+
+
+class PlaceDetailAPI(APIView):
+    authentication_classes = (JWTAuthentication,)
+    def get(self, request, pk, format=None):
+        place = Place.objects.filter(pk=pk).first()
+        if place:
+            serializer = QuerySerializer(place)
             return Response(serializer.data)
         return Response({'message': 'Не найдено'}, status=status.HTTP_404_NOT_FOUND)
 
