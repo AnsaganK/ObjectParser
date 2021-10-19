@@ -18,93 +18,91 @@
 {% block content %}
 
     <h4 class="centered_link">{{ place.data.name }}</h4>
-    <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-                        aria-expanded="true" aria-controls="collapseOne">
-                    <div class="accordion_flex"><span>Данные взятые при первом парсинге</span>
-                        <span>{{ place.date_create }}</span></div>
-                </button>
-            </h2>
-            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
-                <div class="accordion-body">
+    <div class="tabs is-centered">
+        <ul>
+            <li class="tab is-active" data-box="basic_data" onclick="toggleActive(this)"><a>Основные данные</a></li>
+            <li class="tab" data-box="detail_data" onclick="toggleActive(this)"><a>Детальные данные</a></li>
+        </ul>
+    </div>
+    <div class="box block_data show" id="basic_data">
+        <span>{{ place.date_create }}</span>
+        <div class="">
+            <p><span>Название:</span> <span>{{ place.data.name }}</span></p>
+            <p><span>Адрес:</span> <span>{{ place.data.formatted_address }}</span></p>
+            <p><span>Рейтинг:</span> <span>{{ place.data.rating }}</span></p>
+            <p><span>Пользователей оценило:</span> <span>{{ place.data.user_ratings_total }}</span></p>
+            <p><span>Тип:</span> <span>{% for type in place.data.types %}{{ type }}{% if not forloop.last %},
+            {% endif %}{% endfor %}</span></p>
 
-                    <p><span>Название:</span> <span>{{ place.data.name }}</span></p>
-                    <p><span>Адрес:</span> <span>{{ place.data.formatted_address }}</span></p>
-                    <p><span>Рейтинг:</span> <span>{{ place.data.rating }}</span></p>
-                    <p><span>Пользователей оценило:</span> <span>{{ place.data.user_ratings_total }}</span></p>
-                    <p><span>Тип:</span> <span>{% for type in place.data.types %}{{ type }}{% if not forloop.last %},
-                    {% endif %}{% endfor %}</span></p>
-
-                </div>
-            </div>
         </div>
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-                        aria-expanded="true" aria-controls="collapseTwo">
-                    <div class="accordion_flex"><span>Данные взятые при детальном парсинге</span>
-                        <span>{{ place.date_update }}</span></div>
-                </button>
-            </h2>
-            <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo">
-                <div class="accordion-body">
-                    <a href="{% url 'app:place_update' place.pk %}" class="button_add btn btn-secondary">
-                        {% if place.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
-
-                    {% if place.detail_data %}
-                        <p><span>Название:</span> <span>{{ place.detail_data.name }}</span></p>
-                        <p><span>Адрес:</span> <span>{{ place.detail_data.formatted_address }}</span></p>
-                        <p><span>Рейтинг:</span> <span>{{ place.detail_data.rating }}</span></p>
-                        <p><span>Пользователей оценило:</span> <span>{{ place.detail_data.user_ratings_total }}</span>
-                        </p>
-                        <p><span>Тип:</span> <span>{% for type in place.detail_data.types %}{{ type }}
-                            {% if not forloop.last %}, {% endif %}{% endfor %}</span></p>
-                        <p><span>Ссылка GoogleMaps 1:</span> <span><a href="{{ place.detail_data.url }}"
-                                                                      target="_blank">{{ place.detail_data.url }}</a></span>
-                        </p>
-                        <p><span>Ссылка GoogleMaps 2:</span> <span><a
-                                href="https://www.google.com/maps/place/?q=place_id:{{ place.place_id }}"
-                                target="_blank">https://www.google.com/maps/place/?q=place_id:{{ place.place_id }}</a></span>
-                        </p>
-                        <p><span>Ссылка на сайт:</span> <span><a href="{{ place.detail_data.website }}"
-                                                                 target="_blank">{{ place.detail_data.website }}</a></span>
-                        </p>
-                        <p><span>Телефон:</span> <span>{{ place.detail_data.formatted_phone_number }}</span></p>
-                        <p><span>График:</span> <span>
+    </div>
+    <div class="box block_data" id="detail_data">
+        <span>{{ place.date_update }}</span>
+        <a href="{% url 'app:place_update' place.pk %}" class="button_add button is-info">
+            {% if place.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
+        {% if place.detail_data %}
+            <p><span>Название:</span> <span>{{ place.detail_data.name }}</span></p>
+            <p><span>Адрес:</span> <span>{{ place.detail_data.formatted_address }}</span></p>
+            <p><span>Рейтинг:</span> <span>{{ place.detail_data.rating }}</span></p>
+            <p><span>Пользователей оценило:</span> <span>{{ place.detail_data.user_ratings_total }}</span>
+            </p>
+            <p><span>Тип:</span> <span>{% for type in place.detail_data.types %}{{ type }}{% if not forloop.last %},
+            {% endif %}
+            {% endfor %}</span></p>
+            <p><span>Ссылка GoogleMaps 1:</span> <span><a href="{{ place.detail_data.url }}"
+                                                          target="_blank">{{ place.detail_data.url }}</a></span>
+            </p>
+            <p><span>Ссылка GoogleMaps 2:</span> <span><a
+                    href="https://www.google.com/maps/place/?q=place_id:{{ place.place_id }}"
+                    target="_blank">https://www.google.com/maps/place/?q=place_id:{{ place.place_id }}</a></span>
+            </p>
+            <p><span>Ссылка на сайт:</span> <span><a href="{{ place.detail_data.website }}"
+                                                     target="_blank">{{ place.detail_data.website }}</a></span>
+            </p>
+            <p><span>Телефон:</span> <span>{{ place.detail_data.formatted_phone_number }}</span></p>
+            <p><span>График:</span> <span>
                             {% for day in place.detail_data.opening_hours.weekday_text %}
                                 <p class="weekday_text">{{ day }}</p>
                             {% empty %}
                                 Не указан
                             {% endfor %}
-                        </span>
-                        </p>
-                        <h4>Отзывы</h4>
-                        <div class="reviews">
-                            {% for review in place.detail_data.reviews %}
-                                <div class="review">
-                                    <span class="author">{{ review.author_name }}</span>
-                                    <span class="text">{{ review.text }}</span>
-                                </div>
-
-                            {% empty %}
-                                <p class="empty">Пока никто не оставил отзывов</p>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <br>
-                        <p class="empty">Данных детального парсинга не найдено</p>
-                        <br>
-                    {% endif %}
+            <h4 class="block_title">Отзывы</h4>
+            {% for review in place.detail_data.reviews %}
+                <div class="columns is-centered">
+                    <div class="column is-8 box">
+                        <span class="author">{{ review.author_name }}</span>
+                        <span class="text">{{ review.text }}</span>
+                    </div>
                 </div>
+                <br>
+            {% empty %}
+                <p class="empty">Пока никто не оставил отзывов</p>
+            {% endfor %}
+        {% else %}
+            <br>
+            <p class="empty">Данных детального парсинга не найдено</p>
+            <br>
+        {% endif %}
+    </div>
+    <div class="dropdown" onclick="this.classList.toggle('is-active')">
+        <div class="dropdown-trigger">
+            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu3">
+                <span>Относящийся запросы</span>
+                <span class="icon is-small">
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                  </span>
+            </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu3" role="menu">
+            <div class="dropdown-content">
+                {% for query in place.queries.all %}
+                    <a href="{{ query.query.get_absolute_url }}" class="dropdown-item">
+                        {{ query }}
+                    </a>
+                {% endfor %}
             </div>
         </div>
     </div>
-    <p class="">Относящиеся запросы:</p>
-    {% for query in place.queries.all %}
-        <p style="color:grey;"><a href="{{ query.query.get_absolute_url }}">{{ query }}</a></p>
-    {% endfor %}
     <hr>
     <h3 class="block_title">Отзывы</h3>
     <div class="columns is-centered">
@@ -165,4 +163,17 @@
 {% endblock %}
 
 {% block script %}
+    <script>
+        function toggleActive(elem) {
+            if (!elem.classList.contains('is-active')) {
+                let tab_elements = document.querySelectorAll('li.tab');
+                tab_elements.forEach((element) => {
+                    let data_box_id = element.getAttribute('data-box');
+                    let data_box = document.getElementById(data_box_id);
+                    data_box.classList.toggle('show');
+                    element.classList.toggle('is-active')
+                })
+            }
+        }
+    </script>
 {% endblock %}

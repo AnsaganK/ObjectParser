@@ -1,0 +1,29 @@
+{% extends 'app/base.html' %}
+{% load app_tags %}
+
+{% block title %}
+    {{ query.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="columns is-multiline">
+        {% for place in places|slice:":8" %}
+            <div class="column is-3" style="padding: 10px; box-sizing: border-box">
+                <a class="box" href="{{ place.get_absolute_url }}">
+                    <span>{{ place }}</span>
+                    <br>
+                    <span>Рейтинг: {{ place.get_rating }}</span>
+                    <p>Ссылка: {{ place.place_id }}</p>
+                </a>
+            </div>
+        {% endfor %}
+        <hr>
+
+        {% for letter in places_letter %}
+            {{ place.letter }}
+            {% for place in places_letter|getValue:letter %}
+                {{ place }}
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endblock %}

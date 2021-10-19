@@ -142,6 +142,26 @@ def queries(request):
     queries = get_paginator(request, queries, 16)
     return render(request, 'app/query/queries.html', {'queries': queries})
 
+def places(request, pk):
+    places_letter = {
+
+    }
+    query = Query.objects.filter(pk=pk).first()
+    if not query:
+        return redirect('app:index')
+    places = Place.objects.filter(queries__query=query).all()
+    for i in places:
+        first_letter = i.get_name[0]
+        if first_letter in places_letter:
+            places_letter[first_letter]['places'].append(i)
+        else:
+            places_letter[first_letter] = {
+                'letter': first_letter,
+                'places': [i]
+            }
+    print(places_letter)
+    return render(request, 'app/query/places.html', {'query': query, 'places': places, 'places_letter': places_letter})
+
 @login_required()
 def place_detail(request, place_id):
     place = Place.objects.filter(place_id=place_id).first()

@@ -233,20 +233,16 @@
             transition: background-color .4s linear;
         }
 
-        .review .author {
+        .box .author {
             display: block;
             width: fit-content;
-            border-bottom: 1px solid black;
         }
 
-        .review .text {
+        .box .text {
             transition: color .4s linear;
             color: grey;
         }
 
-        .review:hover {
-            background-color: white;
-        }
 
         .review:hover .text {
             color: #000;
@@ -336,6 +332,12 @@
 
         .menu_nav {
             box-shadow: 0px 0px 5px 1px lightgrey;
+        }
+        .block_data{
+            display: none;
+        }
+        .show{
+            display: block;
         }
     </style>
 </head>
