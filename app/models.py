@@ -75,6 +75,10 @@ class Place(models.Model):
         return self.data['rating'] if self.data and 'rating' in self.data else 0
 
     @property
+    def get_name(self):
+        return self.data['name'] if self.data and 'name' in self.data else '-'
+
+    @property
     def locale_rating(self):
         return 1
 
@@ -97,6 +101,7 @@ class Review(models.Model):
     stars_choices = ((i, i) for i in range(1, 6))
     rating = models.IntegerField(max_length=100, default=5, choices=stars_choices)
 
+    is_edit = models.BooleanField(default=False)
     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
 

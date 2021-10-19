@@ -4,14 +4,19 @@
     {{ place.place_id }}
 {% endblock %}
 
-{% block content %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'app:query_list' %}">Мои запросы</a></li>
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'app:query_list' %}">Мои запросы</a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
-            <li class="breadcrumb-item active" aria-current="page">{{ place.place_id }}</li>
-        </ol>
+            <li class="is-active"><a href="#" aria-current="page">{{ place.place_id }}</a></li>
+        </ul>
     </nav>
+
+{% endblock %}
+
+{% block content %}
+
     <h4 class="centered_link">{{ place.data.name }}</h4>
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
@@ -101,37 +106,62 @@
         <p style="color:grey;"><a href="{{ query.query.get_absolute_url }}">{{ query }}</a></p>
     {% endfor %}
     <hr>
-    <h3>Отзывы</h3>
-    <form action="{% url 'app:review_add' place.place_id %}" method="post" style="width: 400px; display: flex; justify-content: center; align-items: center; flex-direction: column;">
-        {% csrf_token %}
-        <div class="rating-area">
-            <input type="radio" id="star-5" name="rating" value="5">
-            <label for="star-5" title="Оценка «5»"></label>
-            <input type="radio" id="star-4" name="rating" value="4">
-            <label for="star-4" title="Оценка «4»"></label>
-            <input type="radio" id="star-3" name="rating" value="3">
-            <label for="star-3" title="Оценка «3»"></label>
-            <input type="radio" id="star-2" name="rating" value="2">
-            <label for="star-2" title="Оценка «2»"></label>
-            <input type="radio" id="star-1" checked name="rating" value="1">
-            <label for="star-1" title="Оценка «1»"></label>
-        </div>
-        <i class="fa fa-star-o"></i>
-        <textarea name="text" id="" cols="" rows="">
+    <h3 class="block_title">Отзывы</h3>
+    <div class="columns is-centered">
+        <div class="review_form box column is-8">
+            {% if not my_review %}
 
-        </textarea>
-
-        <button type="submit">Отправить</button>
-    </form>
-    {% for review in place.reviews.all %}
-        {% if review.user == request.user %}
-            Вы можете изменить
-        {% endif %}
-        <div class="review">
-            <div><span class="author">{{ review.user.username }}</span><span class="star">{{ review.rating }}</span></div>
-            <span class="text">{{ review.text }}</span>
+                <form action="{% url 'app:review_add' place.place_id %}" method="post">
+                    {% csrf_token %}
+                    <div class="rating-area">
+                        <input type="radio" id="star-5" name="rating" value="5">
+                        <label for="star-5" title="Оценка «5»"></label>
+                        <input type="radio" id="star-4" name="rating" value="4">
+                        <label for="star-4" title="Оценка «4»"></label>
+                        <input type="radio" id="star-3" name="rating" value="3">
+                        <label for="star-3" title="Оценка «3»"></label>
+                        <input type="radio" id="star-2" name="rating" value="2">
+                        <label for="star-2" title="Оценка «2»"></label>
+                        <input type="radio" id="star-1" checked name="rating" value="1">
+                        <label for="star-1" title="Оценка «1»"></label>
+                    </div>
+                    <i class="fa fa-star-o"></i>
+                    Оставить отзыв как: {{ request.user.last_name }} {{ user.request.first_name }}
+                    <textarea name="text" class="textarea" id="" cols="" rows=""></textarea>
+                    <button type="submit" class="button is-info block_centered">Отправить</button>
+                </form>
+            {% else %}
+                <p class="text_centered" style="color:lightgreen;">Ваш отзыв сохранен</p>
+            {% endif %}
         </div>
+    </div>
+    <br>
+    {% for review in reviews %}
+        <div class="columns is-centered">
+            <div class="box column is-8">
+                <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
+                    <span>{{ review.user.last_name }} {{ review.user.first_name }}</span>
+                    {% if review.user == request.user or request.user|hasGroup:'Редактор' %}
+                        <a href="{% url 'app:my_review_edit' review.pk %}">
+                            {% if review.is_edit %}
+                                <span style="color: grey">Было ред.:{{ review.date_update }}</span>
+                            {% endif %}
+                            <span class="icon" style="color: orange">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                        </a>
+                    {% else %}
+                        <p></p>
+                    {% endif %}
+                </p>
+                <span>{{ review.rating|getRating|safe }}</span>
+                <p>{{ review.text }}</p>
+            </div>
+        </div>
+        <br>
     {% endfor %}
+    {% include 'app/include/pagination.html' with page=reviews %}
+
 {% endblock %}
 
 {% block script %}

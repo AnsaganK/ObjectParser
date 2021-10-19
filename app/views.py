@@ -13,12 +13,34 @@ from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
 from app.tasks import celery_parser, generate_file
+from app.templatetags.app_tags import GROUPS
 
 
 def show_form_errors(request, errors):
     for error in errors:
         messages.error(request, errors[error])
 
+def get_paginator(request, queryset, count):
+    paginator = Paginator(queryset, count)
+    page = request.GET.get('page')
+    try:
+        queryset = paginator.page(page)
+    except PageNotAnInteger:
+        queryset = paginator.page(1)
+    except EmptyPage:
+        queryset = paginator.page(paginator.num_pages)
+    return queryset
+
+
+def has_group(user, group_name):
+    group = user.groups.first()
+    if not group:
+        return False
+    current_index = GROUPS[group.name]
+    recommended_index = GROUPS[group_name]
+    if current_index < recommended_index:
+        return False
+    return True
 
 
 def index(request):
@@ -69,15 +91,11 @@ def query_add(request):
 @login_required()
 def query_list(request):
     user = request.user
+    if not has_group(user, 'Администратор'):
+        return redirect('app:index')
+
     queries = Query.objects.filter(user=user)
-    paginator = Paginator(queries, 20)
-    page = request.GET.get('page')
-    try:
-        queries = paginator.page(page)
-    except PageNotAnInteger:
-        queries = paginator.page(1)
-    except EmptyPage:
-        queries = paginator.page(paginator.num_pages)
+    queries = get_paginator(request, queries, 20)
     return render(request, 'app/query/list.html', {'queries': queries})
 
 def rating_sorted(query):
@@ -96,14 +114,7 @@ def query_detail(request, pk):
             places = sorted(places, key=rating_sorted)
         elif sort_type == 'rating_lt':
             places = sorted(places, key=rating_sorted, reverse=True)
-    paginator = Paginator(places, 20)
-    page = request.GET.get('page')
-    try:
-        places = paginator.page(page)
-    except PageNotAnInteger:
-        places = paginator.page(1)
-    except EmptyPage:
-        places = paginator.page(paginator.num_pages)
+    places = get_paginator(request, places, 20)
     return render(request, 'app/query/detail.html', {'query': query, 'places': places, 'sort_type': sort_type})
 
 @login_required()
@@ -126,15 +137,25 @@ def query_file_generate(request, pk):
     file = generate_file(name, places)
     return file
 
+def queries(request):
+    queries = Query.objects.all()
+    queries = get_paginator(request, queries, 16)
+    return render(request, 'app/query/queries.html', {'queries': queries})
 
 @login_required()
 def place_detail(request, place_id):
     place = Place.objects.filter(place_id=place_id).first()
-    return render(request, 'app/place/detail.html', {'place': place})
+    reviews = place.reviews.all()
+    reviews = get_paginator(request, reviews, 10)
+    my_review = Review.objects.filter(place=place).filter(user=request.user).first()
+    return render(request, 'app/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
 
 @login_required()
 def review_add(request, place_id):
     place = Place.objects.filter(place_id=place_id).first()
+    if Review.objects.filter(user=request.user).filter(place=place).first():
+        messages.error(request, 'Вы не можете оставить более одного отзыва')
+        return redirect(place.get_absolute_url())
     if not place:
         return render(request, '404.html')
     if request.method == 'POST':
@@ -175,23 +196,26 @@ def profile(request):
 def my_reviews(request):
     user = request.user
     reviews = user.reviews.all()
-    return render(request, 'app/user/reviews.html', {'reviews': reviews})
+    reviews = get_paginator(request, reviews, 10)
+    return render(request, 'app/reviews/reviews.html', {'reviews': reviews})
 
 
 @login_required()
 def my_review_edit(request, pk):
     review = Review.objects.filter(pk=pk).first()
-    if not review or request.user != review.user:
+    if (not review or request.user != review.user) and not has_group(request.user, 'Редактор'):
         return redirect('app:my_reviews')
     if request.method == 'POST':
         form = ReviewForm(request.POST, instance=review)
         if form.is_valid():
+            review = form.save(commit=False)
+            review.is_edit = True
+            review.save()
             messages.success(request, 'Отзыв успешно отредактирован')
-            form.save()
         else:
             show_form_errors(request, form.errors)
         return redirect('app:my_reviews')
-    return render(request, 'app/user/review_edit.html', {'review': review})
+    return render(request, 'app/reviews/review_edit.html', {'review': review})
 
 
 
@@ -199,7 +223,11 @@ def registration(request):
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            group = Group.objects.filter(name='Пользователь').first()
+            if group:
+                user.groups.add(group)
+            user.save()
             login(request, user)
             return redirect(reverse('app:profile'))
         else:
@@ -239,11 +267,14 @@ def admin_dashboard(request):
 @login_required()
 def user_list(request):
     users = User.objects.all().order_by('-pk')
+    users = get_paginator(request, users, 10)
     return render(request, 'app/user/list.html', {'users': users})
 
 
 @login_required()
 def user_detail(request, pk):
+    if not has_group(request.user, 'Администратор'):
+        return redirect('app:index')
     user = User.objects.filter(pk=pk).first()
     if request.method == 'POST':
         form = UserDetailForm(request.POST, instance=user)
@@ -256,6 +287,7 @@ def user_detail(request, pk):
                 user.groups.clear()
                 user.groups.add(group)
             user.save()
+            messages.success(request, 'Данные успешно изменены')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('app:user_detail', args=[user.id]))

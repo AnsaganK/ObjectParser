@@ -1,0 +1,20 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    Места
+{% endblock %}
+
+{% block content %}
+    <div class="columns is-multiline">
+        {% for query in queries %}
+            <div class="column is-3" style="padding: 10px; box-sizing: border-box">
+                <a class="box" href="{% url 'app:query_detail' query.pk %}">
+                    <span>{{ query }}</span>
+                    <p>Объектов: {{ query.places_count }}</p>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'app/include/pagination.html' with page=queries %}
+{% endblock %}

@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'app:query_add' %}" class="btn btn-primary button_add">Добавить</a>
+    <a href="{% url 'app:query_add' %}" class="button is-success button_add">Добавить</a>
     {% if queries %}
 
+        <h4 class="block_title">Список запросов</h4>
     <table class="table caption-top">
-        <caption>Список запросов</caption>
         <thead class="table-light">
             <tr>
                 <td>Название</td>

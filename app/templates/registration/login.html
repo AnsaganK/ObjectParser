@@ -8,15 +8,24 @@
     <form action="" method="post" class="custom_form">
         <span class="form_title">Вход</span>
         {% csrf_token %}
-        <div class="mb-3">
-        <label for="exampleInputEmail1" class="form-label">Логин</label>
-        <input type="text" class="form-control" name="username">
-      </div>
-      <div class="mb-3">
-        <label for="exampleInputPassword1" class="form-label">Пароль</label>
-        <input type="password" class="form-control" name="password">
-      </div>
-        <button type="submit" class="btn btn-outline-secondary centered">Вход</button>
+
+        <div class="field">
+            <label for="" class="label">
+                Логин
+            </label>
+            <div class="control">
+                <input type="text" class="input" name="username">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Пароль
+            </label>
+            <div class="control">
+                <input type="text" class="input" name="password">
+            </div>
+        </div>
+        <button type="submit" class="button is-info">Вход</button>
         <a href="{% url 'app:registration' %}" class="centered_link">Регистрация</a>
     </form>
 {% endblock %}

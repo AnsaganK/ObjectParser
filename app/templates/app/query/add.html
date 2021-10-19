@@ -7,18 +7,26 @@
 {% block content %}
     <form action="" method="post" class="custom_form">
         {% csrf_token %}
-          <div class="mb-3">
-            <label class="form-label">Название запроса</label>
-            <input type="text" required class="form-control" name="name" placeholder="Отели в москве">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Количество страниц</label>
-            <input type="number" required class="form-control" name="page" value="1">
-          </div>
-            <div class="form-check form-switch centered_link">
-              <input class="form-check-input" type="checkbox" name="detail">
-              <label class="form-check-label">Детальный поиск</label>
+        <div class="field">
+            <label for="" class="label">
+                Название запроса
+            </label>
+            <div class="control">
+                <input type="text" required class="input" name="name" placeholder="Отели в москве">
             </div>
-            <button type="submit" class="btn btn-outline-primary centered">Искать</button>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Количевство страниц
+            </label>
+            <div class="control">
+                <input type="number" required class="input" name="page" value="1">
+            </div>
+        </div>
+        <label class="checkbox">
+            <input class="checkbox" type="checkbox" name="detail">
+            Детальный поиск
+        </label>
+        <button type="submit" class="button is-info centered">Искать</button>
     </form>
 {% endblock %}

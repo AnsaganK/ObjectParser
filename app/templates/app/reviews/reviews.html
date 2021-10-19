@@ -1,0 +1,37 @@
+{% extends 'app/base.html' %}
+{% load app_tags %}
+
+
+{% block title %}
+    Мои отзывы
+{% endblock %}
+
+{% block content %}
+    <h2 class="block_title">Мои отзывы</h2>
+    {% for review in reviews %}
+        <div class="columns is-centered">
+            <div class="box column is-8">
+                <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
+                    <span>Отзыв на <a href="{{ review.place.get_absolute_url }}"
+                                      class="link">{{ review.place.get_name }}</a></span>
+                    <a href="{% url 'app:my_review_edit' review.pk %}">
+                        {% if review.is_edit %}
+                            <span style="color: grey">Было ред.:{{ review.date_update }}</span>
+                        {% endif %}
+                        <span class="icon" style="color: orange">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                    </a>
+                </p>
+                <span>{{ review.rating|getRating|safe }}</span>
+                <p>{{ review.text }}</p>
+            </div>
+        </div>
+        <br>
+        {% empty %}
+        <p class="text_centered" style="color:grey;">Вы пока не оставляли отзывов</p>
+    {% endfor %}
+    {% if reviews %}
+        {% include 'app/include/pagination.html' with page=reviews %}
+    {% endif %}
+{% endblock %}

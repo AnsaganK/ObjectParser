@@ -12,6 +12,7 @@ urlpatterns = [
     path('query/delete/<int:pk>', views.query_delete, name="query_delete"),
     path('query/<int:pk>', views.query_detail, name="query_detail"),
 
+    path('queries/', views.queries, name='queries'),
     path('place/<str:place_id>/review/add', views.review_add, name="review_add"),
     path('place/<str:place_id>', views.place_detail, name="place_detail"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
