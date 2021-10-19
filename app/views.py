@@ -159,8 +159,9 @@ def places(request, pk):
                 'letter': first_letter,
                 'places': [i]
             }
-    print(places_letter)
-    return render(request, 'app/query/places.html', {'query': query, 'places': places, 'places_letter': places_letter})
+    letters = list(places_letter.keys())
+    letters = sorted(letters)
+    return render(request, 'app/query/places.html', {'query': query, 'places': places, 'places_letter': places_letter, 'letters': letters})
 
 @login_required()
 def place_detail(request, place_id):
@@ -243,11 +244,10 @@ def registration(request):
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
+            user = form.save()
             group = Group.objects.filter(name='Пользователь').first()
             if group:
                 user.groups.add(group)
-            user.save()
             login(request, user)
             return redirect(reverse('app:profile'))
         else:

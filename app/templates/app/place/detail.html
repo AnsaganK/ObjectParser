@@ -38,8 +38,10 @@
     </div>
     <div class="box block_data" id="detail_data">
         <span>{{ place.date_update }}</span>
-        <a href="{% url 'app:place_update' place.pk %}" class="button_add button is-info">
-            {% if place.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
+        {% if request.user|hasGroup:'Администратор' %}
+            <a href="{% url 'app:place_update' place.pk %}" class="button_add button is-info">
+                {% if place.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
+        {% endif %}
         {% if place.detail_data %}
             <p><span>Название:</span> <span>{{ place.detail_data.name }}</span></p>
             <p><span>Адрес:</span> <span>{{ place.detail_data.formatted_address }}</span></p>
@@ -96,7 +98,7 @@
         <div class="dropdown-menu" id="dropdown-menu3" role="menu">
             <div class="dropdown-content">
                 {% for query in place.queries.all %}
-                    <a href="{{ query.query.get_absolute_url }}" class="dropdown-item">
+                    <a href="{% url 'app:places' query.query.pk %}" class="dropdown-item">
                         {{ query }}
                     </a>
                 {% endfor %}
@@ -124,7 +126,7 @@
                         <label for="star-1" title="Оценка «1»"></label>
                     </div>
                     <i class="fa fa-star-o"></i>
-                    Оставить отзыв как: {{ request.user.last_name }} {{ user.request.first_name }}
+                    Оставить отзыв как: {{ request.user.last_name }} {{ request.user.first_name }}
                     <textarea name="text" class="textarea" id="" cols="" rows=""></textarea>
                     <button type="submit" class="button is-info block_centered">Отправить</button>
                 </form>
@@ -138,7 +140,9 @@
         <div class="columns is-centered">
             <div class="box column is-8">
                 <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
-                    <span>{{ review.user.last_name }} {{ review.user.first_name }}</span>
+                    <span>{{ review.user.last_name }} {{ review.user.first_name }}
+                <span style="color:grey;">({{ review.date_create }})</span>
+                    </span>
                     {% if review.user == request.user or request.user|hasGroup:'Редактор' %}
                         <a href="{% url 'app:my_review_edit' review.pk %}">
                             {% if review.is_edit %}
@@ -155,7 +159,9 @@
                 <span>{{ review.rating|getRating|safe }}</span>
                 <p>{{ review.text }}</p>
             </div>
+
         </div>
+
         <br>
     {% endfor %}
     {% include 'app/include/pagination.html' with page=reviews %}

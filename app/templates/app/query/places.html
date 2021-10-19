@@ -6,24 +6,36 @@
 {% endblock %}
 
 {% block content %}
+    <h4 class="block_title"> {{ query.name }} </h4>
     <div class="columns is-multiline">
         {% for place in places|slice:":8" %}
             <div class="column is-3" style="padding: 10px; box-sizing: border-box">
                 <a class="box" href="{{ place.get_absolute_url }}">
-                    <span>{{ place }}</span>
+                    <span>{{ place.get_name }}</span>
                     <br>
-                    <span>Рейтинг: {{ place.get_rating }}</span>
-                    <p>Ссылка: {{ place.place_id }}</p>
+                    <span><b>Рейтинг</b>: {{ place.get_rating }}</span><br>
+                    <span><b>Адрес</b>: {{ place.data.formatted_address }}</span>
                 </a>
             </div>
         {% endfor %}
         <hr>
 
-        {% for letter in places_letter %}
-            {{ place.letter }}
-            {% for place in places_letter|getValue:letter %}
-                {{ place }}
-            {% endfor %}
+
+    </div>
+    <h4 class="block_title">Весь список</h4>
+    <div class="columns is-multiline">
+        {% for letter in letters %}
+            <div class="column is-3">
+                <hr>
+                <span style="color: cornflowerblue">{{ letter }}</span>
+                {% for place in places_letter|getValue:letter|getValue:'places' %}
+                    <p><a href="{{ place.get_absolute_url }}" class="hover_link">{{ place.get_name }}</a></p>
+                {% endfor %}
+            </div>
         {% endfor %}
+    </div>
+    <hr>
+    <div style="color: grey">
+        <p>Всего {{ places.count }} объектов</p>
     </div>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'app/base.html' %}
-
+{% load app_tags %}
 {% block title %}
     {{ query.name }}
 {% endblock %}
@@ -47,5 +47,7 @@
         </tbody>
     </table>
     {% include 'app/include/pagination.html' with page=places %}
-    <a href="{% url 'app:query_delete' query.pk %}" class="button is-danger aligned right">Удалить данный запрос</a>
+    {% if request.user|hasGroup:'Суперадминистратор' %}
+        <a href="{% url 'app:query_delete' query.pk %}" class="button is-danger aligned right">Удалить данный запрос</a>
+    {% endif %}
 {% endblock %}

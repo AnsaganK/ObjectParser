@@ -1,6 +1,6 @@
-DB_USER = 'postgres'
-DB_NAME = 'clarion2'
-DB_PASSWORD = '12345'
+DB_USER = 'user'
+DB_NAME = 'googleparser'
+DB_PASSWORD = 'password'
 DB_HOST = '127.0.0.1'
 
 
