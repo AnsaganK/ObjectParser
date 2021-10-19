@@ -1,19 +1,21 @@
 {% extends 'app/base.html' %}
+{% load app_tags %}
 
 {% block title %}
     {{ review.text|truncatechars:20 }}
 {% endblock %}
 
 {% block content %}
-    <h4 class="block_title">Изменить отзыв на <a href="{{ review.place.get_absolute_url }}" class="link">{{ review.place.get_name }}</a></h4>
+    <h4 class="block_title">Изменить отзыв на <a href="{{ review.place.get_absolute_url }}"
+                                                 class="link">{{ review.place.get_name }}</a></h4>
     <div class="columns is-centered">
         <div class="box column is-8">
             <form action="" method="post">
                 {% csrf_token %}
                 <div class="rating-area">
-                    {% for i in '12345'|make_list %}
-                        <input type="radio" id="star-{{ i }}" name="rating" value="{{ i }}"
-                                {% if review.rating == forloop.counter %} checked {% endif %}>
+                    {% for i in '54321'|make_list %}
+                        <input type="radio" id="star-{{ i }}" name="rating" value="{{ i }}" data-check="{{ i }}"
+                               {% if i == review.rating %}checked{% endif %}>
                         <label for="star-{{ i }}" title="Оценка «{{ i }}»"></label>
                     {% endfor %}
                 </div>
@@ -22,4 +24,12 @@
             </form>
         </div>
     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        let rating_input = document.getElementById('star-{{ review.rating }}');
+        console.log(rating_input)
+        rating_input.checked = true;
+    </script>
 {% endblock %}

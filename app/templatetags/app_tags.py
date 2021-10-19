@@ -39,3 +39,7 @@ def toJson(data):
 @register.filter(name='getValue')
 def getValue(dic, key):
     return dic[key]
+
+@register.filter(name="toString")
+def toString(variable):
+    return str(variable)
