@@ -7,7 +7,8 @@ urlpatterns = [
     path('', views.index, name="index"),
 
     path('query/add', views.query_add, name="query_add"),
-    path('query/', views.query_list, name="query_list"),
+    path('query/my', views.query_list, name="query_list"),
+    path('query/all', views.query_all, name="query_all"),
     path('query/file/<int:pk>', views.query_file_generate, name="query_file"),
     path('query/delete/<int:pk>', views.query_delete, name="query_delete"),
     path('query/<int:pk>', views.query_detail, name="query_detail"),

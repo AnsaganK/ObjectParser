@@ -87,6 +87,14 @@ def query_add(request):
             return render(request, 'app/query/add.html')
     return render(request, 'app/query/add.html')
 
+@login_required()
+def query_all(request):
+    user = request.user
+    if not has_group(user, 'Суперадминистратор'):
+        return redirect('app:index')
+    queries = Query.objects.all()
+    queries = get_paginator(request, queries, 20)
+    return render(request, 'app/query/all.html', {'queries': queries})
 
 @login_required()
 def query_list(request):
