@@ -214,6 +214,14 @@ def profile(request):
     return render(request, 'app/user/profile.html', {'user': user})
 
 @login_required()
+def all_reviews(request):
+    if not has_group(request.user, 'Редактор'):
+        return redirect('app:index')
+    reviews = Review.objects.all()
+    reviews = get_paginator(request, reviews, 10)
+    return render(request, 'app/reviews/all.html', {'reviews': reviews})
+
+@login_required()
 def my_reviews(request):
     user = request.user
     reviews = user.reviews.all()

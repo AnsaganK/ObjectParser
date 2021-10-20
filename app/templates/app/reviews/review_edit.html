@@ -14,11 +14,11 @@
                 {% csrf_token %}
                 <div class="rating-area">
                     {% for i in '54321'|make_list %}
-                        <input type="radio" id="star-{{ i }}" name="rating" value="{{ i }}" data-check="{{ i }}"
-                               {% if i == review.rating %}checked{% endif %}>
+                        <input type="radio" id="star-{{ i }}" name="rating" value="{{ i }}" data-check="{{ i }}">
                         <label for="star-{{ i }}" title="Оценка «{{ i }}»"></label>
                     {% endfor %}
                 </div>
+                {% if request.user|hasGroup:'Редактор' %}Изменить отзыв как: {{ review.user.last_name }} {{ review.user.first_name }}{% endif %}
                 <textarea name="text" id="" cols="" rows="" class="textarea">{{ review.text }}</textarea>
                 <button type="submit" class="button is-info block_centered">Изменить</button>
             </form>

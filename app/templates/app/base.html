@@ -379,6 +379,9 @@
                     <a class="navbar-item" href="{% url 'app:query_list' %}">Мои запросы</a>
                 {% endif %}
                 <a class="navbar-item" href="{% url 'app:my_reviews' %}">Мои отзывы</a>
+                {% if request.user|hasGroup:'Редактор' %}
+                    <a class="navbar-item" href="{% url 'app:all_reviews' %}">Все отзывы</a>
+                {% endif %}
             {% else %}
                 <a class="navbar-item" href="{% url 'app:index' %}">Главная</a>
             {% endif %}

@@ -20,6 +20,7 @@ urlpatterns = [
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 
     path('profile/', views.profile, name="profile"),
+    path('reviews/', views.all_reviews, name="all_reviews"),
     path('my/reviews', views.my_reviews, name="my_reviews"),
     path('my/reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
     path('registration/', views.registration, name="registration"),
