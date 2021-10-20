@@ -128,7 +128,7 @@ def query_detail(request, pk):
 @login_required()
 def query_delete(request, pk):
     query = Query.objects.filter(pk=pk).first()
-    if query and query.user == request.user:
+    if query and query.user == request.user or has_group(request.user, 'Суперадминистратор'):
         query.delete()
         messages.success(request, f'Запрос "{query.name}" успешно удален')
     return redirect('app:query_list')
