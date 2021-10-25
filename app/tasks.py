@@ -18,6 +18,7 @@ from app.models import Query, Place, QueryPlace
 KEY = 'AIzaSyAbOkxUWUw9z54up8AiMSCMX7rO7-8hqv8'
 gmaps = googlemaps.Client(key=KEY)
 detail_url = 'https://www.google.com/maps/place/?q=place_id:'
+cid_to_place_id_url = 'https://maps.googleapis.com/maps/api/place/details/json?cid={0}&key='+KEY
 photo_url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth={0}&photo_reference={1}&key={2}'
 detail_url_for_api = 'https://maps.googleapis.com/maps/api/place/details/json?place_id={0}&key={1}'
 
@@ -113,6 +114,70 @@ def celery_parser(name, page_token='', page=1, detail=False, query_id=None):
 
 
 
+
+# Парсер который я написал первым на Selenium
+from selenium import webdriver
+import csv
+import time
+
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+QUERY = 'отели+в+Астане'  # Запрос в поиске
+URL = f'https://www.google.com/search?q={QUERY}&newwindow=1&tbm=lcl&sxsrf=AOaemvJF91rSXoO-Kt8Dcs2gkt9_JXLlCQ%3A1632305149583&ei=_f9KYayPI-KExc8PlcaGqA4&oq={QUERY}&gs_l=psy-ab.3...5515.12119.0.12483.14.14.0.0.0.0.0.0..0.0....0...1c.1.64.psy-ab..14.0.0....0.zLZdDbmH5so#rlfi=hd:;'
+PAGE = 6  # Количество страниц для парсинга
+
+def startFireFox():
+    driver = webdriver.Firefox()
+    driver.get(URL)
+    return driver
+
+def startChrome():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.get(URL)
+    return driver
+
+
+def google_parser():
+    #driver = startChrome()
+    driver = startChrome()
+    for page in range(1, PAGE+1):
+        # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
+        pagination = driver.find_element_by_class_name('AaVjTc')
+        available_pages = pagination.find_elements_by_tag_name('td')
+        for i in available_pages:
+            if str(page) == i.text and page != 1:
+                i.click()
+                # После клика нужно ждать
+                # чтобы не ставить на долгое время, использовал цикл, который при
+                # изменении текущей страницы на следующую запустить парсинг страницы
+                for j in range(20):
+                    try:
+                        pagination = driver.find_element_by_class_name('AaVjTc')
+                        current_page = pagination.find_element_by_class_name('YyVfkd')
+                        if current_page.text == str(page):
+                            break
+                    except:
+                        pass
+                    time.sleep(1)
+                time.sleep(1)
+                break
+
+        print(f'СТРАНИЦА {page} начата')
+        parse_page(driver, page)
+        print(f'{page} страница готова')
+        print('-----------------------------------')
+
+    print('Парсинг завершен')
+    driver.close()
+
+
+# Все что ниже нужно для генерации CSV файла
 
 def get_headers():
     return {

@@ -11,10 +11,13 @@ from django.shortcuts import reverse
 #
 #     def __str__(self):
 #         return self.name
+from django.utils.text import slugify
+
 
 class Query(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='queries', verbose_name='Пользователь')
     name = models.CharField(max_length=1000, verbose_name='Название')
+    slug = models.SlugField(null=True, blank=True, unique=True)
     page = models.IntegerField(null=True, blank=True)
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     status_choices = (
@@ -28,13 +31,14 @@ class Query(models.Model):
     def __str__(self):
         return self.name
 
+
     class Meta:
         verbose_name = 'Название запроса'
         verbose_name_plural = 'Названии запросов'
         ordering = ['-pk']
 
     def get_absolute_url(self):
-        return reverse('app:query_detail', args=[self.id])
+        return reverse('app:query_detail', args=[self.slug])
 
     @property
     def places_count(self):

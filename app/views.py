@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect, reverse
+from pytils.translit import slugify
 
 from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm
 from app.models import Query, Place, Review
@@ -63,6 +64,11 @@ def query_add(request):
             query = Query(user=request.user, name=query_name, page=query_page, status='wait')
             query.save()
             query_id = query.id
+
+            slug = slugify(query_name+'-'+str(query_id))
+            query.slug = slug
+            query.save()
+
             try:
                 celery_parser.delay(name=query_name, page=query_page, detail=detail, query_id=query_id)
             except:
@@ -110,8 +116,8 @@ def rating_sorted(query):
     return query.get_rating
 
 @login_required()
-def query_detail(request, pk):
-    query = Query.objects.filter(pk=pk).first()
+def query_detail(request, slug):
+    query = Query.objects.filter(slug=slug).first()
     # places = query.places.all()
     places = Place.objects.filter(queries__query=query).all()
     # print(places)
@@ -150,11 +156,11 @@ def queries(request):
     queries = get_paginator(request, queries, 16)
     return render(request, 'app/query/queries.html', {'queries': queries})
 
-def places(request, pk):
+def places(request, slug):
     places_letter = {
 
     }
-    query = Query.objects.filter(pk=pk).first()
+    query = Query.objects.filter(slug=slug).first()
     if not query:
         return redirect('app:index')
     places = Place.objects.filter(queries__query=query).all()
