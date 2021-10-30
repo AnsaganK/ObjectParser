@@ -2,4 +2,4 @@ constants.py
 chromedriver.exe
 geckodriver.exe
 venv/
-media
+media/
