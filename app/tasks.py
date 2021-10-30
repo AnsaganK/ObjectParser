@@ -550,9 +550,9 @@ def main():
         print('Критическая ошибка')
 
 
-# if __name__ == '__main__':
-#     startTime = datetime.now()
-#     main()
+if __name__ == '__main__':
+    # startTime = datetime.now()
+    main()
 
 
 
