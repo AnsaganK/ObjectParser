@@ -44,14 +44,6 @@ class Query(models.Model):
     def places_count(self):
         return Place.objects.filter(queries__query_id=self.id).count()
 
-
-# class QueryPlace(models.Model):
-#     type = models.ManyToManyField(QueryType)
-#     place = models.ManyToManyField('Query')
-#
-#     def __str__(self):
-#         return self.pk
-
 class QueryPlace(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True, related_name='places')
     place = models.ManyToManyField('Place', related_name='queries')
@@ -66,13 +58,27 @@ class QueryPlace(models.Model):
 
 
 class Place(models.Model):
-    place_id = models.TextField(verbose_name='Идентификатор в гугл картах', unique=True)
+    place_id = models.TextField(verbose_name='Идентификатор в гугл картах', null=True, blank=True)
+    name = models.CharField(max_length=500, null=True, blank=True)
+    cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True, unique=True)
+    img = models.ImageField(upload_to='place_images', null=True, blank=True, verbose_name='Картинка')
+    img_url = models.TextField(null=True, blank=True)
+    address = models.CharField(max_length=500, null=True, blank=True)
+    phone_number = models.CharField(max_length=500, null=True, blank=True)
+    site = models.CharField(max_length=500, null=True, blank=True)
+    description = models.CharField(max_length=500, null=True, blank=True)
+    meta = models.TextField(null=True, blank=True)
+    attractions = models.ManyToManyField('Attraction', related_name='places')
+
+    rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
+    rating_user_count = models.IntegerField(null=True, blank=True, default=0)
+
     data = models.JSONField(null=True, blank=True, verbose_name='Данные JSON')
     detail_data = models.JSONField(null=True, blank=True, verbose_name='Детальные данные JSON')
-    # query = models.ForeignKey(Query, null=True, blank=True, on_delete=models.CASCADE, related_name='places', verbose_name='Запрос')
+
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     date_update = models.DateTimeField(auto_now=True, null=True, blank=True)
-    # rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
+
 
     @property
     def get_rating(self):
@@ -87,7 +93,7 @@ class Place(models.Model):
         return 1
 
     def __str__(self):
-        return self.place_id
+        return self.cid
 
     class Meta:
         verbose_name = 'Объект'
@@ -95,7 +101,7 @@ class Place(models.Model):
         ordering = ['-pk']
 
     def get_absolute_url(self):
-        return reverse('app:place_detail', args=[self.place_id])
+        return reverse('app:place_detail', args=[self.cid])
 
 
 class Review(models.Model):
@@ -103,11 +109,12 @@ class Review(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField()
     stars_choices = ((i, i) for i in range(1, 6))
-    rating = models.IntegerField(max_length=100, default=5, choices=stars_choices)
+    rating = models.IntegerField(default=5, choices=stars_choices)
 
     is_edit = models.BooleanField(default=False)
     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
+
 
     def __str__(self):
         return self.place.data['name']
@@ -116,6 +123,61 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = ['-pk']
+
+
+class ReviewGoogle(models.Model):
+    author_name = models.CharField(max_length=500)
+    rating = models.CharField(max_length=250)
+    text = models.TextField(null=True, blank=True)
+
+    place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews_google')
+
+    def __str__(self):
+        return self.author_name
+
+    class Meta:
+        verbose_name = 'Отзыв с Google'
+        verbose_name_plural = 'Отзывы с Google'
+
+class AttractionImage(models.Model):
+    url = models.URLField()
+    img = models.ImageField(upload_to='attractions')
+
+    def __str__(self):
+        return self.url
+
+    class Meta:
+        verbose_name = 'Картинка достопримечательности'
+        verbose_name_plural = 'Картинки'
+
+
+class Attraction(models.Model):
+    name = models.CharField(max_length=250)
+    img = models.ForeignKey(AttractionImage, on_delete=models.DO_NOTHING, related_name='attractions')
+
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Достопричательность'
+        verbose_name_plural = 'Достопричательности'
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=250)
+    text = models.TextField(null=True, blank=True)
+    rating = models.CharField(max_length=250, null=True, blank=True)
+
+    place = models.OneToOneField(Place, related_name='location', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Местоположение'
+        verbose_name_plural = 'Местоположения'
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')

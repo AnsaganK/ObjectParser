@@ -43,3 +43,27 @@ def getValue(dic, key):
 @register.filter(name="toString")
 def toString(variable):
     return str(variable)
+
+@register.filter(name="isValue")
+def isValue(value):
+    if value:
+        return value
+    return ' - '
+
+@register.filter(name="getImg")
+def getImg(img):
+    if img:
+        return img.url
+    return '/static/img/not_found.png'
+
+@register.filter(name="getBaseImg")
+def getBaseImg(query):
+    if query:
+        places = query.places
+        try:
+            first_place = places.first().place.first()
+            if first_place.img:
+                return first_place.img.url
+        except:
+            pass
+    return '/static/img/not_found.png'

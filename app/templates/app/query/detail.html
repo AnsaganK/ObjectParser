@@ -29,18 +29,16 @@
             <td>Название</td>
             <td>Адрес</td>
             <td>Рейтинг</td>
-            <td>Детальный</td>
         </tr>
         </thead>
         <tbody>
 
         {% for place in places %}
             <tr>
-                <td><a href="{{ place.get_absolute_url }}">{{ place.place_id }}</a></td>
-                <td>{{ place.data.name }}</td>
-                <td>{{ place.data.formatted_address }}</td>
-                <td>{{ place.get_rating }}</td>
-                <td>{% if place.detail_data %} Есть {% else %} Нет {% endif %}</td>
+                <td><a href="{{ place.get_absolute_url }}">{{ place.cid }}</a></td>
+                <td>{{ place.name }}</td>
+                <td>{{ place.address }}</td>
+                <td>{{ place.rating }}</td>
             </tr>
         {% endfor %}
 

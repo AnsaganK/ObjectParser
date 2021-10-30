@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 
@@ -16,3 +17,10 @@ urlpatterns += [
     path('accounts/login/', acc.LoginView.as_view(), name='login'),
     path('accounts/logout/', acc.LogoutView.as_view(), name='logout'),
 ]
+
+if settings.DEBUG:
+    from django.conf.urls.static import static
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

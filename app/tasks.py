@@ -1,36 +1,56 @@
 import csv
+import os
+from io import BytesIO
 
 from celery import shared_task
+from django.core.files import File
+from django.core.files.base import ContentFile
+from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
+
+from app.models import Place, Query, QueryPlace
 
 
 @shared_task
 def add_task(x, y):
     return x+y
 
+from pip._vendor import requests
+from selenium import webdriver
+import csv
 import time
-import googlemaps
-from googlemaps.exceptions import ApiError
-import requests
+from bs4 import BeautifulSoup as BS
+from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, \
+    NoSuchElementException, NoSuchAttributeException
 
-from app.models import Query, Place, QueryPlace
+from constants import CHROME_PATH, IS_LINUX
+from datetime import datetime
+import re
+from selenium.webdriver.chrome.options import Options
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+INDEX = 0
+FILE_NAME = 'hotels.csv'  # Назавние файла для сохранения
+# QUERY = 'lawn care New york'  # Запрос в поиске
+QUERY = 'Клининги москве'  # Запрос в поиске
+URL = f'https://www.google.com/search?q={QUERY}&newwindow=1&tbm=lcl&sxsrf=AOaemvJF91rSXoO-Kt8Dcs2gkt9_JXLlCQ%3A1632305149583&ei=_f9KYayPI-KExc8PlcaGqA4&oq={QUERY}&gs_l=psy-ab.3...5515.12119.0.12483.14.14.0.0.0.0.0.0..0.0....0...1c.1.64.psy-ab..14.0.0....0.zLZdDbmH5so#rlfi=hd:;'
+CUSTOM_URL = 'https://www.google.com/search?q={0}&newwindow=1&tbm=lcl&sxsrf=AOaemvJF91rSXoO-Kt8Dcs2gkt9_JXLlCQ%3A1632305149583&ei=_f9KYayPI-KExc8PlcaGqA4&oq={0}&gs_l=psy-ab.3...5515.12119.0.12483.14.14.0.0.0.0.0.0..0.0....0...1c.1.64.psy-ab..14.0.0....0.zLZdDbmH5so#rlfi=hd:;'
+
+PAGE = 100  # Количество страниц для парсинга
 
 KEY = 'AIzaSyAbOkxUWUw9z54up8AiMSCMX7rO7-8hqv8'
-gmaps = googlemaps.Client(key=KEY)
-detail_url = 'https://www.google.com/maps/place/?q=place_id:'
-cid_to_place_id_url = 'https://maps.googleapis.com/maps/api/place/details/json?cid={0}&key='+KEY
-photo_url = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth={0}&photo_reference={1}&key={2}'
-detail_url_for_api = 'https://maps.googleapis.com/maps/api/place/details/json?place_id={0}&key={1}'
+CID_API_URL = 'https://maps.googleapis.com/maps/api/place/details/json?cid={0}&key='+KEY
+CID_URL = 'https://maps.google.com/?cid={0}'
 
+display = None
 
-def updateDetail(pk):
-    place = Place.objects.filter(pk=pk).first()
-    place_id = place.place_id
-    url_api = detail_url_for_api.format(place_id, KEY)
-    detail_data = requests.get(url_api)
-    place.detail_data = detail_data.json()['result']
-    place.save()
-
+if IS_LINUX:
+    from pyvirtualdisplay import Display
+    display = Display(visible=False, size=(800, 600))
+    display.start()
 
 def create_query_place(place, query):
     query_place = QueryPlace.objects.filter(query=query).first()
@@ -41,159 +61,485 @@ def create_query_place(place, query):
         query_place.save()
         query_place.place.add(place)
 
+def strToInt(string):
+    value = ''
+    for i in string:
+        try:
+            number = int(i)
+            value += i
+        except:
+            pass
+    return int(value)
 
-def searchDetail(place_id, query):
-    url_api = detail_url_for_api.format(place_id, KEY)
-    detail_data = requests.get(url_api)
-    place = Place.objects.filter(place_id=place_id).first()
-    if not place:
-        place = Place.objects.create(place_id=place_id, detail_data=detail_data.json()['result'])
+def startFireFox(url=URL):
+    driver = webdriver.Firefox()
+    driver.get(url)
+    return driver
+
+
+def startChrome(url=URL, path=None):
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    if path:
+        driver = webdriver.Chrome(executable_path=path, options=chrome_options)
     else:
-        place.detail_data = detail_data.json()['result']
-    place.save()
-    create_query_place(place, query)
+        driver = webdriver.Chrome(options=chrome_options)
+    driver.get(url)
+    return driver
 
 
-def searchDetailList(places, detail, query_id):
-    if detail:
-        query = Query.objects.filter(pk=query_id).first()
-        for place in places:
-            searchDetail(place_id=place['place_id'], query=query)
+def clicked_object(object, count):
+    i = 0
+    while i < count:
+        try:
+            object.click()
+            return True
+        except ElementClickInterceptedException:
+            i += 1
+            time.sleep(1)
+    return False
 
 
-
-
-def searchQuery(name, page_token='', page=1, detail=False, query_id=None):
-    result_list = []
+def is_find_object(parent_object, class_name):
     try:
-        time.sleep(2)
-        response = gmaps.places(query=name, page_token=page_token)
-        results = response['results']
-        searchDetailList(results, detail, query_id)
-        if page > 1 and 'next_page_token' in response:
-            if response['next_page_token']:
-                page_token = response['next_page_token']
-            page -= 1
-            next_page_result = searchQuery(name=name, page_token=page_token, page=page, detail=detail, query_id=query_id)
+        object = parent_object.find_element_by_class_name(class_name)
+    except Exception as e:
+        print('Ошибка при получении объекта в DOM: ', e.__class__.__name__)
+        print(class_name)
+        object = ''
+    return object
 
-            result_list += results + next_page_result
-            # print('Token: ', page_token)
-            # print('Длина основного массива: ', len(result_list))
-            # print('Длина малого массива: ', len(results))
-            return result_list
+
+def get_site(url):
+    r = requests.get(url)
+    if r.status_code == 200:
+        return r.text
+    return None
+
+
+def get_soup(html):
+    if html:
+        return BS(html)
+    return html
+
+
+def get_attractions(driver):
+    attractions_list = []
+    try:
+        attractions = is_find_object(driver, 'xtu1r-K9a4Re-ibnC6b-haAclf')
+        attractions = attractions.find_elements_by_class_name('NovK6')
+        for attraction in attractions:
+            pattern = r'(?<=image:url\(//)(.+?)(?=\))'
+            attraction_img = attraction.get_attribute('innerHTML')
+            attraction_img_url = re.search(pattern, attraction_img)
+            attraction_text = attraction.get_attribute('innerText')
+            attractions_list.append({'url': attraction_img_url.group(), 'text': attraction_text})
+    except Exception as e:
+        print('Ошибка при  получении достопримечательностей: ', e.__class__.__name__)
+        return None
+    print(attractions_list)
+    return attractions_list
+
+
+def get_photos(driver):
+    try:
+        photo_buttons = driver.find_elements_by_class_name('a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')
+        photo_buttons[0].click()
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'mWq4Rd-HiaYvf-CNusmb-gevUs')))
+        photos = driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:3]
+        print(len(photos))
+        time.sleep(3)
+        for i in photos:
+            print(i)
+            print(i.get_attribute('innerHTML'))
+            photo = i.find_element_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs').get_attribute('innerHTML')
+            pattern = r'(?<=image:url\(")(.+?)(?="\))'
+            photo_url = re.search(pattern, photo)
+            print(photo_url.group())
+    except Exception as e:
+        print('Ошибка при получении фотографии: ', e.__class__.__name__)
+        pass
+
+
+def get_place_information(driver):
+    try:
+        place_information = is_find_object(driver, 'uxOu9-sTGRBb-UmHwN')
+        print(place_information.get_attribute('innerText'))
+        return place_information.get_attribute('innerText')
+    except Exception as e:
+        print('Ошибка при получении описания места: ', e.__class__.__name__)
+        return None
+
+def get_location_information(driver):
+    try:
+        location_name = is_find_object(driver, 'exOO9c-V1ur5d')
+        location_rating = is_find_object(driver, 'v10Rgb-v88uof-haAclf')
+        location_text = is_find_object(driver, 'XgnsRd-HSrbLb-h3fvze-text')
+        print(location_name.get_attribute('innerText'))
+        print(location_rating.get_attribute('innerText'))
+        print(location_text.get_attribute('innerText'))
+    except Exception as e:
+        print('Ошибка при получении информации о местности: ', e.__class__.__name__)
+        return None
+
+def get_photo(driver):
+    try:
+        photo = is_find_object(driver, 'F8J9Nb-LfntMc-header-HiaYvf-LfntMc')
+        button = photo.find_element_by_tag_name('img')
+        src = button.get_attribute('src')
+        if len(src.split('=')) == 2:
+            link = src.split('=')[0]
+            print('Ссылка на главное фото: ', link)
         else:
-            return results
-    except ApiError as e:
-        print(e)
-        return []
+            link = src
+            print('Ссылка на главное фото: ', link)
+        return link
+    except Exception as e:
+        print('Ошибка при получении главного фото: ', e.__class__.__name__)
+        return None
+
+@shared_task()
+def set_photo(img_url, place_id):
+    place = Place.objects.filter(id=place_id).first()
+    if place:
+        r = requests.get(img_url)
+        if r.status_code == 200:
+            place.img_url = img_url
+            img = r.content
+            place.img.save(os.path.basename(img_url), ContentFile(img))
+            place.save()
+        return 'Фото назначено для {}'.format(place_id)
+    return 'Фото не назначено {}'.format(place_id)
+
+
+def get_reviews(driver):
+    try:
+        review_button = driver.find_element_by_class_name('Yr7JMd-pane-hSRGPd')
+        clicked_object(review_button, 10)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
+        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')[:5]
+        print(len(reviews))
+        for review in reviews:
+            print(review.get_attribute('innerHTML'))
+            exception = 0
+            print()
+            while exception < 3:
+                try:
+                    try:
+                        author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
+                    except (NoSuchElementException, StaleElementReferenceException):
+                        author_name = ''
+                    try:
+                        stars = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
+                    except (NoSuchElementException, StaleElementReferenceException):
+                        try:
+                            stars = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
+                        except Exception as e:
+                            print('Ошибка при получении звезд: ', e.__class__.__name__)
+                            stars = 'None'
+                    try:
+                        try:
+                            # more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
+                            # print(more_text_button.text)
+                            # clicked_object(more_text_button, 10)
+                            time.sleep(1)
+                        except Exception as e:
+                            print(e.__class__.__name__)
+                            pass
+                        # text = review.find_element_by_class_name('ODSEW-ShBeI-text')
+                    except (NoSuchElementException, NoSuchAttributeException, StaleElementReferenceException):
+                        text = ''
+                        print('Ошибка')
+                    print(author_name, stars)
+                    break
+                except StaleElementReferenceException:
+                    exception += 1
+                    print('Перехватил отзыв')
+                    time.sleep(1)
+    except Exception as e:
+        print('Ошибка при получении отзывов: ', e.__class__.__name__)
+        return None
+
+
+def get_or_create_place(name, rating, rating_user_count, cid):
+    place = Place.objects.filter(cid=cid).first()
+    if place:
+        place.name = name
+        place.rating = rating
+        place.rating_user_count = rating_user_count
+        place.save()
+        return place
+    place = Place.objects.create(name=name, rating=rating, rating_user_count=rating_user_count, cid=cid)
+    place.save()
+    return place
+
+
+def get_info(driver):
+    data = {}
+    data_names = {
+        'https://www.gstatic.com/images/icons/material/system_gm/1x/place_gm_blue_24dp.png': 'address',
+        'https://www.gstatic.com/images/icons/material/system_gm/2x/place_gm_blue_24dp.png': 'address',
+        'https://www.gstatic.com/images/icons/material/system_gm/1x/phone_gm_blue_24dp.png': 'phone_number',
+        'https://www.gstatic.com/images/icons/material/system_gm/2x/phone_gm_blue_24dp.png': 'phone_number',
+        'https://www.gstatic.com/images/icons/material/system_gm/1x/schedule_gm_blue_24dp.png': 'timetable',
+        'https://www.gstatic.com/images/icons/material/system_gm/2x/schedule_gm_blue_24dp.png': 'timetable',
+        'https://www.google.com/images/cleardot.gif': 'location',
+        'https://www.gstatic.com/images/icons/material/system_gm/1x/public_gm_blue_24dp.png': 'site',
+        'https://www.gstatic.com/images/icons/material/system_gm/2x/public_gm_blue_24dp.png': 'site',
+        'https://maps.gstatic.com/mapfiles/maps_lite/images/1x/ic_plus_code.png': 'plus_code',
+        'https://maps.gstatic.com/mapfiles/maps_lite/images/2x/ic_plus_code.png': 'plus_code',
+        'https://gstatic.com/local/placeinfo/schedule_ic_24dp_blue600.png': 'schedule',
+    }
+    try:
+        data_objects = driver.find_elements_by_class_name('AeaXub')
+        for i in data_objects:
+            image_src = i.find_element_by_tag_name('img').get_attribute('src')
+            try:
+                image_type = data_names[image_src]
+                print(image_type)
+                data[image_type] = i.get_attribute('innerText')
+                print(i.get_attribute('innerText'))
+            except KeyError:
+                pass
+        return data
+    except Exception as e:
+        print('Ошибка при получении общих данных: ', e.__class__.__name__)
+        return None
+
+@shared_task()
+def get_site_description(url, place_id):
+    url = 'http://'+url
+    meta_data = ''
+    html = get_site(url)
+    if not html:
+        return html
+    soup = BS(html, 'lxml')
+    meta = soup.find(attrs={'name': 'description'})
+    if meta:
+        meta_data = str(meta)
+    place = Place.objects.filter(id=place_id).first()
+    print(url)
+    print(meta_data)
+    if place:
+        place.meta = meta_data
+        place.save()
+
+
+def set_info(data, place):
+    if not data:
+        return None
+    if 'site' in data:
+        place_id = place.id
+        get_site_description.delay(url=data['site'], place_id=place_id)
+    place.address = data['address'] if 'address' in data else None
+    place.phone_number = data['phone_number'] if 'phone_number' in data else None
+    place.site = data['site'] if 'site' in data else None
+    place.save()
+
+def place_detail(cid, query_id):
+    url = CID_URL.format(cid)
+    # driver = startChrome(url=url)
+    driver = startChrome(url=url)
+    try:
+        title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
+        rating = is_find_object(driver, 'aMPvhf-fI6EEc-KVuj8d').get_attribute('innerText')
+        rating = float(rating.replace(',', '.'))
+        print(rating)
+        rating_user_count = is_find_object(driver, 'Yr7JMd-pane-hSRGPd').get_attribute('innerText')
+        rating_user_count = strToInt(rating_user_count)
+        print(rating_user_count)
+        place = get_or_create_place(title, rating, rating_user_count, cid)
+        query = Query.objects.filter(id=query_id).first()
+        create_query_place(place, query)
+        # rating =
+        data = get_info(driver)
+        print(data)
+        set_info(data, place)
+        print(' --------- Главное фото: ')
+        base_photo = get_photo(driver)
+        set_photo.delay(base_photo, place.id)
+        # print(' --------- Информация о месте: ')
+        # place_information = get_place_information(driver)
+        # print(' --------- Достопримечательности: ')
+        # attractions = get_attractions(driver)                     # class Attraction - manyToMany
+        # print(' --------- Информация о месте: ')
+        # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
+        # photos = get_photos(driver)                                 # class PlacePhoto
+        # print(' --------- Отзывы: ')
+        # reviews = get_reviews(driver)
+        print(title, )
+        print('Закрыто')
+        print('----------------')
+
+        driver.close()
+    except Exception as e:
+        print(e.__class__.__name__)
+        print('Ошибка')
+        driver.close()
+
+
+def place_api_detail(cid):
+    url = CID_API_URL.format(cid)
+    r = requests.get(url)
+    if r.status_code == 200:
+        print(r.json())
+        if r.json()['status'] == 'OK':
+            result = r.json()['result']
+            print(result['place_id'], result['formatted_address'])
+        else:
+            print(r.json()['status'])
+    return None
+
+
+# Функция которая парсит отели на странице
+def parse_places(driver, query_id):
+    time.sleep(3)
+    try:
+        places = driver.find_elements_by_class_name('uMdZh')
+    except:
+        return False
+    print(len(places))
+    for place in places:
+        cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name('C8TUKc') else None
+        print('https://www.google.com/maps?cid='+cid)
+        place_detail(cid, query_id) if cid else None
+    return True
+
+# Функция для смены страниц
+
+def get_pagination(driver, page):
+    pagination = driver.find_element_by_class_name('AaVjTc')
+    available_pages = pagination.find_elements_by_tag_name('td')
+    for i in available_pages:
+        if str(page) == i.text and page != 1:
+            i.click()
+            # После клика нужно ждать
+            # чтобы не ставить на долгое зкште(шьп), использовал цикл, который при
+            # изменении текущей страницы на следующую запустить парсинг страницы
+            for j in range(20):
+                try:
+                    pagination = driver.find_element_by_class_name('AaVjTc')
+                    current_page = pagination.find_element_by_class_name('YyVfkd')
+                    if current_page.text == str(page):
+                        return True
+                except:
+                    pass
+                time.sleep(1)
+            time.sleep(1)
+            break
+    return False
 
 
 @shared_task
-def celery_parser(name, page_token='', page=1, detail=False, query_id=None):
-    query = Query.objects.filter(id=query_id).first()
-    data = []
+def startParsing(query_name, query_id, pages=None):
+    print(1)
+    driver = startChrome(url=CUSTOM_URL.format(query_name))
+    print(2)
     try:
-        data = searchQuery(name=name, page_token=page_token, page=page, detail=detail, query_id=query_id)
-    except:
-        query.status = 'error'
-        query.save()
-    for q in data:
-        place = Place.objects.filter(place_id=q['place_id']).first()
-        if place:
-            place.data = q
-            place.save()
-            create_query_place(place, query)
+        if pages:
+            for page in range(1, pages+1):
+                # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
+                if page == 1:
+                    print(f'СТРАНИЦА {page} начата')
+                    parse_places(driver, query_id)
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+                elif get_pagination(driver, page):
+                    print(f'СТРАНИЦА {page} начата')
+                    parse_places(driver, query_id)
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+            print('Парсинг завершен')
+            query = Query.objects.filter(id=query_id).first()
+            query.status = 'success'
+            query.save()
+            driver.close()
         else:
-            place = Place.objects.create(place_id=q['place_id'], data=q)
-            place.save()
-            create_query_place(place, query)
+            page = 1
+            while True:
+                if pages== 1:
+                    print(f'СТРАНИЦА {page} начата')
+                    if not parse_places(driver, query_id):
+                        break
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+                elif get_pagination(driver, page):
+                    print(f'СТРАНИЦА {page} начата')
+                    if not parse_places(driver, query_id):
+                        break
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+                page += 1
+            query = Query.objects.filter(id=query_id).first()
+            query.status = 'success'
+            query.save()
+            print('Парсинг завершен')
+            driver.close()
+    except Exception as e:
+        print(e.__class__.__name__)
+        if display:
+            display.stop()
 
-    query.status = 'success'
-    query.save()
-    return 'Данные по запросу успешно сохранены: {}'.format(name)
+        driver.close()
+        print('Критическая ошибка')
+
+# Запуск скрипта
+# def main():
+#     #driver = startChrome()
+#     # driver = startChrome(path=CHROME_PATH)
+#     driver = startFireFox()
+#     try:
+#         for page in range(1, PAGE+1):
+#             # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
+#             if page == 1:
+#                 print(f'СТРАНИЦА {page} начата')
+#                 parse_places(driver)
+#                 print(f'{page} страница готова')
+#                 print('-----------------------------------')
+#             elif get_pagination(driver, page):
+#                 print(f'СТРАНИЦА {page} начата')
+#                 parse_places(driver)
+#                 print(f'{page} страница готова')
+#                 print('-----------------------------------')
+#         print('Парсинг завершен')
+#         driver.close()
+#     except Exception as e:
+#         print(e.__class__.__name__)
+#         if display:
+#             display.stop()
+#         print('Критическая ошибка')
+#         driver.close()
 
 
+# if __name__ == '__main__':
+#     startTime = datetime.now()
+#     main()
 
 
-# Парсер который я написал первым на Selenium
-from selenium import webdriver
-import csv
-import time
-
-from selenium.webdriver.chrome.options import Options
-
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
-QUERY = 'отели+в+Астане'  # Запрос в поиске
-URL = f'https://www.google.com/search?q={QUERY}&newwindow=1&tbm=lcl&sxsrf=AOaemvJF91rSXoO-Kt8Dcs2gkt9_JXLlCQ%3A1632305149583&ei=_f9KYayPI-KExc8PlcaGqA4&oq={QUERY}&gs_l=psy-ab.3...5515.12119.0.12483.14.14.0.0.0.0.0.0..0.0....0...1c.1.64.psy-ab..14.0.0....0.zLZdDbmH5so#rlfi=hd:;'
-PAGE = 6  # Количество страниц для парсинга
-
-def startFireFox():
-    driver = webdriver.Firefox()
-    driver.get(URL)
-    return driver
-
-def startChrome():
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.get(URL)
-    return driver
-
-
-def google_parser():
-    #driver = startChrome()
-    driver = startChrome()
-    for page in range(1, PAGE+1):
-        # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
-        pagination = driver.find_element_by_class_name('AaVjTc')
-        available_pages = pagination.find_elements_by_tag_name('td')
-        for i in available_pages:
-            if str(page) == i.text and page != 1:
-                i.click()
-                # После клика нужно ждать
-                # чтобы не ставить на долгое время, использовал цикл, который при
-                # изменении текущей страницы на следующую запустить парсинг страницы
-                for j in range(20):
-                    try:
-                        pagination = driver.find_element_by_class_name('AaVjTc')
-                        current_page = pagination.find_element_by_class_name('YyVfkd')
-                        if current_page.text == str(page):
-                            break
-                    except:
-                        pass
-                    time.sleep(1)
-                time.sleep(1)
-                break
-
-        print(f'СТРАНИЦА {page} начата')
-        parse_page(driver, page)
-        print(f'{page} страница готова')
-        print('-----------------------------------')
-
-    print('Парсинг завершен')
-    driver.close()
 
 
 # Все что ниже нужно для генерации CSV файла
 
 def get_headers():
     return {
-        'place_id': 'place_id',
+        'cid': 'cid',
         'name': 'name',
-        'formatted_address': 'formatted_address',
+        'address': 'address',
         'rating': 'rating',
     }
 
 
 def get_data(place):
     return {
-        'place_id': place.place_id,
-        'name': place.data['name'] if 'name' in place.data else '-',
-        'formatted_address': place.data['formatted_address'] if 'formatted_address' in place.data else '-',
-        'rating': place.data['rating'] if 'rating' in place.data else '-',
+        'cid': place.cid,
+        'name': place.name,
+        'address': place.address,
+        'rating': place.rating,
     }
 
 

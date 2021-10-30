@@ -1,7 +1,13 @@
 {% extends 'app/base.html' %}
 {% load app_tags %}
 {% block title %}
-    {{ place.place_id }}
+    {{ place.name }} | {{ place.cid }}
+{% endblock %}
+
+{% block style %}
+    {% if place.meta %}
+        {{ place.meta|safe }}
+    {% endif %}
 {% endblock %}
 
 {% block breadcrumb %}
@@ -9,82 +15,62 @@
         <ul>
             <li><a href="{% url 'app:query_list' %}">Мои запросы</a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
-            <li class="is-active"><a href="#" aria-current="page">{{ place.place_id }}</a></li>
+            <li class="is-active"><a href="#" aria-current="page">{{ place.cid }}</a></li>
         </ul>
     </nav>
 
 {% endblock %}
 
 {% block content %}
-
     <h4 class="centered_link">{{ place.data.name }}</h4>
-    <div class="tabs is-centered">
-        <ul>
-            <li class="tab is-active" data-box="basic_data" onclick="toggleActive(this)"><a>Основные данные</a></li>
-            <li class="tab" data-box="detail_data" onclick="toggleActive(this)"><a>Детальные данные</a></li>
-        </ul>
-    </div>
-    <div class="box block_data show" id="basic_data">
-        <span>{{ place.date_create }}</span>
-        <div class="">
-            <p><span>Название:</span> <span>{{ place.data.name }}</span></p>
-            <p><span>Адрес:</span> <span>{{ place.data.formatted_address }}</span></p>
-            <p><span>Рейтинг:</span> <span>{{ place.data.rating }}</span></p>
-            <p><span>Пользователей оценило:</span> <span>{{ place.data.user_ratings_total }}</span></p>
-            <p><span>Тип:</span> <span>{% for type in place.data.types %}{{ type }}{% if not forloop.last %},
-            {% endif %}{% endfor %}</span></p>
-
-        </div>
-    </div>
-    <div class="box block_data" id="detail_data">
-        <span>{{ place.date_update }}</span>
+    {#    <div class="box block_data show" id="basic_data">#}
+    {#        <span>{{ place.date_create }}</span>#}
+    {#        <div class="">#}
+    {#            <p><span>Название:</span> <span>{{ place.data.name }}</span></p>#}
+    {#            <p><span>Адрес:</span> <span>{{ place.data.formatted_address }}</span></p>#}
+    {#            <p><span>Рейтинг:</span> <span>{{ place.data.rating }}</span></p>#}
+    {#            <p><span>Пользователей оценило:</span> <span>{{ place.data.user_ratings_total }}</span></p>#}
+    {#            <p><span>Тип:</span> <span>{% for type in place.data.types %}{{ type }}{% if not forloop.last %},#}
+    {#            {% endif %}{% endfor %}</span></p>#}
+    {##}
+    {#        </div>#}
+    {#    </div>#}
+    <div class="box" id="detail_data">
+        <h4 style="color: #64b5f6; text-align: center">{{ place.name }} <br><span
+                style="color:grey; font-size: 11px; ">{{ place.date_update }}</span></h4>
         {% if request.user|hasGroup:'Администратор' %}
             <a href="{% url 'app:place_update' place.pk %}" class="button_add button is-info">
-                {% if place.detail_data %}Обновить{% else %}Добавить{% endif %} данные</a>
+                Обновить данные</a>
         {% endif %}
-        {% if place.detail_data %}
-            <p><span>Название:</span> <span>{{ place.detail_data.name }}</span></p>
-            <p><span>Адрес:</span> <span>{{ place.detail_data.formatted_address }}</span></p>
-            <p><span>Рейтинг:</span> <span>{{ place.detail_data.rating }}</span></p>
-            <p><span>Пользователей оценило:</span> <span>{{ place.detail_data.user_ratings_total }}</span>
-            </p>
-            <p><span>Тип:</span> <span>{% for type in place.detail_data.types %}{{ type }}{% if not forloop.last %},
-            {% endif %}
-            {% endfor %}</span></p>
-            <p><span>Ссылка GoogleMaps 1:</span> <span><a href="{{ place.detail_data.url }}"
-                                                          target="_blank">{{ place.detail_data.url }}</a></span>
-            </p>
-            <p><span>Ссылка GoogleMaps 2:</span> <span><a
-                    href="https://www.google.com/maps/place/?q=place_id:{{ place.place_id }}"
-                    target="_blank">https://www.google.com/maps/place/?q=place_id:{{ place.place_id }}</a></span>
-            </p>
-            <p><span>Ссылка на сайт:</span> <span><a href="{{ place.detail_data.website }}"
-                                                     target="_blank">{{ place.detail_data.website }}</a></span>
-            </p>
-            <p><span>Телефон:</span> <span>{{ place.detail_data.formatted_phone_number }}</span></p>
-            <p><span>График:</span> <span>
-                            {% for day in place.detail_data.opening_hours.weekday_text %}
-                                <p class="weekday_text">{{ day }}</p>
-                            {% empty %}
-                                Не указан
-                            {% endfor %}
-            <h4 class="block_title">Отзывы</h4>
-            {% for review in place.detail_data.reviews %}
-                <div class="columns is-centered">
-                    <div class="column is-8 box">
-                        <span class="author">{{ review.author_name }}</span>
-                        <span class="text">{{ review.text }}</span>
+        <div style="display:flex;">
+            <img src="{{ place.img|getImg }}" class="card" alt=""
+                 style="height: 100% !important; max-width: 300px !important;margin-right: 10px">
+            <div>
+                <p><span>Название:</span> <span>{{ place.name }}</span></p>
+                <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
+                <p><span>Сайт:</span> <span><a
+                        href="http://{{ place.site|isValue }}">{{ place.site|isValue }}</a></span></p>
+                <p><span>Рейтинг:</span> <span>{{ place.rating }}</span></p>
+                <p><span>Пользователей оценило:</span> <span>{{ place.rating_user_count }}</span>
+                </p>
+                <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
+                                                            target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
+                </p>
+                <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
+                <h4 class="block_title">Отзывы</h4>
+                {% for review in place.detail_data.reviews %}
+                    <div class="columns is-centered">
+                        <div class="column is-8 box">
+                            <span class="author">{{ review.author_name }}</span>
+                            <span class="text">{{ review.text }}</span>
+                        </div>
                     </div>
-                </div>
-                <br>
-            {% empty %}
-                <p class="empty">Пока никто не оставил отзывов</p>
-            {% endfor %}
-        {% else %}
-            <br>
-            <p class="empty">Данных детального парсинга не найдено</p>
-            <br>
-        {% endif %}
+                    <br>
+                {% empty %}
+                    <p class="empty">Пока никто не оставил отзывов</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
     <div class="dropdown" onclick="this.classList.toggle('is-active')">
         <div class="dropdown-trigger">
@@ -98,7 +84,7 @@
         <div class="dropdown-menu" id="dropdown-menu3" role="menu">
             <div class="dropdown-content">
                 {% for query in place.queries.all %}
-                    <a href="{% url 'app:places' query.query.pk %}" class="dropdown-item">
+                    <a href="{% url 'app:places' query.query.slug %}" class="dropdown-item">
                         {{ query }}
                     </a>
                 {% endfor %}
@@ -111,7 +97,7 @@
         <div class="review_form box column is-8">
             {% if not my_review %}
 
-                <form action="{% url 'app:review_add' place.place_id %}" method="post">
+                <form action="{% url 'app:review_add' place.cid %}" method="post">
                     {% csrf_token %}
                     <div class="rating-area">
                         <input type="radio" id="star-5" name="rating" value="5">
@@ -169,17 +155,17 @@
 {% endblock %}
 
 {% block script %}
-    <script>
-        function toggleActive(elem) {
-            if (!elem.classList.contains('is-active')) {
-                let tab_elements = document.querySelectorAll('li.tab');
-                tab_elements.forEach((element) => {
-                    let data_box_id = element.getAttribute('data-box');
-                    let data_box = document.getElementById(data_box_id);
-                    data_box.classList.toggle('show');
-                    element.classList.toggle('is-active')
-                })
-            }
-        }
-    </script>
+    {#    <script>#}
+    {#        function toggleActive(elem) {#}
+    {#            if (!elem.classList.contains('is-active')) {#}
+    {#                let tab_elements = document.querySelectorAll('li.tab');#}
+    {#                tab_elements.forEach((element) => {#}
+    {#                    let data_box_id = element.getAttribute('data-box');#}
+    {#                    let data_box = document.getElementById(data_box_id);#}
+    {#                    data_box.classList.toggle('show');#}
+    {#                    element.classList.toggle('is-active')#}
+    {#                })#}
+    {#            }#}
+    {#        }#}
+    {#    </script>#}
 {% endblock %}

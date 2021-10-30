@@ -9,11 +9,10 @@ from pytils.translit import slugify
 
 from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm
 from app.models import Query, Place, Review
-from app.tasks import searchQuery, updateDetail
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
-from app.tasks import celery_parser, generate_file
+from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
 
 
@@ -60,7 +59,6 @@ def query_add(request):
             cd = form.cleaned_data
             query_name = cd['name']
             query_page = cd['page']
-            detail = cd['detail']
             query = Query(user=request.user, name=query_name, page=query_page, status='wait')
             query.save()
             query_id = query.id
@@ -70,8 +68,9 @@ def query_add(request):
             query.save()
 
             try:
-                celery_parser.delay(name=query_name, page=query_page, detail=detail, query_id=query_id)
-            except:
+                startParsing.delay(query_name=query_name, query_id=query_id, pages=int(query_page))
+            except Exception as e:
+                print(e.__class__.__name__)
                 query.status = 'error'
                 query.save()
             # for q in queries:
@@ -89,7 +88,6 @@ def query_add(request):
             return redirect('/')
         else:
             show_form_errors(request, form.errors)
-            #Тут надо сделать message
             return render(request, 'app/query/add.html')
     return render(request, 'app/query/add.html')
 
@@ -112,8 +110,8 @@ def query_list(request):
     queries = get_paginator(request, queries, 20)
     return render(request, 'app/query/list.html', {'queries': queries})
 
-def rating_sorted(query):
-    return query.get_rating
+# def rating_sorted(query):
+#     return query.get_rating
 
 @login_required()
 def query_detail(request, slug):
@@ -125,9 +123,9 @@ def query_detail(request, slug):
     if request.GET:
         sort_type = request.GET.get('sorted')
         if sort_type == 'rating_gt':
-            places = sorted(places, key=rating_sorted)
+            places = places.order_by('rating')
         elif sort_type == 'rating_lt':
-            places = sorted(places, key=rating_sorted, reverse=True)
+            places = places.order_by('-rating')
     places = get_paginator(request, places, 20)
     return render(request, 'app/query/detail.html', {'query': query, 'places': places, 'sort_type': sort_type})
 
@@ -163,9 +161,9 @@ def places(request, slug):
     query = Query.objects.filter(slug=slug).first()
     if not query:
         return redirect('app:index')
-    places = Place.objects.filter(queries__query=query).all()
+    places = Place.objects.filter(queries__query=query).all().order_by('-rating')
     for i in places:
-        first_letter = i.get_name[0]
+        first_letter = i.name[0]
         if first_letter in places_letter:
             places_letter[first_letter]['places'].append(i)
         else:
@@ -178,16 +176,16 @@ def places(request, slug):
     return render(request, 'app/query/places.html', {'query': query, 'places': places, 'places_letter': places_letter, 'letters': letters})
 
 @login_required()
-def place_detail(request, place_id):
-    place = Place.objects.filter(place_id=place_id).first()
+def place_detail(request, cid):
+    place = Place.objects.filter(cid=cid).first()
     reviews = place.reviews.all()
     reviews = get_paginator(request, reviews, 10)
     my_review = Review.objects.filter(place=place).filter(user=request.user).first()
     return render(request, 'app/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
 
 @login_required()
-def review_add(request, place_id):
-    place = Place.objects.filter(place_id=place_id).first()
+def review_add(request, cid):
+    place = Place.objects.filter(cid=cid).first()
     if Review.objects.filter(user=request.user).filter(place=place).first():
         messages.error(request, 'Вы не можете оставить более одного отзыва')
         return redirect(place.get_absolute_url())
@@ -210,7 +208,7 @@ def review_add(request, place_id):
 def place_update(request, pk):
     place = Place.objects.filter(pk=pk).first()
     #selenium_query_detail(place_id=place.place_id)
-    updateDetail(place.pk)
+    # updateDetail(place.pk)
     return redirect(place.get_absolute_url())
 
 

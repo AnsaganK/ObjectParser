@@ -5,16 +5,51 @@
     {{ query.name }}
 {% endblock %}
 
+
+{% block style %}
+    <style>
+        .place_little_card:hover .top_place_number {
+            opacity: 1;
+        }
+
+        .top_place_number {
+            position: absolute;
+            opacity: 0;
+            width: 50px;
+            transition: opacity .3s;
+            padding: 10px;
+            background-color: white;
+            color: cornflowerblue;
+            text-align: center;
+            z-index: 999 !important;
+        }
+
+        .number_right {
+            margin-left: 269px;
+            background: white;
+            font-weight: 600;
+        }
+    </style>
+{% endblock %}
 {% block content %}
     <h4 class="block_title"> {{ query.name }} </h4>
     <div class="columns is-multiline">
         {% for place in places|slice:":20" %}
             <div class="column is-3" style="padding: 10px; box-sizing: border-box">
-                <a class="box" href="{{ place.get_absolute_url }}">
-                    <span>{{ place.get_name }}</span>
-                    <br>
-                    <span><b>Рейтинг</b>: {{ place.get_rating }}</span><br>
-                    <span><b>Адрес</b>: {{ place.data.formatted_address }}</span>
+                <a class="box place_little_card" href="{{ place.get_absolute_url }}" style="min-height: 380px">
+                    <span class="top_place_number">{{ forloop.counter }}</span>
+                    <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
+                    <img src="{{ place.img|getImg }}" alt="" style="width: 100% !important; height: 200px !important;">
+                    <div>
+                        <span style="color: black;
+    text-align: center;
+    display: block;
+    border-bottom: 1px solid grey;margin: 0px
+;">{{ place.name }}</span>
+                        <span><b>Рейтинг</b>: {{ place.rating }}</span><br>
+                        <span><b>Адрес</b>: {{ place.address }}</span><br>
+                        <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span>
+                    </div>
                 </a>
             </div>
         {% endfor %}
@@ -29,7 +64,7 @@
                 <hr>
                 <span style="color: cornflowerblue">{{ letter }}</span>
                 {% for place in places_letter|getValue:letter|getValue:'places' %}
-                    <p><a href="{{ place.get_absolute_url }}" class="hover_link">{{ place.get_name }}</a></p>
+                    <p><a href="{{ place.get_absolute_url }}" class="hover_link">{{ place.name }}</a></p>
                 {% endfor %}
             </div>
         {% endfor %}
