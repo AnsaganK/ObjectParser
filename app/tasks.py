@@ -437,14 +437,13 @@ def get_pagination(driver, page):
 def startParsing(query_name, query_id, pages=None):
     display = None
     if IS_LINUX:
-        from xvfbwrapper import Xvfb
+        # from xvfbwrapper import Xvfb
+        # with Xvfb() as xvfb:
+        #     display = xvfb.start()
 
-        with Xvfb() as xvfb:
-            display = xvfb.start()
-
-        # from pyvirtualdisplay import Display
-        # display = Display(visible=False, size=(800, 600))
-        # display.start()
+        from pyvirtualdisplay import Display
+        display = Display(visible=0, size=(800, 600))
+        display.start()
     print(1)
     driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     print(2)
