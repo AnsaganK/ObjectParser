@@ -47,10 +47,17 @@ CID_URL = 'https://maps.google.com/?cid={0}'
 
 display = None
 
+
+
 if IS_LINUX:
-    from pyvirtualdisplay import Display
-    display = Display(visible=False, size=(800, 600))
-    display.start()
+    from xvfbwrapper import Xvfb
+
+    with Xvfb() as xvfb:
+        display = xvfb.start()
+    #
+    # from pyvirtualdisplay import Display
+    # display = Display(visible=False, size=(800, 600))
+    # display.start()
 
 def create_query_place(place, query):
     query_place = QueryPlace.objects.filter(query=query).first()
