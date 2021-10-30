@@ -13,7 +13,7 @@
             <div class="box column is-8">
                 <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
                     <span>Отзыв на <a href="{{ review.place.get_absolute_url }}"
-                                      class="link">{{ review.place.get_name }}</a></span>
+                                      class="link">{{ review.place.name }}</a></span>
                     <a href="{% url 'app:my_review_edit' review.pk %}">
                         {% if review.is_edit %}
                             <span style="color: grey">Было ред.:{{ review.date_update }}</span>

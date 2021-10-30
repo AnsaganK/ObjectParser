@@ -298,9 +298,9 @@ def get_info(driver):
             image_src = i.find_element_by_tag_name('img').get_attribute('src')
             try:
                 image_type = data_names[image_src]
-                print(image_type)
+                # print(image_type)
                 data[image_type] = i.get_attribute('innerText')
-                print(i.get_attribute('innerText'))
+                # print(i.get_attribute('innerText'))
             except KeyError:
                 pass
         return data
@@ -320,8 +320,8 @@ def get_site_description(url, place_id):
     if meta:
         meta_data = str(meta)
     place = Place.objects.filter(id=place_id).first()
-    print(url)
-    print(meta_data)
+    # print(url)
+    # print(meta_data)
     if place:
         place.meta = meta_data
         place.save()
@@ -445,24 +445,24 @@ def startParsing(query_name, query_id, pages=None):
         display = Display(visible=False, size=(800, 600))
         display.start()
 
-    print(1)
+    # print(1)
     driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
-    print(2)
+    # print(2)
     try:
         if pages:
             for page in range(1, pages+1):
                 # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
                 if page == 1:
-                    print(f'СТРАНИЦА {page} начата')
+                    # print(f'СТРАНИЦА {page} начата')
                     parse_places(driver, query_id)
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
+#                     # print(f'{page} страница готова')
+#                     # print('-----------------------------------')
                 elif get_pagination(driver, page):
-                    print(f'СТРАНИЦА {page} начата')
+#                     # print(f'СТРАНИЦА {page} начата')
                     parse_places(driver, query_id)
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
-            print('Парсинг завершен')
+#             #         print(f'{page} страница готова')
+#             #         print('-----------------------------------')
+#             # print('Парсинг завершен')
             query = Query.objects.filter(id=query_id).first()
             query.status = 'success'
             query.save()
@@ -471,22 +471,22 @@ def startParsing(query_name, query_id, pages=None):
             page = 1
             while True:
                 if pages== 1:
-                    print(f'СТРАНИЦА {page} начата')
+                    # print(f'СТРАНИЦА {page} начата')
                     if not parse_places(driver, query_id):
                         break
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
+                    # print(f'{page} страница готова')
+                    # print('-----------------------------------')
                 elif get_pagination(driver, page):
-                    print(f'СТРАНИЦА {page} начата')
+                    # print(f'СТРАНИЦА {page} начата')
                     if not parse_places(driver, query_id):
                         break
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
+                    # print(f'{page} страница готова')
+                    # print('-----------------------------------')
                 page += 1
             query = Query.objects.filter(id=query_id).first()
             query.status = 'success'
             query.save()
-            print('Парсинг завершен')
+            # print('Парсинг завершен')
             driver.close()
     except Exception as e:
         print(e.__class__.__name__)
