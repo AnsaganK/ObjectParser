@@ -351,7 +351,7 @@ def set_info(data, place):
 def place_detail(cid, query_id):
     url = CID_URL.format(cid)
     # driver = startChrome(url=url)
-    driver = startChrome(url=url, path=CHROME_PATH)
+    driver = startChrome(url=url)
 
     try:
         title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
@@ -446,7 +446,7 @@ def get_pagination(driver, page):
 @shared_task
 def startParsing(query_name, query_id, pages=None):
     print(1)
-    driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+    driver = startChrome(url=CUSTOM_URL.format(query_name))
     print(2)
     try:
         if pages:
