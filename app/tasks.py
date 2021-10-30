@@ -8,7 +8,7 @@ from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
 
-from app.models import Place, Query, QueryPlace
+from .models import Place, Query, QueryPlace
 
 
 @shared_task
@@ -550,9 +550,9 @@ def main():
         print('Критическая ошибка')
 
 
-if __name__ == '__main__':
-    # startTime = datetime.now()
-    main()
+# if __name__ == '__main__':
+#     # startTime = datetime.now()
+#     main()
 
 
 
