@@ -49,16 +49,6 @@ display = None
 
 
 
-if IS_LINUX:
-    # from xvfbwrapper import Xvfb
-    #
-    # with Xvfb() as xvfb:
-    #     display = xvfb.start()
-
-    from pyvirtualdisplay import Display
-    display = Display(visible=False, size=(800, 600))
-    display.start()
-
 def create_query_place(place, query):
     query_place = QueryPlace.objects.filter(query=query).first()
     if query_place:
@@ -445,6 +435,15 @@ def get_pagination(driver, page):
 
 @shared_task
 def startParsing(query_name, query_id, pages=None):
+    if IS_LINUX:
+        # from xvfbwrapper import Xvfb
+        #
+        # with Xvfb() as xvfb:
+        #     display = xvfb.start()
+
+        from pyvirtualdisplay import Display
+        display = Display(visible=False, size=(800, 600))
+        display.start()
     print(1)
     driver = startChrome(url=CUSTOM_URL.format(query_name))
     print(2)
