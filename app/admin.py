@@ -12,7 +12,7 @@ class QueryAdmin(admin.ModelAdmin):
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
     list_display = ['id', 'cid', 'name', 'img_url']
-    list_display_links = ['id', 'place_id']
+    list_display_links = ['id']
     # list_filter = ['query']
 
 admin.site.register(Profile)

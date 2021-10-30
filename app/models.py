@@ -93,7 +93,7 @@ class Place(models.Model):
         return 1
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         verbose_name = 'Объект'
