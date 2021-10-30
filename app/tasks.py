@@ -442,8 +442,9 @@ def startParsing(query_name, query_id, pages=None):
         #     display = xvfb.start()
 
         from pyvirtualdisplay import Display
-        display = Display(visible=0, size=(800, 600))
+        display = Display(visible=False, size=(800, 600))
         display.start()
+
     print(1)
     driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     print(2)
