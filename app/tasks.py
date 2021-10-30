@@ -298,9 +298,9 @@ def get_info(driver):
             image_src = i.find_element_by_tag_name('img').get_attribute('src')
             try:
                 image_type = data_names[image_src]
-                # print(image_type)
+                print(image_type)
                 data[image_type] = i.get_attribute('innerText')
-                # print(i.get_attribute('innerText'))
+                print(i.get_attribute('innerText'))
             except KeyError:
                 pass
         return data
@@ -402,6 +402,8 @@ def parse_places(driver, query_id):
     except:
         return False
     print(len(places))
+    if len(places) == 0:
+        return False
     for place in places:
         cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name('C8TUKc') else None
         print('https://www.google.com/maps?cid='+cid)
@@ -453,16 +455,18 @@ def startParsing(query_name, query_id, pages=None):
             for page in range(1, pages+1):
                 # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
                 if page == 1:
-                    # print(f'СТРАНИЦА {page} начата')
+                    print(f'СТРАНИЦА {page} начата')
                     parse_places(driver, query_id)
-#                     # print(f'{page} страница готова')
-#                     # print('-----------------------------------')
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
                 elif get_pagination(driver, page):
-#                     # print(f'СТРАНИЦА {page} начата')
-                    parse_places(driver, query_id)
-#             #         print(f'{page} страница готова')
-#             #         print('-----------------------------------')
-#             # print('Парсинг завершен')
+                    print(f'СТРАНИЦА {page} начата')
+                    parse = parse_places(driver, query_id)
+                    if not parse:
+                        break
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+            print('Парсинг завершен')
             query = Query.objects.filter(id=query_id).first()
             query.status = 'success'
             query.save()
@@ -470,7 +474,7 @@ def startParsing(query_name, query_id, pages=None):
         else:
             page = 1
             while True:
-                if pages== 1:
+                if page == 1:
                     # print(f'СТРАНИЦА {page} начата')
                     if not parse_places(driver, query_id):
                         break

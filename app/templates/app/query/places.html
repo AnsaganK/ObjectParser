@@ -47,7 +47,7 @@
     border-bottom: 1px solid grey;margin: 0px
 ;">{{ place.name }}</span>
                         <span><b>Рейтинг</b>: {{ place.rating }}</span><br>
-                        <span><b>Адрес</b>: {{ place.address }}</span><br>
+                        <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
                         <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span>
                     </div>
                 </a>
