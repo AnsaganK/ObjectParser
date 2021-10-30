@@ -11,7 +11,7 @@ class QueryAdmin(admin.ModelAdmin):
 
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'place_id']
+    list_display = ['id', 'cid', 'name', 'img_url']
     list_display_links = ['id', 'place_id']
     # list_filter = ['query']
 
