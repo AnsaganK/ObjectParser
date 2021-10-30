@@ -482,7 +482,8 @@ def startParsing(query_name, query_id, pages=None):
                     # print('-----------------------------------')
                 elif get_pagination(driver, page):
                     # print(f'СТРАНИЦА {page} начата')
-                    if not parse_places(driver, query_id):
+                    parse = parse_places(driver, query_id)
+                    if not parse:
                         break
                     # print(f'{page} страница готова')
                     # print('-----------------------------------')
