@@ -497,31 +497,57 @@ def startParsing(query_name, query_id, pages=None):
         print('Критическая ошибка')
 
 # Запуск скрипта
-# def main():
-#     #driver = startChrome()
-#     # driver = startChrome(path=CHROME_PATH)
-#     driver = startFireFox()
-#     try:
-#         for page in range(1, PAGE+1):
-#             # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
-#             if page == 1:
-#                 print(f'СТРАНИЦА {page} начата')
-#                 parse_places(driver)
-#                 print(f'{page} страница готова')
-#                 print('-----------------------------------')
-#             elif get_pagination(driver, page):
-#                 print(f'СТРАНИЦА {page} начата')
-#                 parse_places(driver)
-#                 print(f'{page} страница готова')
-#                 print('-----------------------------------')
-#         print('Парсинг завершен')
-#         driver.close()
-#     except Exception as e:
-#         print(e.__class__.__name__)
-#         if display:
-#             display.stop()
-#         print('Критическая ошибка')
-#         driver.close()
+def main():
+    query_name = 'name'
+    query_id = 1
+    pages = 4
+    print(1)
+    driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+    print(2)
+    try:
+        if pages:
+            for page in range(1, pages+1):
+                # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
+                if page == 1:
+                    print(f'СТРАНИЦА {page} начата')
+                    parse_places(driver, query_id)
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+                elif get_pagination(driver, page):
+                    print(f'СТРАНИЦА {page} начата')
+                    parse_places(driver, query_id)
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+            print('Парсинг завершен')
+            driver.close()
+        else:
+            page = 1
+            while True:
+                if pages== 1:
+                    print(f'СТРАНИЦА {page} начата')
+                    if not parse_places(driver, query_id):
+                        break
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+                elif get_pagination(driver, page):
+                    print(f'СТРАНИЦА {page} начата')
+                    if not parse_places(driver, query_id):
+                        break
+                    print(f'{page} страница готова')
+                    print('-----------------------------------')
+                page += 1
+            query = Query.objects.filter(id=query_id).first()
+            query.status = 'success'
+            query.save()
+            print('Парсинг завершен')
+            driver.close()
+    except Exception as e:
+        print(e.__class__.__name__)
+        if display:
+            display.stop()
+
+        driver.close()
+        print('Критическая ошибка')
 
 
 # if __name__ == '__main__':
