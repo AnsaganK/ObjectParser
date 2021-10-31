@@ -315,7 +315,7 @@ def get_site_description(url, place_id):
     url = 'http://'+url
     meta_data = ''
     try:
-        html = get_site(url, timeout=10)
+        html = get_site(url, timeout=15)
     except:
         return f'Не взял Description {0}'.format(place_id)
     if not html:
