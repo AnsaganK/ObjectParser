@@ -471,6 +471,7 @@ def startParsing(query_name, query_id, pages=None):
                     print(f'СТРАНИЦА {page} начата')
                     parse = parse_places(driver, query_id)
                     if not parse:
+                        print('Возможно список не появился на этой странице')
                         break
                     print(f'{page} страница готова')
                     print('-----------------------------------')
