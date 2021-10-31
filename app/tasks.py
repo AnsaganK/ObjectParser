@@ -434,27 +434,31 @@ def parse_places(driver, query_id):
 # Функция для смены страниц
 
 def get_pagination(driver, page):
-    pagination = is_find_object(driver, 'AaVjTc')
-    available_pages = pagination.find_elements_by_tag_name('td')
-    for i in available_pages:
-        if str(page) == i.text and page != 1:
-            i.click()
-            # После клика нужно ждать
-            # чтобы не ставить на долгое зкште(шьп), использовал цикл, который при
-            # изменении текущей страницы на следующую запустить парсинг страницы
-            for j in range(20):
-                try:
-                    pagination = driver.find_element_by_class_name('AaVjTc')
-                    current_page = pagination.find_element_by_class_name('YyVfkd')
-                    if current_page.text == str(page):
-                        return True
-                except:
-                    pass
+    try:
+        pagination = is_find_object(driver, 'AaVjTc')
+        available_pages = pagination.find_elements_by_tag_name('td')
+        for i in available_pages:
+            if str(page) == i.text and page != 1:
+                i.click()
+                # После клика нужно ждать
+                # чтобы не ставить на долгое зкште(шьп), использовал цикл, который при
+                # изменении текущей страницы на следующую запустить парсинг страницы
+                for j in range(20):
+                    try:
+                        pagination = driver.find_element_by_class_name('AaVjTc')
+                        current_page = pagination.find_element_by_class_name('YyVfkd')
+                        if current_page.text == str(page):
+                            return True
+                    except Exception as e:
+                        print('Ошибка в пагинации: ', e.__class__.__name__)
+                        return False
+                    time.sleep(1)
                 time.sleep(1)
-            time.sleep(1)
-            break
-    return False
-
+                break
+        return False
+    except Exception as e:
+        print('Ошибка в пагинации: ', e.__class__.__name__)
+        return False
 
 @shared_task
 def startParsing(query_name, query_id, pages=None):
