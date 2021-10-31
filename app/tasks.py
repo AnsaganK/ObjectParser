@@ -344,11 +344,17 @@ def place_detail(cid, query_id):
 
     try:
         title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
-        rating = is_find_object(driver, 'aMPvhf-fI6EEc-KVuj8d').get_attribute('innerText')
-        rating = float(rating.replace(',', '.'))
+        try:
+            rating = is_find_object(driver, 'aMPvhf-fI6EEc-KVuj8d').get_attribute('innerText')
+            rating = float(rating.replace(',', '.'))
+        except:
+            rating = 0
         print(rating)
-        rating_user_count = is_find_object(driver, 'Yr7JMd-pane-hSRGPd').get_attribute('innerText')
-        rating_user_count = strToInt(rating_user_count)
+        try:
+            rating_user_count = is_find_object(driver, 'Yr7JMd-pane-hSRGPd').get_attribute('innerText')
+            rating_user_count = strToInt(rating_user_count)
+        except:
+            rating_user_count = 0
         print(rating_user_count)
         place = get_or_create_place(title, rating, rating_user_count, cid)
         query = Query.objects.filter(id=query_id).first()
