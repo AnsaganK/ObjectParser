@@ -199,7 +199,6 @@ def get_photo(driver):
         print('Ошибка при получении главного фото: ', e.__class__.__name__)
         return None
 
-@shared_task()
 def set_photo(img_url, place_id):
     place = Place.objects.filter(id=place_id).first()
     if place:
@@ -360,7 +359,7 @@ def place_detail(cid, query_id):
         set_info(data, place)
         print(' --------- Главное фото: ')
         base_photo = get_photo(driver)
-        set_photo.delay(base_photo, place.id)
+        set_photo(base_photo, place.id)
         # print(' --------- Информация о месте: ')
         # place_information = get_place_information(driver)
         # print(' --------- Достопримечательности: ')
