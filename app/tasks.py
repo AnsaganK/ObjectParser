@@ -349,7 +349,10 @@ def place_detail(cid, query_id):
     driver = startChrome(url=url, path=CHROME_PATH)
 
     try:
-        title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
+        try:
+            title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
+        except:
+            title = 'No Name'
         try:
             rating = is_find_object(driver, 'aMPvhf-fI6EEc-KVuj8d').get_attribute('innerText')
             rating = float(rating.replace(',', '.'))
