@@ -110,8 +110,11 @@ def is_find_object(parent_object, class_name):
     return object
 
 
-def get_site(url):
-    r = requests.get(url)
+def get_site(url, timeout=None):
+    if timeout:
+        r = requests.get(url, timeout=timeout)
+    else:
+        r = requests.get(url)
     if r.status_code == 200:
         return r.text
     return None
@@ -312,7 +315,7 @@ def get_site_description(url, place_id):
     url = 'http://'+url
     meta_data = ''
     try:
-        html = get_site(url)
+        html = get_site(url, timeout=10)
     except:
         return f'Не взял Description {0}'.format(place_id)
     if not html:
@@ -327,7 +330,7 @@ def get_site_description(url, place_id):
     if place:
         place.meta = meta_data
         place.save()
-
+    return url
 
 def set_info(data, place):
     if not data:
