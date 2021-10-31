@@ -59,6 +59,8 @@ def query_add(request):
             cd = form.cleaned_data
             query_name = cd['name']
             query_page = cd['page']
+
+
             query = Query(user=request.user, name=query_name, page=query_page, status='wait')
             query.save()
             query_id = query.id

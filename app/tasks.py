@@ -285,8 +285,8 @@ def get_info(driver):
         'https://www.gstatic.com/images/icons/material/system_gm/2x/place_gm_blue_24dp.png': 'address',
         'https://www.gstatic.com/images/icons/material/system_gm/1x/phone_gm_blue_24dp.png': 'phone_number',
         'https://www.gstatic.com/images/icons/material/system_gm/2x/phone_gm_blue_24dp.png': 'phone_number',
-        'https://www.gstatic.com/images/icons/material/system_gm/1x/schedule_gm_blue_24dp.png': 'timetable',
-        'https://www.gstatic.com/images/icons/material/system_gm/2x/schedule_gm_blue_24dp.png': 'timetable',
+        # 'https://www.gstatic.com/images/icons/material/system_gm/1x/schedule_gm_blue_24dp.png': 'timetable',
+        # 'https://www.gstatic.com/images/icons/material/system_gm/2x/schedule_gm_blue_24dp.png': 'timetable',
         'https://www.google.com/images/cleardot.gif': 'location',
         'https://www.gstatic.com/images/icons/material/system_gm/1x/public_gm_blue_24dp.png': 'site',
         'https://www.gstatic.com/images/icons/material/system_gm/2x/public_gm_blue_24dp.png': 'site',
@@ -294,6 +294,13 @@ def get_info(driver):
         'https://maps.gstatic.com/mapfiles/maps_lite/images/2x/ic_plus_code.png': 'plus_code',
         'https://gstatic.com/local/placeinfo/schedule_ic_24dp_blue600.png': 'schedule',
     }
+    try:
+        timetable = driver.find_element_by_class_name('y0skZc-jyrRxf-Tydcue')
+        print(timetable.text)
+    except Exception as e:
+        timetable = ''
+        print(e.__class__.__name__)
+    data['timetable'] = timetable
     try:
         data_objects = driver.find_elements_by_class_name('AeaXub')
         for i in data_objects:
@@ -427,7 +434,7 @@ def parse_places(driver, query_id):
 # Функция для смены страниц
 
 def get_pagination(driver, page):
-    pagination = driver.find_element_by_class_name('AaVjTc')
+    pagination = is_find_object(driver, 'AaVjTc')
     available_pages = pagination.find_elements_by_tag_name('td')
     for i in available_pages:
         if str(page) == i.text and page != 1:
@@ -462,6 +469,7 @@ def startParsing(query_name, query_id, pages=None):
         display.start()
 
     # print(1)
+    print(CUSTOM_URL.format(query_name))
     driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     # print(2)
     try:
