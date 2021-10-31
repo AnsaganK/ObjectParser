@@ -311,7 +311,10 @@ def get_info(driver):
 def get_site_description(url, place_id):
     url = 'http://'+url
     meta_data = ''
-    html = get_site(url)
+    try:
+        html = get_site(url)
+    except:
+        return f'Не взял Description {0}'.format(place_id)
     if not html:
         return html
     soup = BS(html, 'lxml')
