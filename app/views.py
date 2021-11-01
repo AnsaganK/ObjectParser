@@ -62,6 +62,10 @@ def query_add(request):
 
             if not_all:
                 query_page = cd['page']
+                try:
+                    query_page = int(query_page)
+                except:
+                    query_page = 1
             else:
                 query_page = None
 
@@ -77,7 +81,7 @@ def query_add(request):
             query.save()
 
             try:
-                startParsing.delay(query_name=query_name, query_id=query_id, pages=int(query_page))
+                startParsing.delay(query_name=query_name, query_id=query_id, pages=query_page)
             except Exception as e:
                 print(e.__class__.__name__)
                 query.status = 'error'
