@@ -516,6 +516,12 @@ def startParsing(query_name, query_id, pages=None):
                         break
                     print(f'{page} страница готова')
                     print('-----------------------------------')
+                else:
+                    query = Query.objects.filter(id=query_id).first()
+                    query.status = 'success'
+                    query.save()
+                    print('Парсинг завершен')
+                    driver.close()
                 page += 1
             query = Query.objects.filter(id=query_id).first()
             query.status = 'success'
