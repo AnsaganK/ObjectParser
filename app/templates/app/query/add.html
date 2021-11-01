@@ -6,7 +6,7 @@
 
 {% block style %}
     <style>
-        .hidden {
+        .hidden_block {
             display: none;
             transition: .8s all;
         }
@@ -87,17 +87,17 @@
             </div>
         </div>
         <label class="switch" style="margin: auto; display: block">
-            <input type="checkbox" required id="page_checkbox" name="all_pages">
+            <input type="checkbox" required id="page_checkbox" name="not_all">
             <span class="slider"></span>
         </label>
 
         <div style="color: grey; margin-bottom: 15px; text-align: center" id="all_page_text">Все страницы</div>
-        <div class="field hidden" id="page">
+        <div class="field hidden_block" id="page">
             <label for="" class="label">
                 Количевство страниц
             </label>
             <div class="control">
-                <input type="number" class="input hidden" name="page" value="1" disabled>
+                <input type="number" class="input hidden_block" name="page" value="1" disabled>
             </div>
         </div>
 
@@ -116,9 +116,9 @@
             function () {
                 let page = document.getElementById('page');
                 let all_page_text = document.getElementById('all_page_text');
-                page.classList.toggle('hidden');
+                page.classList.toggle('hidden_block');
                 page.children[1].children[0].disabled = !page.children[1].children[0].disabled;
-                all_page_text.classList.toggle('hidden');
+                all_page_text.classList.toggle('hidden_block');
             }
         )
     </script>

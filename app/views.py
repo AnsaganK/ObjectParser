@@ -58,15 +58,15 @@ def query_add(request):
         if form.is_valid():
             cd = form.cleaned_data
             query_name = cd['name']
-            query_not_all = cd['all_pages']
+            not_all = cd['not_all']
 
-            if query_not_all:
+            if not_all:
                 query_page = cd['page']
             else:
                 query_page = None
 
 
-            print(query_name, query_all, query_page)
+            print(query_name, not_all, query_page)
 
             query = Query(user=request.user, name=query_name, page=query_page, status='wait')
             query.save()
