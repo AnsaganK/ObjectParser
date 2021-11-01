@@ -86,10 +86,11 @@
                 <input type="text" required class="input" name="name" placeholder="Отели в москве">
             </div>
         </div>
-        <label class="switch" style="margin: 10px auto; display: block">
+        <label class="switch" style="margin: auto; display: block">
             <input type="checkbox" id="page_checkbox" name="not_all">
             <span class="slider"></span>
         </label>
+        <div style="color: grey; text-align: center; margin-bottom: 10px;" id="all_pages_text">Все страницы</div>
 
         <div class="field hidden_block" id="page">
             <label for="" class="label">
@@ -115,6 +116,8 @@
             function () {
                 let page = document.getElementById('page');
                 page.classList.toggle('hidden_block');
+                let all_pages_text = document.getElementById('all_pages_text');
+                all_pages_text.classList.toggle('hidden_block');
                 if (page_checkbox) {
                     if (page_checkbox.checked) {
                         page.children[1].children[0].setAttribute('name', 'page');
