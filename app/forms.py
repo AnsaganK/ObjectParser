@@ -7,8 +7,8 @@ from app.models import Review
 
 class QueryForm(forms.Form):
     name = forms.CharField(max_length=1000)
-    all_pages = forms.BooleanField()
-    page = forms.IntegerField(min_value=1, null=True, blank=True, max_value=100)
+    all_pages = forms.BooleanField(required=False)
+    page = forms.IntegerField(min_value=1, required=False, max_value=1000)
     # detail = forms.BooleanField(required=False)
 
 
