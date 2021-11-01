@@ -531,8 +531,8 @@ def startParsing(query_name, query_id, pages=None):
     except Exception as e:
         print(e.__class__.__name__)
         if display:
-            # display.stop()
-            display.popen.terminate()
+            display.stop()
+            # display.popen.terminate()
 
         driver.close()
         print('Критическая ошибка')
