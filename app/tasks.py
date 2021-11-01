@@ -296,7 +296,7 @@ def get_info(driver):
     }
     try:
         timetable = driver.find_element_by_class_name('y0skZc-jyrRxf-Tydcue')
-        print(timetable.text)
+        timetable = timetable.get_attribute('innerText')
     except Exception as e:
         timetable = ''
         print(e.__class__.__name__)
