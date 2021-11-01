@@ -4,6 +4,77 @@
     Добавление запроса
 {% endblock %}
 
+{% block style %}
+    <style>
+        .hidden {
+            display: none;
+            transition: .8s all;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* The slider */
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <form action="" method="post" class="custom_form">
         {% csrf_token %}
@@ -15,7 +86,13 @@
                 <input type="text" required class="input" name="name" placeholder="Отели в москве">
             </div>
         </div>
-        <div class="field">
+        <label class="switch" style="margin: auto; display: block">
+            <input type="checkbox" id="page_checkbox" name="all_pages">
+            <span class="slider"></span>
+        </label>
+
+        <div style="color: grey; margin-bottom: 15px; text-align: center" id="all_page_text">Все страницы</div>
+        <div class="field hidden" id="page">
             <label for="" class="label">
                 Количевство страниц
             </label>
@@ -24,10 +101,24 @@
             </div>
         </div>
 
-{#        <label class="checkbox">#}
-{#            <input class="checkbox" type="checkbox" name="detail">#}
-{#            Детальный поиск#}
-{#        </label>#}
+        {#        <label class="checkbox">#}
+        {#            <input class="checkbox" type="checkbox" name="detail">#}
+        {#            Детальный поиск#}
+        {#        </label>#}
         <button type="submit" class="button is-info centered">Искать</button>
     </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+        let page_checkbox = document.getElementById('page_checkbox');
+        page_checkbox.addEventListener("change",
+            function () {
+                let page = document.getElementById('page');
+                let all_page_text = document.getElementById('all_page_text');
+                page.classList.toggle('hidden');
+                all_page_text.classList.toggle('hidden');
+            }
+        )
+    </script>
 {% endblock %}
