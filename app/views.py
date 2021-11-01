@@ -59,8 +59,10 @@ def query_add(request):
             cd = form.cleaned_data
             query_name = cd['name']
             query_all = cd['all_pages']
-            query_page = None
-            if not query_all:
+
+            if query_all:
+                query_page = None
+            else:
                 query_page = cd['page']
 
 
