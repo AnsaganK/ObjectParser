@@ -31,7 +31,7 @@
 
                     <a href="{{ query.get_absolute_url }}">{{ query.name }}</a>
                 </td>
-                <td>{{ query.page }}</td>
+                <td>{% if query.page %}{{ query.page }}{% else %}Все{% endif %}</td>
                 <td>{{ query.date_create }}</td>
                 <td>{{ query.places_count }}</td>
             </tr>
