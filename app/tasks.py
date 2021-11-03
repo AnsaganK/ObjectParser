@@ -1,7 +1,9 @@
+import base64
 import csv
 import os
 from io import BytesIO
 
+import googlemaps
 from celery import shared_task
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -9,7 +11,7 @@ from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
 from pytils.translit import slugify
 
-from .models import Place, Query, QueryPlace, ReviewGoogle
+from .models import Place, Query, QueryPlace, ReviewGoogle, PlacePhoto
 
 
 @shared_task
@@ -48,7 +50,7 @@ CID_URL = 'https://maps.google.com/?cid={0}'
 
 display = None
 
-
+gmaps = googlemaps.Client(key=KEY)
 
 def create_query_place(place, query):
     query_place = QueryPlace.objects.filter(query=query).first()
@@ -203,29 +205,53 @@ def get_photo(driver):
         print('Ошибка при получении главного фото: ', e.__class__.__name__)
         return None
 
-def set_photo(img_url, place_id):
+def set_photo_url(img_url, place_id):
     place = Place.objects.filter(id=place_id).first()
-    if place:
+    if place and img_url:
         r = requests.get(img_url)
         if r.status_code == 200:
+            content = r.content
+
             place.img_url = img_url
-            img = r.content
-            place.img.save(os.path.basename(img_url), ContentFile(img))
+            place.img.save(os.path.basename(img_url), ContentFile(content))
             place.save()
+
+
         return 'Фото назначено для {}'.format(place_id)
     return 'Фото не назначено {}'.format(place_id)
+
+
+def set_photo_content(content, place_id, file_name='no_name'):
+    place = Place.objects.filter(id=place_id).first()
+    if not place:
+        return None
+    place_photo = PlacePhoto()
+    place_photo.img.save(os.path.basename(file_name), ContentFile(content))
+    place_photo.place = place
+    place_photo.save()
 
 
 def get_reviews(driver):
     review_list = []
     try:
+        wait1 = WebDriverWait(driver, 10)
+        wait1.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Yr7JMd-pane-hSRGPd')))
         review_button = driver.find_element_by_class_name('Yr7JMd-pane-hSRGPd')
         clicked_object(review_button, 10)
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
-        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')[:1]
+
+        wait2 = WebDriverWait(driver, 10)
+        wait2.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
+        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')
+        print(len(reviews))
+        time.sleep(2)
+        driver.execute_script('let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
+                              'a.scrollTo(0, a.scrollHeight);')
+        time.sleep(2)
+        print('Всего загружено: ', len(reviews))
+        reviews = reviews[:1]
         print(len(reviews))
         for review in reviews:
+            print(review.get_attribute('innerHTML'))
             exception = 0
             print()
             while exception < 3:
@@ -252,6 +278,7 @@ def get_reviews(driver):
                         except Exception as e:
                             print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
                             pass
+
                         text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
                     except Exception as e:
                         text = ''
@@ -342,6 +369,8 @@ def get_info(driver):
 
 @shared_task()
 def get_site_description(url, place_id):
+    if not url or url == ' - ':
+        return None
     url = 'http://'+url
     meta_data = ''
     try:
@@ -373,12 +402,29 @@ def set_info(data, place):
     place.site = data['site'] if 'site' in data else None
     place.save()
 
-def place_detail(cid, query_id):
+def cid_to_place_id(cid):
+    url = f'https://maps.googleapis.com/maps/api/place/details/json?cid={cid}&key={KEY}'
+    print(url)
+    r = requests.get(url)
+    print(r)
+    if r.status_code == 200 and r.json()['status'] == 'OK':
+        print(r.json())
+        return r.json()
+    print('Ошибка ', url)
+    return None
+
+
+def place_create_driver(cid, query_id):
     url = CID_URL.format(cid)
     # driver = startChrome(url=url)
-    # driver = startFireFox(url=url)
-    driver = startChrome(url=url, path=CHROME_PATH)
-
+    try:
+        driver = startFireFox(url=url)
+        # driver = startChrome(url=url, path=CHROME_PATH)
+    except Exception as e:
+        time.sleep(1)
+        print('Не удалось открыть детальную страницу в боаузере: ', e.__class__.__name__)
+        place_create_driver(cid, query_id)
+        return None
     try:
         try:
             title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
@@ -405,7 +451,7 @@ def place_detail(cid, query_id):
         set_info(data, place)
         print(' --------- Главное фото: ')
         base_photo = get_photo(driver)
-        set_photo(base_photo, place.id)
+        set_photo_url(base_photo, place.id)
         # print(' --------- Информация о месте: ')
         # place_information = get_place_information(driver)
         # print(' --------- Достопримечательности: ')
@@ -428,17 +474,81 @@ def place_detail(cid, query_id):
         driver.close()
 
 
-def place_api_detail(cid):
-    url = CID_API_URL.format(cid)
-    r = requests.get(url)
-    if r.status_code == 200:
-        print(r.json())
-        if r.json()['status'] == 'OK':
-            result = r.json()['result']
-            print(result['place_id'], result['formatted_address'])
-        else:
-            print(r.json()['status'])
-    return None
+def set_api_photos(photos, place):
+    place.photos.all().delete()
+    for photo in photos:
+        print(photo)
+        height = photo['height']
+        width = photo['width']
+        photo_reference = photo['photo_reference']
+        image = gmaps.places_photo(photo_reference=photo_reference, max_width=width, max_height=height)
+        image_file = ''
+        for chunk in image:
+            image_file += str(chunk)
+        print(image_file)
+        image_file = base64.b64decode(image_file)
+        print(image_file)
+        set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
+
+
+def get_value_or_none(data, key, default_value=' - '):
+    if key in data:
+        return data[key]
+    return default_value
+
+
+def place_create_api(cid, query_id, api_data):
+    name = get_value_or_none(api_data, 'name')
+    address = get_value_or_none(api_data, 'formatted_address')
+    phone_number = get_value_or_none(api_data, 'formatted_phone_number')
+    rating = float(api_data['rating'] if 'rating' in api_data else 0)
+    rating_user_count = float(api_data['user_ratings_total'] if 'user_ratings_total' in api_data else 0)
+    site = get_value_or_none(api_data, 'website')
+    place = Place.objects.filter(cid=cid).first()
+    if not place:
+        place = Place.objects.create(cid=cid).save()
+    place.name = name
+    place.address = address
+    place.phone_number = phone_number
+    place.rating = rating
+    place.rating_user_count = rating_user_count
+    place.site = site
+    place.isApiData = True
+    place.save()
+    place.slug = slugify(f'{name}-{str(place.id)}')
+    place.save()
+
+    query = Query.objects.filter(id=query_id).first()
+    create_query_place(place, query)
+
+    get_site_description(site, place.id)
+    print('Беру отзывы')
+    reviews = api_data['reviews']
+    set_reviews(reviews, place)
+    print('Беру фотографии')
+    photos = api_data['photos'] if 'photos' in api_data else []
+    set_api_photos(photos, place)
+
+def place_detail(cid, query_id):
+    api_data = cid_to_place_id(cid)
+    if api_data:
+        place_create_api(cid, query_id, api_data['result'])
+    print(f'Тут нужен драйвер {cid}')
+    # place_create_driver(cid, query_id)
+
+
+
+# def place_api_detail(cid):
+#     url = CID_API_URL.format(cid)
+#     r = requests.get(url)
+#     if r.status_code == 200:
+#         print(r.json())
+#         if r.json()['status'] == 'OK':
+#             result = r.json()['result']
+#             print(result['place_id'], result['formatted_address'])
+#         else:
+#             print(r.json()['status'])
+#     return None
 
 
 # Функция которая парсит отели на странице
@@ -500,8 +610,8 @@ def startParsing(query_name, query_id, pages=None):
 
     # print(1)
     print(CUSTOM_URL.format(query_name))
-    # driver = startFireFox(url=CUSTOM_URL.format(query_name))
-    driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+    driver = startFireFox(url=CUSTOM_URL.format(query_name))
+    # driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     # print(2)
     try:
         if pages:

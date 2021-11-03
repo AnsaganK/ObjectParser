@@ -59,14 +59,14 @@ class QueryPlace(models.Model):
 
 class Place(models.Model):
     place_id = models.TextField(verbose_name='Идентификатор в гугл картах', null=True, blank=True)
-    name = models.CharField(max_length=500, null=True, blank=True)
-    slug = models.SlugField(max_length=500, null=True, blank=True)
+    name = models.CharField(max_length=1000, null=True, blank=True)
+    slug = models.SlugField(max_length=1000, null=True, blank=True)
     cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True, unique=True)
     img = models.ImageField(upload_to='place_images', null=True, blank=True, verbose_name='Картинка')
     img_url = models.TextField(null=True, blank=True)
     address = models.CharField(max_length=500, null=True, blank=True)
     phone_number = models.CharField(max_length=500, null=True, blank=True)
-    site = models.CharField(max_length=500, null=True, blank=True)
+    site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     meta = models.TextField(null=True, blank=True)
     attractions = models.ManyToManyField('Attraction', related_name='places')
@@ -80,6 +80,7 @@ class Place(models.Model):
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     date_update = models.DateTimeField(auto_now=True, null=True, blank=True)
 
+    isApiData = models.BooleanField(default=False)
 
     @property
     def get_rating(self):
@@ -103,6 +104,17 @@ class Place(models.Model):
 
     def get_absolute_url(self):
         return reverse('app:place_detail', args=[self.slug])
+
+class PlacePhoto(models.Model):
+    img = models.ImageField(upload_to='place_photos', null=True, blank=True)
+    place = models.ForeignKey(Place, on_delete=models.CASCADE, null=True, blank=True, related_name='photos')
+
+    def __str__(self):
+        return self.id
+
+    class Meta:
+        verbose_name = 'Фотография'
+        verbose_name_plural = 'Фотографии'
 
 
 class Review(models.Model):
