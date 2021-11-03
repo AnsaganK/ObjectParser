@@ -33,31 +33,34 @@
 {% endblock %}
 {% block content %}
     <h4 class="block_title"> {{ query.name }} </h4>
-    <div class="columns is-multiline">
-        {% for place in places|slice:":20" %}
-            <div class="column is-3" style="padding: 10px; box-sizing: border-box">
-                <a class="box place_little_card" href="{{ place.get_absolute_url }}" style="min-height: 380px">
+    {% for place in places|slice:":20" %}
+        <div class="columns is-centered">
+            <div class="column is-9" style="padding: 10px; box-sizing: border-box">
+                <a class="box place_little_card" href="{{ place.get_absolute_url }}">
                     <span class="top_place_number">{{ forloop.counter }}</span>
                     <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
-                    <img src="{{ place.img|getImg }}" alt="" style="width: 100% !important; height: 200px !important;">
-                    <div>
+                    <div style="display: flex; ">
+                        <img src="{{ place.img|getImg }}" alt=""
+                             style="width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px">
+                        <div style="flex-grow: 1; width: min-content">
                         <span style="color: black;
     text-align: center;
     display: block;
-    border-bottom: 1px solid grey;margin: 0px
+    border-bottom: 1px solid grey;margin: 0px;
 ;">{{ place.name }}</span>
-                        <span><b>Рейтинг</b>: {{ place.rating }}</span><br>
-                        <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
-                        <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span><br>
-                        <span><b>Описание</b>: {{ place.meta|isValue|getMetaText }}</span>
+                            <span><b>Рейтинг</b>: {{ place.rating }}</span><br>
+                            <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
+                            <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span><br>
+                            <span><b>Описание</b>: {{ place.meta|isValue|getMetaText|truncatechars:'300' }}</span>
+                        </div>
                     </div>
                 </a>
             </div>
-        {% endfor %}
-        <hr>
+        </div>
+    {% endfor %}
+    <hr>
 
 
-    </div>
     <h4 class="block_title">Весь список</h4>
     <div class="columns is-multiline">
         {% for letter in letters %}
