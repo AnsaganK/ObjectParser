@@ -225,9 +225,15 @@ def place_update(request, pk):
     # updateDetail(place.pk)
     return redirect(place.get_absolute_url())
 
+def generate_slug():
+    places = Place.objects.all()
+    for place in places:
+        place.slug = slugify(f'{place.name}-{str(place.id)}')
+        place.save()
 
 @login_required()
 def profile(request):
+    generate_slug()
     user = request.user
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)

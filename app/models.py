@@ -60,6 +60,7 @@ class QueryPlace(models.Model):
 class Place(models.Model):
     place_id = models.TextField(verbose_name='Идентификатор в гугл картах', null=True, blank=True)
     name = models.CharField(max_length=500, null=True, blank=True)
+    slug = models.SlugField(max_length=500, null=True, blank=True)
     cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True, unique=True)
     img = models.ImageField(upload_to='place_images', null=True, blank=True, verbose_name='Картинка')
     img_url = models.TextField(null=True, blank=True)
