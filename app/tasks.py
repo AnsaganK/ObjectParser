@@ -235,14 +235,14 @@ def get_reviews(driver):
                     except (NoSuchElementException, StaleElementReferenceException):
                         author_name = ''
                     try:
-                        stars = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
-                        stars = int(stars[0])
+                        rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
+                        rating = int(rating[0])
                     except (NoSuchElementException, StaleElementReferenceException):
                         try:
-                            stars = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
+                            rating = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
                         except Exception as e:
                             print('Ошибка при получении звезд: ', e.__class__.__name__)
-                            stars = None
+                            rating = None
                     try:
                         try:
                             more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
@@ -256,11 +256,10 @@ def get_reviews(driver):
                     except Exception as e:
                         text = ''
                         print('Ошибка в отзыве: ', e.__class__.__name__)
-                    print(review.get_attribute('innerHTML'))
-                    print(author_name, stars, text)
+                    print(author_name, rating, text)
                     review_list.append({
                         'author_name': author_name,
-                        'stars': stars,
+                        'rating': rating,
                         'text': text
                     })
                     break
@@ -273,14 +272,16 @@ def get_reviews(driver):
     return review_list
 
 def set_reviews(review_list, place):
-    place.reviews_google.clear()
-    for review in review_list:
-        review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
-                                                    stars=review['stars'],
-                                                    text=review['text'],
-                                                    place=place)
-        review_google.save()
-
+    try:
+        place.reviews_google.all().delete()
+        for review in review_list:
+            review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
+                                                        rating=review['rating'],
+                                                        text=review['text'],
+                                                        place=place)
+            review_google.save()
+    except Exception as e:
+        print('Ошибка при назначении отзывов: ', e.__class__.__name__)
 
 
 def get_or_create_place(name, rating, rating_user_count, cid):
@@ -321,7 +322,7 @@ def get_info(driver):
         timetable = timetable.get_attribute('innerText')
     except Exception as e:
         timetable = ''
-        print(e.__class__.__name__)
+        print('Ошибка при взятии расписания: ', e.__class__.__name__)
     data['timetable'] = timetable
     try:
         data_objects = driver.find_elements_by_class_name('AeaXub')
@@ -374,9 +375,9 @@ def set_info(data, place):
 
 def place_detail(cid, query_id):
     url = CID_URL.format(cid)
-    driver = startChrome(url=url)
+    # driver = startChrome(url=url)
     # driver = startFireFox(url=url)
-    # driver = startChrome(url=url, path=CHROME_PATH)
+    driver = startChrome(url=url, path=CHROME_PATH)
 
     try:
         try:
@@ -414,6 +415,7 @@ def place_detail(cid, query_id):
         # photos = get_photos(driver)                                 # class PlacePhoto
         print(' --------- Отзывы: ')
         reviews = get_reviews(driver)
+        print('Jnpsds', reviews)
         set_reviews(reviews, place)
         print(title)
         print('Закрыто')

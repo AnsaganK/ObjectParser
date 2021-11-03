@@ -128,7 +128,7 @@ class Review(models.Model):
 
 class ReviewGoogle(models.Model):
     author_name = models.CharField(max_length=500, null=True, blank=True)
-    rating = models.CharField(max_length=250, null=True, blank=True)
+    rating = models.IntegerField(null=True, blank=True)
     text = models.TextField(null=True, blank=True)
 
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews_google')
