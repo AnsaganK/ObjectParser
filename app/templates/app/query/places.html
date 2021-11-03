@@ -48,8 +48,8 @@
 ;">{{ place.name }}</span>
                         <span><b>Рейтинг</b>: {{ place.rating }}</span><br>
                         <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
-                        <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span>
-                        <span><b>Описание</b>: {{ place.meta|isValue }}</span>
+                        <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span><br>
+                        <span><b>Описание</b>: {{ place.meta|isValue|getMetaText }}</span>
                     </div>
                 </a>
             </div>

@@ -67,3 +67,11 @@ def getBaseImg(query):
         except:
             pass
     return '/static/img/not_found.png'
+
+@register.filter(name="getMetaText")
+def getMetaText(meta):
+    if meta == ' - ':
+        return meta
+    pattern = r'(?<=content=")(.+?)(?=")'
+    meta = meta.search(pattern, meta)
+    return meta.group
