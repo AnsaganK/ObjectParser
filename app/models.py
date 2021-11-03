@@ -102,7 +102,7 @@ class Place(models.Model):
         ordering = ['-pk']
 
     def get_absolute_url(self):
-        return reverse('app:place_detail', args=[self.cid])
+        return reverse('app:place_detail', args=[self.slug])
 
 
 class Review(models.Model):

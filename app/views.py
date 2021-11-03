@@ -190,8 +190,8 @@ def places(request, slug):
     return render(request, 'app/query/places.html', {'query': query, 'places': places, 'places_letter': places_letter, 'letters': letters})
 
 @login_required()
-def place_detail(request, cid):
-    place = Place.objects.filter(cid=cid).first()
+def place_detail(request, slug):
+    place = Place.objects.filter(slug=slug).first()
     reviews = place.reviews.all()
     reviews = get_paginator(request, reviews, 10)
     my_review = Review.objects.filter(place=place).filter(user=request.user).first()
