@@ -77,5 +77,5 @@ def getMetaText(meta):
     pattern = r'(?<=content=")(.+?)(?=")'
     meta = re.search(pattern, meta)
     if meta:
-        return meta.group
+        return meta.group()
     return ' - '
