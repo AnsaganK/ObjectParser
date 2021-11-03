@@ -57,6 +57,7 @@
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
                 <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
+                <p><span>Описание:</span> <span>{{ place.meta|isValue }}</span></p>
                 <h4 class="block_title">Отзывы</h4>
                 {% for review in place.detail_data.reviews %}
                     <div class="columns is-centered">

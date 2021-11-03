@@ -328,7 +328,7 @@ def get_site_description(url, place_id):
     if not html:
         return html
     soup = BS(html, 'lxml')
-    meta = soup.find(attrs={'name': 'description'})
+    meta = soup.find('meta', attrs={'name': 'description'})
     if meta:
         meta_data = str(meta)
     place = Place.objects.filter(id=place_id).first()
