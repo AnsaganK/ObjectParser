@@ -1,3 +1,5 @@
+import re
+
 from django import template
 import json
 
@@ -73,5 +75,5 @@ def getMetaText(meta):
     if meta == ' - ':
         return meta
     pattern = r'(?<=content=")(.+?)(?=")'
-    meta = meta.search(pattern, meta)
+    meta = re.search(pattern, meta)
     return meta.group
