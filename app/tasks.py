@@ -9,7 +9,7 @@ from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
 from pytils.translit import slugify
 
-from .models import Place, Query, QueryPlace
+from .models import Place, Query, QueryPlace, ReviewGoogle
 
 
 @shared_task
@@ -217,15 +217,15 @@ def set_photo(img_url, place_id):
 
 
 def get_reviews(driver):
+    review_list = []
     try:
         review_button = driver.find_element_by_class_name('Yr7JMd-pane-hSRGPd')
         clicked_object(review_button, 10)
         wait = WebDriverWait(driver, 10)
         wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
-        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')[:5]
+        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')[:1]
         print(len(reviews))
         for review in reviews:
-            print(review.get_attribute('innerHTML'))
             exception = 0
             print()
             while exception < 3:
@@ -236,26 +236,33 @@ def get_reviews(driver):
                         author_name = ''
                     try:
                         stars = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
+                        stars = int(stars[0])
                     except (NoSuchElementException, StaleElementReferenceException):
                         try:
                             stars = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
                         except Exception as e:
                             print('Ошибка при получении звезд: ', e.__class__.__name__)
-                            stars = 'None'
+                            stars = None
                     try:
                         try:
-                            # more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
-                            # print(more_text_button.text)
-                            # clicked_object(more_text_button, 10)
+                            more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
+                            print(more_text_button.text)
+                            clicked_object(more_text_button, 10)
                             time.sleep(1)
                         except Exception as e:
-                            print(e.__class__.__name__)
+                            print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
                             pass
-                        # text = review.find_element_by_class_name('ODSEW-ShBeI-text')
-                    except (NoSuchElementException, NoSuchAttributeException, StaleElementReferenceException):
+                        text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
+                    except Exception as e:
                         text = ''
-                        print('Ошибка')
-                    print(author_name, stars)
+                        print('Ошибка в отзыве: ', e.__class__.__name__)
+                    print(review.get_attribute('innerHTML'))
+                    print(author_name, stars, text)
+                    review_list.append({
+                        'author_name': author_name,
+                        'stars': stars,
+                        'text': text
+                    })
                     break
                 except StaleElementReferenceException:
                     exception += 1
@@ -263,7 +270,17 @@ def get_reviews(driver):
                     time.sleep(1)
     except Exception as e:
         print('Ошибка при получении отзывов: ', e.__class__.__name__)
-        return None
+    return review_list
+
+def set_reviews(review_list, place):
+    place.reviews_google.clear()
+    for review in review_list:
+        review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
+                                                    stars=review['stars'],
+                                                    text=review['text'],
+                                                    place=place)
+        review_google.save()
+
 
 
 def get_or_create_place(name, rating, rating_user_count, cid):
@@ -358,7 +375,8 @@ def set_info(data, place):
 def place_detail(cid, query_id):
     url = CID_URL.format(cid)
     # driver = startChrome(url=url)
-    driver = startChrome(url=url, path=CHROME_PATH)
+    driver = startFireFox(url=url)
+    # driver = startChrome(url=url, path=CHROME_PATH)
 
     try:
         try:
@@ -394,9 +412,10 @@ def place_detail(cid, query_id):
         # print(' --------- Информация о месте: ')
         # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
         # photos = get_photos(driver)                                 # class PlacePhoto
-        # print(' --------- Отзывы: ')
-        # reviews = get_reviews(driver)
-        print(title, )
+        print(' --------- Отзывы: ')
+        reviews = get_reviews(driver)
+        set_reviews(reviews, place)
+        print(title)
         print('Закрыто')
         print('----------------')
 
@@ -479,7 +498,8 @@ def startParsing(query_name, query_id, pages=None):
 
     # print(1)
     print(CUSTOM_URL.format(query_name))
-    driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+    driver = startFireFox(url=CUSTOM_URL.format(query_name))
+    # driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     # print(2)
     try:
         if pages:

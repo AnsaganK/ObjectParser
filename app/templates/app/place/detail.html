@@ -58,10 +58,10 @@
                 <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
                 <p><span>Описание:</span> <span>{{ place.meta|isValue|getMetaText }}</span></p>
                 <h4 class="block_title">Отзывы</h4>
-                {% for review in place.detail_data.reviews %}
+                {% for review in place.reviews_google.all %}
                     <div class="columns is-centered">
                         <div class="column is-8 box">
-                            <span class="author">{{ review.author_name }}</span>
+                            <span class="author">{{ review.author_name }} {{ review.stars }}</span>
                             <span class="text">{{ review.text }}</span>
                         </div>
                     </div>
