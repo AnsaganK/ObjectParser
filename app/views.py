@@ -233,7 +233,6 @@ def generate_slug():
 
 @login_required()
 def profile(request):
-    generate_slug()
     user = request.user
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)

@@ -7,6 +7,7 @@ from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
+from pytils.translit import slugify
 
 from .models import Place, Query, QueryPlace
 
@@ -273,7 +274,11 @@ def get_or_create_place(name, rating, rating_user_count, cid):
         place.rating_user_count = rating_user_count
         place.save()
         return place
-    place = Place.objects.create(name=name, rating=rating, rating_user_count=rating_user_count, cid=cid)
+    place = Place.objects.create(name=name,
+                                 slug=slugify(f'{place.name}-{str(place.id)}'),
+                                 rating=rating,
+                                 rating_user_count=rating_user_count,
+                                 cid=cid)
     place.save()
     return place
 
