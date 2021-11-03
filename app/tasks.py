@@ -638,7 +638,7 @@ def generate_file(file_name, places):
         streaming_content=(iter_items(places, Echo())),
         content_type='text/csv',
     )
-    response['Content-Disposition'] = 'attachment;filename=items.csv'
+    response['Content-Disposition'] = f'attachment;filename={file_name}.csv'
     return response
     # response = StreamingHttpResponse(content_type='text/csv')
     # response['Content-Disposition'] = 'attachment; filename="data.csv"'

@@ -158,8 +158,9 @@ def query_file_generate(request, pk):
         return redirect(query.get_absolute_url)
     # places = query.places.all()
     places = Place.objects.filter(queries__query=query).all()
-    name = query.name
-    file = generate_file(name, places)
+    slug = query.slug
+    print(slug)
+    file = generate_file(slug, places)
     return file
 
 def queries(request):
