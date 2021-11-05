@@ -477,7 +477,7 @@ def place_create_driver(cid, query_id):
         print('Ошибка')
         driver.close()
 
-@shared_task()
+
 def set_api_photos(photos, place_id):
     place = Place.objects.filter(id=place_id).first()
     if not place:
@@ -491,7 +491,6 @@ def set_api_photos(photos, place_id):
         url = f'https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference={photo_reference}&key={KEY}'
         set_photo_url(img_url=url, place_id=place.id, base=base)
         base = False
-        time.sleep(1)
         # image = gmaps.places_photo(photo_reference=photo_reference, max_width=width, max_height=height)
         # image_file = ''
         # for chunk in image:
@@ -499,7 +498,7 @@ def set_api_photos(photos, place_id):
         # image_file = base64.b64decode(image_file)
         # print(image_file)
         # set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
-
+    time.sleep(1)
 def get_value_or_none(data, key, default_value=' - '):
     if key in data:
         return data[key]
@@ -536,7 +535,7 @@ def place_create_api(cid, query_id, api_data):
     print('Беру фотографии')
     photos = api_data['photos'] if 'photos' in api_data else []
     print(len(photos))
-    set_api_photos.delay(photos, place.id)
+    set_api_photos(photos, place.id)
 
     print('Беру отзывы')
     reviews = api_data['reviews']
