@@ -15,6 +15,7 @@ from app.models import Query, Place, Review
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
+from app.serializers import QuerySerializer
 from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
 
@@ -390,3 +391,13 @@ class QueryAdd(APIView):
             query.save()
 
         return Response({"message": "Парсинг начат"}, status=status.HTTP_200_OK)
+
+
+class QueryUser(APIView):
+    def get(self, request, username, format=None):
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        queries = user.queries
+        serializer = QuerySerializer(queries, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
