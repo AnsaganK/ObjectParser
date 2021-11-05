@@ -59,7 +59,7 @@
                 <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
                 <p><span>Описание:</span> <span>{{ place.meta|isValue|getMetaText }}</span></p>
                 {% for photo in place.photos.all %}
-                    <img src="{{ photo.img.url }}" alt="" width="150px" height="150px" >
+                    <img src="{{ photo.img.url }}" alt="" style="width: 200px !important; height: 200px !important;" >
 
                 {% endfor %}
                 <h4 class="block_title">Отзывы</h4>

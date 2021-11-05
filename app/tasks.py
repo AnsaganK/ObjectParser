@@ -205,19 +205,21 @@ def get_photo(driver):
         print('Ошибка при получении главного фото: ', e.__class__.__name__)
         return None
 
-def set_photo_url(img_url, place_id):
+def set_photo_url(img_url, place_id, base=True):
     place = Place.objects.filter(id=place_id).first()
     if place and img_url:
         r = requests.get(img_url)
         if r.status_code == 200:
             content = r.content
-
-            place.img_url = img_url
-            place.img.save(os.path.basename(img_url), ContentFile(content))
-            place.save()
-
-
-        return 'Фото назначено для {}'.format(place_id)
+            if base:
+                place.img_url = img_url
+                place.img.save(os.path.basename(img_url), ContentFile(content))
+                place.save()
+            else:
+                photo = PlacePhoto(place=place)
+                photo.img.save(os.path.basename(img_url), ContentFile(content))
+                photo.save()
+            return 'Фото назначено для {}'.format(place_id)
     return 'Фото не назначено {}'.format(place_id)
 
 
@@ -298,11 +300,12 @@ def get_reviews(driver):
         print('Ошибка при получении отзывов: ', e.__class__.__name__)
     return review_list
 
+
 def set_reviews(review_list, place):
     try:
         place.reviews_google.all().delete()
         for review in review_list:
-            if review['author_name'] and review['rating'] and review['text']:
+            if review['author_name']:
                 review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
                                                             rating=review['rating'],
                                                             text=review['text'],
@@ -452,7 +455,7 @@ def place_create_driver(cid, query_id):
         set_info(data, place)
         print(' --------- Главное фото: ')
         base_photo = get_photo(driver)
-        set_photo_url(base_photo, place.id)
+        set_photo_url(base_photo, place.id, base=True)
         # print(' --------- Информация о месте: ')
         # place_information = get_place_information(driver)
         # print(' --------- Достопримечательности: ')
@@ -474,18 +477,21 @@ def place_create_driver(cid, query_id):
         print('Ошибка')
         driver.close()
 
-
-def set_api_photos(photos, place):
+@shared_task()
+def set_api_photos(photos, place_id):
+    place = Place.objects.filter(id=place_id).first()
+    if not place:
+        return None
     place.photos.all().delete()
     photos = photos[:5]
+    base = True
     for photo in photos:
         print(photo)
-        height = photo['height']
-        width = photo['width']
         photo_reference = photo['photo_reference']
         url = f'https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference={photo_reference}&key={KEY}'
-        set_photo_url(img_url=url, place_id=place.id)
-
+        set_photo_url(img_url=url, place_id=place.id, base=base)
+        base = False
+        time.sleep(1)
         # image = gmaps.places_photo(photo_reference=photo_reference, max_width=width, max_height=height)
         # image_file = ''
         # for chunk in image:
@@ -509,7 +515,8 @@ def place_create_api(cid, query_id, api_data):
     site = get_value_or_none(api_data, 'website')
     place = Place.objects.filter(cid=cid).first()
     if not place:
-        place = Place.objects.create(cid=cid).save()
+        print('Такого объекта нет Создаю')
+        place = Place.objects.create(cid=cid)
     place.name = name
     place.address = address
     place.phone_number = phone_number
@@ -524,20 +531,24 @@ def place_create_api(cid, query_id, api_data):
     query = Query.objects.filter(id=query_id).first()
     create_query_place(place, query)
 
-    get_site_description(site, place.id)
+    get_site_description.delay(site, place.id)
+
+    print('Беру фотографии')
+    photos = api_data['photos'] if 'photos' in api_data else []
+    print(len(photos))
+    set_api_photos.delay(photos, place.id)
+
     print('Беру отзывы')
     reviews = api_data['reviews']
     set_reviews(reviews, place)
-    print('Беру фотографии')
-    photos = api_data['photos'] if 'photos' in api_data else []
-    set_api_photos(photos, place)
 
 def place_detail(cid, query_id):
     api_data = cid_to_place_id(cid)
     if api_data:
         place_create_api(cid, query_id, api_data['result'])
-    print(f'Тут нужен драйвер {cid}')
-    # place_create_driver(cid, query_id)
+    else:
+        print(f'Тут нужен драйвер {cid}')
+        # place_create_driver(cid, query_id)
 
 
 
