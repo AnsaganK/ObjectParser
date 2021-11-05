@@ -547,7 +547,7 @@ def place_detail(cid, query_id):
         place_create_api(cid, query_id, api_data['result'])
     else:
         print(f'Тут нужен драйвер {cid}')
-        # place_create_driver(cid, query_id)
+        place_create_driver(cid, query_id)
 
 
 

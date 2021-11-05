@@ -4,12 +4,18 @@ from app.models import Query, Place, QueryPlace
 
 
 class QuerySerializer(serializers.ModelSerializer):
+    places_count = serializers.SerializerMethodField('places_count')
+
+    def places_count(self, foo):
+        return Place.objects.filter(queries__query_id=Query.id).count()
+
     class Meta:
         model = Query
-        fields = '__all__'
+        fields = ['name', 'slug', 'places_count']
 
 
 class PlaceSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Place
         fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'description', 'meta', 'date_create']
