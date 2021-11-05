@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from app.models import Query, Place
+from app.models import Query, Place, QueryPlace
 
 
 class QuerySerializer(serializers.ModelSerializer):
@@ -8,10 +8,19 @@ class QuerySerializer(serializers.ModelSerializer):
         model = Query
         fields = '__all__'
 
+
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
-        fields = ('id', 'place_id', 'date_create', 'date_update', 'get_rating')
+        fields = ['name', 'slug', 'cid', 'rating']
+
+
+class QueryPlaceSerializer(serializers.ModelSerializer):
+    place = PlaceSerializer(many=True)
+
+    class Meta:
+        model = QueryPlace
+        fields = ['place']
 
 
 class UserSerializer(serializers.ModelSerializer):

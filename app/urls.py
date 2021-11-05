@@ -40,6 +40,7 @@ urlpatterns = [
 urlpatterns += [
     path('api/v1/query/add', views.QueryAdd.as_view(), name='query_add'),
     path('api/v1/query/<str:username>', views.QueryUser.as_view(), name='query_user'),
+    path('api/v1/query/<slug:slug>/places', views.QueryPlaces.as_view(), name='query_places'),
     path('api/v1/query/<int:pk>', views.QueryAdd.as_view(), name='query_detail'),
     path('api/v1/query/<int:pk>/places', views.QueryAdd.as_view(), name='query_places'),
 ]
