@@ -418,8 +418,8 @@ def place_create_driver(cid, query_id):
     url = CID_URL.format(cid)
     # driver = startChrome(url=url)
     try:
-        driver = startFireFox(url=url)
-        # driver = startChrome(url=url, path=CHROME_PATH)
+        # driver = startFireFox(url=url)
+        driver = startChrome(url=url, path=CHROME_PATH)
     except Exception as e:
         time.sleep(1)
         print('Не удалось открыть детальную страницу в боаузере: ', e.__class__.__name__)
@@ -485,9 +485,9 @@ def set_api_photos(photos, place):
         image_file = ''
         for chunk in image:
             image_file += str(chunk)
-        print(image_file)
+        # print(image_file)
         image_file = base64.b64decode(image_file)
-        print(image_file)
+        # print(image_file)
         set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
 
 
@@ -610,8 +610,8 @@ def startParsing(query_name, query_id, pages=None):
 
     # print(1)
     print(CUSTOM_URL.format(query_name))
-    driver = startFireFox(url=CUSTOM_URL.format(query_name))
-    # driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+    # driver = startFireFox(url=CUSTOM_URL.format(query_name))
+    driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     # print(2)
     try:
         if pages:
