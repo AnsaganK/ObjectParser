@@ -302,11 +302,12 @@ def set_reviews(review_list, place):
     try:
         place.reviews_google.all().delete()
         for review in review_list:
-            review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
-                                                        rating=review['rating'],
-                                                        text=review['text'],
-                                                        place=place)
-            review_google.save()
+            if review['author_name'] and review['rating'] and review['text']:
+                review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
+                                                            rating=review['rating'],
+                                                            text=review['text'],
+                                                            place=place)
+                review_google.save()
     except Exception as e:
         print('Ошибка при назначении отзывов: ', e.__class__.__name__)
 
@@ -460,9 +461,9 @@ def place_create_driver(cid, query_id):
         # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
         # photos = get_photos(driver)                                 # class PlacePhoto
         print(' --------- Отзывы: ')
-        reviews = get_reviews(driver)
-        print('Jnpsds', reviews)
-        set_reviews(reviews, place)
+        # reviews = get_reviews(driver)
+        # print('Jnpsds', reviews)
+        # set_reviews(reviews, place)
         print(title)
         print('Закрыто')
         print('----------------')
@@ -476,20 +477,22 @@ def place_create_driver(cid, query_id):
 
 def set_api_photos(photos, place):
     place.photos.all().delete()
+    photos = photos[:5]
     for photo in photos:
         print(photo)
         height = photo['height']
         width = photo['width']
         photo_reference = photo['photo_reference']
-        image = gmaps.places_photo(photo_reference=photo_reference, max_width=width, max_height=height)
-        image_file = ''
-        for chunk in image:
-            image_file += str(chunk)
-        # print(image_file)
-        image_file = base64.b64decode(image_file)
-        # print(image_file)
-        set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
+        url = f'https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference={photo_reference}&key={KEY}'
+        set_photo_url(img_url=url, place_id=place.id)
 
+        # image = gmaps.places_photo(photo_reference=photo_reference, max_width=width, max_height=height)
+        # image_file = ''
+        # for chunk in image:
+        #     image_file += str(chunk)
+        # image_file = base64.b64decode(image_file)
+        # print(image_file)
+        # set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
 
 def get_value_or_none(data, key, default_value=' - '):
     if key in data:
