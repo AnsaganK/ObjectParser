@@ -179,7 +179,7 @@ def places(request, slug):
     query = Query.objects.filter(slug=slug).first()
     if not query:
         return redirect('app:index')
-    places = Place.objects.filter(queries__query=query).all().order_by('-rating').order_by('-rating_user_count')
+    places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
     for i in places:
         first_letter = i.name[0]
         if first_letter in places_letter:
@@ -415,7 +415,7 @@ class QueryPlaces(APIView):
         query = Query.objects.filter(slug=slug).first()
         if not query:
             return redirect('app:index')
-        places = Place.objects.filter(queries__query=query).all().order_by('-rating').order_by('-rating_user_count')
+        places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
         for i in places:
             first_letter = i.name[0]
             i = PlaceMinSerializer(i).data
