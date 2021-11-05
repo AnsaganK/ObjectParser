@@ -44,6 +44,16 @@ class Query(models.Model):
     def places_count(self):
         return Place.objects.filter(queries__query_id=self.id).count()
 
+    @property
+    def base_img(self):
+        host = 'http://170.130.40.103'
+        places = Place.objects.filter(queries__query_id=self.id)
+        if len(places) > 0:
+            place = places[0]
+            if place and place.img:
+                return f'{host}{place.img.url}'
+        return f'{host}/static/img/not_found.png'
+
 class QueryPlace(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True, related_name='places')
     place = models.ManyToManyField('Place', related_name='queries')

@@ -20,7 +20,7 @@ class QuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Query
-        fields = ['name', 'slug', 'places_count']
+        fields = ['name', 'slug', 'places_count', 'base_img']
 
 
 class PlaceSerializer(serializers.ModelSerializer):
