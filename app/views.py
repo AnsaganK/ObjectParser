@@ -4,8 +4,11 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from pytils.translit import slugify
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm
 from app.models import Query, Place, Review
@@ -355,3 +358,35 @@ def user_detail(request, pk):
     if user:
         return render(request, 'app/user/detail.html', {'user': user, 'groups': groups})
     return redirect('/')
+
+
+class QueryAdd(APIView):
+    def get(self, request, format=None):
+        username = request.GET.get('username')
+        query_name = request.GET.get('query_name')
+        query_page = request.GET.get('query_page')
+
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            query_page = int(query_page)
+        except:
+            query_page = 1
+        if query_page == 0:
+            query_page = None
+        query = Query(user=user, name=query_name, page=query_page, status='wait')
+        query.save()
+        query_id = query.id
+        slug = slugify(query_name + '-' + str(query_id))
+        query.slug = slug
+        query.save()
+        try:
+            print(query_name)
+            startParsing.delay(query_name=query_name, query_id=query_id, pages=query_page)
+        except Exception as e:
+            print(e.__class__.__name__)
+            query.status = 'error'
+            query.save()
+
+        return Response({"message": "Парсинг начат"}, status=status.HTTP_200_OK)

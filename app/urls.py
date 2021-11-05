@@ -35,3 +35,10 @@ urlpatterns = [
     path('admin_dashboard/users/', views.user_list, name="user_list"),
     path('admin_dashboard/users/<int:pk>', views.user_detail, name="user_detail"),
 ]
+
+
+urlpatterns += [
+    path('api/v1/query/add', views.QueryAdd.as_view(), name='query_add'),
+    path('api/v1/query/<int:pk>', views.QueryAdd.as_view(), name='query_detail'),
+    path('api/v1/query/<int:pk>/places', views.QueryAdd.as_view(), name='query_places'),
+]
