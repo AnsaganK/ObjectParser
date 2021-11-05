@@ -7,19 +7,20 @@ class QuerySerializer(serializers.ModelSerializer):
     places_count = serializers.SerializerMethodField('places_count')
     base_img = serializers.SerializerMethodField('base_img')
 
-    def base_img(self):
-        place = Place.objects.filter(queries__query_id=Query.id).first()
-        if place and place.img:
-            return place.img.url
-        else:
-            return 'http://170.130.40.103/static/img/not_found.png'
+    def base_img(self, obj):
+        places = obj.places.all()
+        if len(places) > 0:
+            place = places[0]
+            if place and place.img:
+                return place.img.url
+        return 'http://170.130.40.103/static/img/not_found.png'
 
-    def places_count(self):
+    def places_count(self, obj):
         return Place.objects.filter(queries__query_id=Query.id).count()
 
     class Meta:
         model = Query
-        fields = ['name', 'slug', 'places_count', 'base_img']
+        fields = ['name', 'slug', 'places_count']
 
 
 class PlaceSerializer(serializers.ModelSerializer):
