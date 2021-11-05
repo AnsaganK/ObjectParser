@@ -58,7 +58,7 @@
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
                 <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
-                <p><span>Описание:</span> <span>{{ place.meta|isValue|getMetaText }}</span></p>
+                <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>
 
                 <section class="" style="max-width: 1000px">
                     <div class="is-clipped">

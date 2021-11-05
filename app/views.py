@@ -15,7 +15,7 @@ from app.models import Query, Place, Review
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
-from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer
+from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer
 from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
 
@@ -408,15 +408,40 @@ class QueryPlaces(APIView):
         query = Query.objects.filter(slug=slug).first()
         if not query:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        places = query.places.all()
-        serializer = QueryPlaceSerializer(places, many=True)
-        return Response(serializer.data, status.HTTP_200_OK)
+
+        places_letter = {
+
+        }
+        query = Query.objects.filter(slug=slug).first()
+        if not query:
+            return redirect('app:index')
+        places = Place.objects.filter(queries__query=query).all().order_by('-rating')
+        for i in places:
+            first_letter = i.name[0]
+            i = PlaceMinSerializer(i).data
+            if first_letter in places_letter:
+                places_letter[first_letter]['places'].append(i)
+            else:
+                places_letter[first_letter] = {
+                    'letter': first_letter,
+                    'places': [i]
+                }
+        letters = list(places_letter.keys())
+        letters = sorted(letters)
+
+        serializer = PlaceSerializer(places, many=True)
+        ser = serializer.data
+        data = {
+            'places': ser,
+            'letters': letters,
+            'places_letter': places_letter
+        }
+        return Response(data, status.HTTP_200_OK)
 
 
 class PlaceDetail(APIView):
     def get(self, request, slug, format=None):
         place = Place.objects.filter(slug=slug).first()
-        print(place)
         if not place:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         serializer = PlaceSerializer(place)

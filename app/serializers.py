@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from app.models import Query, Place, QueryPlace
+import re
 
 
 class QuerySerializer(serializers.ModelSerializer):
@@ -23,11 +24,40 @@ class QuerySerializer(serializers.ModelSerializer):
         fields = ['name', 'slug', 'places_count', 'base_img']
 
 
+
+
 class PlaceSerializer(serializers.ModelSerializer):
+    get_meta_description = serializers.SerializerMethodField('get_meta_description')
+
+    def get_meta_description(self, obj):
+        if obj.meta == None:
+            return None
+        pattern = r'(?<=content=")(.+?)(?=")'
+        meta = re.search(pattern, obj.meta)
+        if meta:
+            return meta.group()
+        return ' - '
 
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'description', 'meta', 'date_create']
+        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'description', 'meta', 'date_create', 'get_meta_description']
+
+class PlaceMinSerializer(serializers.ModelSerializer):
+    get_meta_description = serializers.SerializerMethodField('get_meta_description')
+
+    def get_meta_description(self, obj):
+        if obj.meta == None:
+            return None
+        pattern = r'(?<=content=")(.+?)(?=")'
+        meta = re.search(pattern, obj.meta)
+        if meta:
+            return meta.group()
+        return ' - '
+
+    class Meta:
+        model = Place
+        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'meta', 'get_meta_description']
+
 
 
 class QueryPlaceSerializer(serializers.ModelSerializer):

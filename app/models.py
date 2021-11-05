@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
@@ -95,6 +97,16 @@ class Place(models.Model):
     @property
     def get_rating(self):
         return self.data['rating'] if self.data and 'rating' in self.data else 0
+
+    @property
+    def get_meta_description(self):
+        if self.meta == None:
+            return None
+        pattern = r'(?<=content=")(.+?)(?=")'
+        meta = re.search(pattern, self.meta)
+        if meta:
+            return meta.group()
+        return ' - '
 
     @property
     def get_name(self):

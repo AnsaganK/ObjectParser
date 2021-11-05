@@ -51,7 +51,7 @@
                             <span><b>Рейтинг</b>: {{ place.rating }}</span><br>
                             <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
                             <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span><br>
-                            <span><b>Описание</b>: {{ place.meta|isValue|getMetaText|truncatechars:'300' }}</span>
+                            <span><b>Описание</b>: {{ place.get_meta_description|truncatechars:'300' }}</span>
                         </div>
                     </div>
                 </a>
