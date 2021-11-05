@@ -8941,9 +8941,12 @@ console.warn: SearchSettings: "get: No settings file exists, new profile?" (new 
 1636091770171	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 console.log: WebExtensions: reset-default-search: starting.
 console.log: WebExtensions: reset-default-search: No addons in our list are installed.
-\\firefox.exe" "--marionette" "-no-remote" "-profile" "C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileErdyne"
-1636091893926	Marionette	INFO	Marionette enabled
-console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileErdyne\\search.json.mozlz4", (void 0)))
+1636097285106	Marionette	INFO	Stopped listening on port 62952
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileErdyne\\search.json.mozlz4", (void 0)))
 1636091896294	Marionette	INFO	Listening on port 63206
 1636091896709	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 console.error: Region.jsm: "Error fetching region" (new Error("TIMEOUT", "resource://gre/modules/Region.jsm", 772))

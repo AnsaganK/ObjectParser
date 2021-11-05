@@ -483,7 +483,7 @@ def set_api_photos(photos, place_id):
     if not place:
         return None
     place.photos.all().delete()
-    photos = photos[:5]
+    photos = photos[:6]
     base = True
     for photo in photos:
         print(photo)

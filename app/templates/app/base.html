@@ -10,7 +10,9 @@
 
     {% endblock %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="{% static 'css/bulma/bulma-switch.min.css' %}">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/css/bulma-carousel.min.css">
+
     <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
     <style>
         html, body {
@@ -453,6 +455,14 @@
 <div class="footer">
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/js/bulma-carousel.min.js"></script>
+<script>
+    bulmaCarousel.attach('#slider', {
+        slidesToScroll: 1,
+        slidesToShow: 3,
+        infinite: true,
+    });
+</script>
 {% block script %}
 
 {% endblock %}

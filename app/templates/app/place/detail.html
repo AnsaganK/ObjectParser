@@ -51,22 +51,38 @@
                 <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
                 <p><span>Сайт:</span> <span><a
                         href="http://{{ place.site|isValue }}">{{ place.site|isValue }}</a></span></p>
-                <p><span>Рейтинг:</span> <span>{{ place.rating }} (<span style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
+                <p><span>Рейтинг:</span> <span>{{ place.rating }} (<span
+                        style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
                 </p>
                 <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
                 <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
                 <p><span>Описание:</span> <span>{{ place.meta|isValue|getMetaText }}</span></p>
-                {% for photo in place.photos.all %}
-                    <img src="{{ photo.img.url }}" alt="" style="width: 200px !important; height: 200px !important;" >
 
-                {% endfor %}
+                <section class="" style="max-width: 1000px">
+                    <div class="is-clipped">
+                        <div id="slider">
+                            {% for photo in place.photos.all %}
+                                <div class="card">
+                                    <div class="card-image">
+                                        <figure class="image is-16by9 is-covered">
+                                            <img src="{{ photo.img.url }}" alt=""
+                                                 style="width: 200px !important; height: 200px !important;">
+                                        </figure>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </section>
                 <h4 class="block_title">Отзывы</h4>
                 {% for review in place.reviews_google.all %}
                     <div class="columns is-centered">
                         <div class="column is-8 box">
-                            <span class="author" style="display: flex; justify-content: space-between; width:auto;">{{ review.author_name }} <span>{{ review.rating|getRating|safe }}</span></span>
+                            <span class="author"
+                                  style="display: flex; justify-content: space-between; width:auto;">{{ review.author_name }} <span>{{ review.rating|getRating|safe }}</span></span>
                             <span class="text">{{ review.text }}</span>
                         </div>
                     </div>
