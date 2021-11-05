@@ -324,11 +324,11 @@ def get_or_create_place(name, rating, rating_user_count, cid):
         place.save()
         return place
     place = Place.objects.create(name=name,
-                                 slug=slugify(f'{place.name}-{str(place.id)}'),
                                  rating=rating,
                                  rating_user_count=rating_user_count,
                                  cid=cid)
     place.save()
+    place.slug=slugify(f'{place.name}-{str(place.id)}')
     return place
 
 
@@ -544,6 +544,7 @@ def place_create_api(cid, query_id, api_data):
 def place_detail(cid, query_id):
     api_data = cid_to_place_id(cid)
     if api_data:
+        print(1)
         place_create_api(cid, query_id, api_data['result'])
     else:
         print(f'Тут нужен драйвер {cid}')
