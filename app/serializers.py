@@ -9,10 +9,11 @@ class QuerySerializer(serializers.ModelSerializer):
 
     def base_img(self):
         place = Place.objects.filter(queries__query_id=Query.id).first()
-        if place:
+        if place and place.img:
             return place.img.url
         else:
             return 'http://170.130.40.103/static/img/not_found.png'
+
     def places_count(self):
         return Place.objects.filter(queries__query_id=Query.id).count()
 
