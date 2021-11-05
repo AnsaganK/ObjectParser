@@ -12,7 +12,7 @@ class QuerySerializer(serializers.ModelSerializer):
 class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating']
+        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'description', 'meta', 'date_create']
 
 
 class QueryPlaceSerializer(serializers.ModelSerializer):
