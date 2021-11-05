@@ -316,21 +316,26 @@ def set_reviews(review_list, place):
 
 
 def get_or_create_place(name, rating, rating_user_count, cid):
-    place = Place.objects.filter(cid=cid).first()
-    if place:
-        place.name = name
-        place.rating = rating
-        place.rating_user_count = rating_user_count
+    try:
+        place = Place.objects.filter(cid=cid).first()
+        if place:
+            place.name = name
+            place.rating = rating
+            place.rating_user_count = rating_user_count
+            place.save()
+            return place
+        place = Place.objects.create(name=name,
+                                     rating=rating,
+                                     rating_user_count=rating_user_count,
+                                     cid=cid)
+        place.save()
+        place.slug=slugify(f'{place.name}-{str(place.id)}')
         place.save()
         return place
-    place = Place.objects.create(name=name,
-                                 rating=rating,
-                                 rating_user_count=rating_user_count,
-                                 cid=cid)
-    place.save()
-    place.slug=slugify(f'{place.name}-{str(place.id)}')
-    place.save()
-    return place
+    except Exception as e:
+        print('Ошибка при создании или взятии palce')
+        print(e.__class__.__name__)
+
 
 
 def get_info(driver):
