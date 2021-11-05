@@ -538,7 +538,7 @@ def place_create_api(cid, query_id, api_data):
     set_api_photos(photos, place.id)
 
     print('Беру отзывы')
-    reviews = api_data['reviews']
+    reviews = api_data['reviews'] if 'reviews' in api_data else []
     set_reviews(reviews, place)
 
 def place_detail(cid, query_id):
