@@ -329,6 +329,7 @@ def get_or_create_place(name, rating, rating_user_count, cid):
                                  cid=cid)
     place.save()
     place.slug=slugify(f'{place.name}-{str(place.id)}')
+    place.save()
     return place
 
 
