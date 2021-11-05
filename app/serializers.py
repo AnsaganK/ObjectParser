@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from app.models import Query, Place, QueryPlace
+from app.models import Query, Place, QueryPlace, ReviewGoogle, PlacePhoto
 import re
 
 
@@ -24,10 +24,22 @@ class QuerySerializer(serializers.ModelSerializer):
         fields = ['name', 'slug', 'places_count', 'base_img']
 
 
+class ReviewGoogleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewGoogle
+        fields = ['author_name', 'rating', 'text']
+
+
+class PlacePhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlacePhoto
+        fields = ['img']
 
 
 class PlaceSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
+    reviews_google = ReviewGoogleSerializer(many=True)
+    photos = PlacePhotoSerializer(many=True)
 
     def get_meta_description(self, obj):
         if obj.meta == None:
@@ -40,7 +52,9 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'description', 'meta', 'date_create', 'get_meta_description']
+        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site',
+                  'description', 'meta', 'date_create', 'get_meta_description', 'reviews_google',
+                  'photos']
 
 class PlaceMinSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
