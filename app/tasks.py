@@ -232,6 +232,49 @@ def set_photo_content(content, place_id, file_name='no_name'):
     place_photo.place = place
     place_photo.save()
 
+def get_review_rating(review):
+    try:
+        rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
+        rating = int(rating[0])
+    except (NoSuchElementException, StaleElementReferenceException):
+        try:
+            rating = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
+        except Exception as e:
+            print('Ошибка при получении звезд: ', e.__class__.__name__)
+            rating = None
+    return rating
+
+
+def review_more_button_click(driver, review):
+    review_id = review.get_attribute('data-review-id')
+    driver.execute_script(f'''
+                            let review = document.querySelector("div[data-review-id={review_id}]");
+                            let more = review.getElementsByClassName('ODSEW-KoToPc-ShBeI')[0].click();
+                            ''')
+    print('Review More Button Clicked')
+
+def get_review_text(driver, review):
+    try:
+        try:
+
+            review_more_button_click(driver, review)
+            # wait = WebDriverWait(review, 10)
+            # wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'ODSEW-KoToPc-ShBeI')))
+            # more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
+            # print(more_text_button.text)
+            # clicked_object(more_text_button, 10)
+            time.sleep(1)
+            print('Нашел кнопку ЕЩЕ')
+        except Exception as e:
+            print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
+            pass
+
+        text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
+    except Exception as e:
+        text = ''
+        print('Ошибка в отзыве: ', e.__class__.__name__)
+    return text
+
 
 def get_reviews(driver):
     review_list = []
@@ -262,29 +305,8 @@ def get_reviews(driver):
                         author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
                     except (NoSuchElementException, StaleElementReferenceException):
                         author_name = ''
-                    try:
-                        rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
-                        rating = int(rating[0])
-                    except (NoSuchElementException, StaleElementReferenceException):
-                        try:
-                            rating = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
-                        except Exception as e:
-                            print('Ошибка при получении звезд: ', e.__class__.__name__)
-                            rating = None
-                    try:
-                        try:
-                            more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
-                            print(more_text_button.text)
-                            clicked_object(more_text_button, 10)
-                            time.sleep(1)
-                        except Exception as e:
-                            print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
-                            pass
-
-                        text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
-                    except Exception as e:
-                        text = ''
-                        print('Ошибка в отзыве: ', e.__class__.__name__)
+                    rating = get_review_rating(review)
+                    text = get_review_text(driver, review)
                     print(author_name, rating, text)
                     review_list.append({
                         'author_name': author_name,
@@ -298,6 +320,26 @@ def get_reviews(driver):
                     time.sleep(1)
     except Exception as e:
         print('Ошибка при получении отзывов: ', e.__class__.__name__)
+    return review_list
+
+def get_this_page_reviews(driver):
+    review_list = []
+    try:
+        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')
+        for review in reviews:
+            try:
+                author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
+            except:
+                author_name = 'no_name'
+            rating = get_review_rating(review)
+            text = get_review_text(driver, review)
+            review_list.append({
+                'author_name': author_name,
+                'rating': rating,
+                'text': text
+            })
+    except Exception as e:
+        print('Ошибка при получении отзывов', e.__class__.__name__)
     return review_list
 
 
@@ -471,8 +513,11 @@ def place_create_driver(cid, query_id):
         # photos = get_photos(driver)                                 # class PlacePhoto
         print(' --------- Отзывы: ')
         # reviews = get_reviews(driver)
-        # print('Jnpsds', reviews)
-        # set_reviews(reviews, place)
+        reviews = get_this_page_reviews(driver)
+        if reviews == 0 and rating_user_count>0:
+            reviews = get_reviews(driver)
+        print('Отзывы готовы', reviews)
+        set_reviews(reviews, place)
         print(title)
         print('Закрыто')
         print('----------------')
@@ -606,14 +651,14 @@ def get_pagination(driver, page):
                         if current_page.text == str(page):
                             return True
                     except Exception as e:
-                        print('Ошибка в пагинации: ', e.__class__.__name__)
+                        print('Ошибка в пагинации1: ', e.__class__.__name__)
                         return False
                     time.sleep(1)
                 time.sleep(1)
                 break
         return False
     except Exception as e:
-        print('Ошибка в пагинации: ', e.__class__.__name__)
+        print('Ошибка в пагинации2: ', e.__class__.__name__)
         return False
 
 @shared_task

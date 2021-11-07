@@ -191,7 +191,10 @@ def places(request, slug):
             }
     letters = list(places_letter.keys())
     letters = sorted(letters)
-    return render(request, 'app/query/places.html', {'query': query, 'places': places, 'places_letter': places_letter, 'letters': letters})
+    return render(request, 'app/query/places.html', {'query': query,
+                                                     'places': places,
+                                                     'places_letter': places_letter,
+                                                     'letters': letters})
 
 @login_required()
 def place_detail(request, slug):
