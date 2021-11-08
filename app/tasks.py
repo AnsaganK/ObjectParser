@@ -593,13 +593,13 @@ def place_create_api(cid, query_id, api_data):
     set_reviews(reviews, place)
 
 def place_detail(cid, query_id):
-    api_data = cid_to_place_id(cid)
-    if api_data:
-        print(1)
-        place_create_api(cid, query_id, api_data['result'])
-    else:
-        print(f'Тут нужен драйвер {cid}')
-        place_create_driver(cid, query_id)
+    # api_data = cid_to_place_id(cid)
+    # if api_data:
+    #     print(1)
+    #     place_create_api(cid, query_id, api_data['result'])
+    # else:
+    #     print(f'Тут нужен драйвер {cid}')
+    place_create_driver(cid, query_id)
 
 
 
