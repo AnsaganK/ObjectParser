@@ -101,7 +101,7 @@ class Place(models.Model):
     @property
     def get_meta_description(self):
         if self.meta == None:
-            return None
+            return ' - '
         pattern = r'(?<=content=")(.+?)(?=")'
         meta = re.search(pattern, self.meta)
         if meta and meta.group():
