@@ -44,13 +44,14 @@ CUSTOM_URL = 'https://www.google.com/search?q={0}&newwindow=1&tbm=lcl&sxsrf=AOae
 
 PAGE = 100  # Количество страниц для парсинга
 
-KEY = 'AIzaSyAbOkxUWUw9z54up8AiMSCMX7rO7-8hqv8'
-CID_API_URL = 'https://maps.googleapis.com/maps/api/place/details/json?cid={0}&key='+KEY
+# KEY = 'AIzaSyAbOkxUWUw9z54up8AiMSCMX7rO7-8hqv8'
+# KEY = '0'
+# CID_API_URL = 'https://maps.googleapis.com/maps/api/place/details/json?cid={0}&key='+KEY
 CID_URL = 'https://maps.google.com/?cid={0}'
 
 display = None
 
-gmaps = googlemaps.Client(key=KEY)
+# gmaps = googlemaps.Client(key=KEY)
 
 def create_query_place(place, query):
     query_place = QueryPlace.objects.filter(query=query).first()
@@ -470,8 +471,10 @@ def place_create_driver(cid, query_id):
     url = CID_URL.format(cid)
     # driver = startChrome(url=url)
     try:
-        # driver = startFireFox(url=url)
-        driver = startChrome(url=url, path=CHROME_PATH)
+        if IS_LINUX:
+            driver = startChrome(url=url, path=CHROME_PATH)
+        else:
+            driver = startFireFox(url=url)
     except Exception as e:
         time.sleep(1)
         print('Не удалось открыть детальную страницу в боаузере: ', e.__class__.__name__)

@@ -35,26 +35,49 @@
     <h4 class="block_title"> {{ query.name }} </h4>
     {% for place in places|slice:":20" %}
         <div class="columns is-centered">
-            <div class="column is-9" style="padding: 10px; box-sizing: border-box">
-                <a class="box place_little_card" href="{{ place.get_absolute_url }}">
+            <div class="column is-9 " style="padding: 10px; box-sizing: border-box">
+                <div class="box place_little_card">
                     <span class="top_place_number">{{ forloop.counter }}</span>
                     <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
                     <div style="display: flex; ">
-                        <img src="{{ place.img|getImg }}" alt=""
-                             style="width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px">
+                        <a href="{{ place.get_absolute_url }}"><img src="{{ place.img|getImg }}" alt=""
+                                                                    style="width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px"></a>
                         <div style="flex-grow: 1; width: min-content">
                         <span style="color: black;
     text-align: center;
     display: block;
     border-bottom: 1px solid grey;margin: 0px;
-;">{{ place.name }}</span>
+;">
+                            <a href="{{ place.get_absolute_url }}">{{ place.name }}</a></span>
                             <span><b>Рейтинг</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
                             <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
-                            <span><b>Телефон</b>: {{ place.phone_number|isValue }}</span><br>
-                            <span><b>Описание</b>: {{ place.get_meta_description|truncatechars:'300' }}</span>
+                            <span><b>Телефон</b>: <a
+                                    href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
+                            <span><b>Описание</b>: {{ place.get_meta_description|truncatechars:'300' }}</span><br>
+
                         </div>
                     </div>
-                </a>
+                    {% with place.reviews_google|getMoreText as review %}
+                        {% if review %}
+                            <div style="margin: 10px auto">
+                            <b>Отзыв: </b>
+                            <span style="border-bottom: 1px dashed lightgray;border-top:1px dashed lightgray; padding: 10px;width: 100%;display:block;">
+
+                                        <div class="columns">
+                                            <div class="column ">
+                                            <span class="author"
+                                                  style="display: flex; justify-content: space-between; width:auto;"><b>{{ review.author_name }}</b><span>
+                                                {{ review.rating|getRating|safe }}
+                                            </span>
+                                            </span>
+                                                <span class="text">{{ review.text }}</span>
+                                            </div>
+                                        </div>
+                            </span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
             </div>
         </div>
     {% endfor %}

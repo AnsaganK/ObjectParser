@@ -3,6 +3,8 @@ import re
 from django import template
 import json
 
+from django.db.models.functions import Length
+
 register = template.Library()
 
 GROUPS = {'Пользователь': 1,
@@ -79,3 +81,22 @@ def getMetaText(meta):
     if meta:
         return meta.group()
     return ' - '
+
+
+@register.filter(name="getMoreText")
+def getMoreText(queries):
+    if queries:
+        queries = queries.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by('-text_len')
+        return queries.first()
+    return ''
+
+
+@register.filter(name="isSite")
+def isSite(site):
+    if not site:
+        return ' - '
+    if site[:4] == 'http':
+        return site
+    else:
+        return 'http://'+site
+

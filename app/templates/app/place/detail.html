@@ -50,14 +50,14 @@
                 <p><span>Название:</span> <span>{{ place.name }}</span></p>
                 <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
                 <p><span>Сайт:</span> <span><a
-                        href="http://{{ place.site|isValue }}">{{ place.site|isValue }}</a></span></p>
+                        href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
                 <p><span>Рейтинг:</span> <span>{{ place.rating }} (<span
                         style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
                 </p>
                 <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
-                <p><span>Телефон:</span> <span>{{ place.phone_number|isValue }}</span></p>
+                <p><span>Телефон:</span> <span><a href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
                 <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>
 
                 <section class="" style="max-width: 1000px">

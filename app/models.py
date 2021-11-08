@@ -173,6 +173,9 @@ class ReviewGoogle(models.Model):
     class Meta:
         verbose_name = 'Отзыв с Google'
         verbose_name_plural = 'Отзывы с Google'
+        ordering = ['-text']
+
+
 
 class AttractionImage(models.Model):
     url = models.URLField()
