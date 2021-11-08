@@ -93,7 +93,7 @@ def getMoreText(queries):
 
 @register.filter(name="isSite")
 def isSite(site):
-    if not site:
+    if not site or site == ' - ':
         return ' - '
     if site[:4] == 'http':
         return site
