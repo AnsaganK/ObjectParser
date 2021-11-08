@@ -104,7 +104,7 @@ class Place(models.Model):
             return None
         pattern = r'(?<=content=")(.+?)(?=")'
         meta = re.search(pattern, self.meta)
-        if meta:
+        if meta and meta.group():
             return meta.group()
         return ' - '
 
