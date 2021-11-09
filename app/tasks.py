@@ -158,7 +158,6 @@ class GetPhotos:
 
     def get_photos(self):
         try:
-
             wait = WebDriverWait(self.driver, 10)
             wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'mWq4Rd-HiaYvf-CNusmb-gevUs')))
             photos = self.driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:2]
@@ -578,15 +577,15 @@ def place_create_driver(cid, query_id):
         # attractions = get_attractions(driver)                     # class Attraction - manyToMany
         # print(' --------- Информация о месте: ')
         # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
-        photos = get_photos(driver)                                 # class PlacePhoto
+        # photos = get_photos(driver)                                 # class PlacePhoto
         print(' --------- Отзывы: ')
         # reviews = GetReviews(driver).get_reviews()
-        # reviews = get_this_page_reviews(driver)
-        # if reviews == [] and rating_user_count > 0:
-        #     print('Отзывы со страницы отзывов')
-        # #     reviews = GetReviews(driver).get_reviews()
-        # print('Отзывы готовы', reviews)
-        # set_reviews(reviews, place)
+        reviews = get_this_page_reviews(driver)
+        if reviews == [] and rating_user_count > 0:
+            print('Отзывы со страницы отзывов')
+        #     reviews = GetReviews(driver).get_reviews()
+        print('Отзывы готовы', reviews)
+        set_reviews(reviews, place)
         print(title)
         print('Закрыто')
         print('----------------')
