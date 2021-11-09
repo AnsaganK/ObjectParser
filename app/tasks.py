@@ -148,18 +148,43 @@ def get_attractions(driver):
     return attractions_list
 
 
+class GetPhotos:
+    def __init__(self, driver):
+        self.driver = driver
+
+    def click_photo_buttons(self):
+        photo_buttons = self.driver.find_elements_by_class_name('a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')
+        photo_buttons[0].click()
+
+    def get_photos(self):
+        try:
+
+            wait = WebDriverWait(self.driver, 10)
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'mWq4Rd-HiaYvf-CNusmb-gevUs')))
+            photos = self.driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:2]
+            print(len(photos))
+            time.sleep(3)
+            for i in photos:
+                print(i)
+                photo = i.find_element_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs').get_attribute('innerHTML')
+                pattern = r'(?<=image:url\(")(.+?)(?="\))'
+                photo_url = re.search(pattern, photo)
+                print(photo_url.group())
+        except Exception as e:
+            print('Ошибка при получении фотографии: ', e.__class__.__name__)
+            pass
+
 def get_photos(driver):
     try:
         photo_buttons = driver.find_elements_by_class_name('a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')
         photo_buttons[0].click()
         wait = WebDriverWait(driver, 10)
         wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'mWq4Rd-HiaYvf-CNusmb-gevUs')))
-        photos = driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:3]
+        photos = driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:2]
         print(len(photos))
         time.sleep(3)
         for i in photos:
             print(i)
-            print(i.get_attribute('innerHTML'))
             photo = i.find_element_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs').get_attribute('innerHTML')
             pattern = r'(?<=image:url\(")(.+?)(?="\))'
             photo_url = re.search(pattern, photo)
@@ -277,51 +302,89 @@ def get_review_text(driver, review):
     return text
 
 
-def get_reviews(driver):
-    review_list = []
-    try:
-        wait1 = WebDriverWait(driver, 10)
-        wait1.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Yr7JMd-pane-hSRGPd')))
-        review_button = driver.find_element_by_class_name('Yr7JMd-pane-hSRGPd')
-        clicked_object(review_button, 10)
+class GetReviews:
+    def __init__(self, driver):
+        self.review_list = []
+        self.driver = driver
 
-        wait2 = WebDriverWait(driver, 10)
-        wait2.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
-        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')
-        print(len(reviews))
-        time.sleep(2)
-        driver.execute_script('let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
-                              'a.scrollTo(0, a.scrollHeight);')
-        time.sleep(2)
-        print('Всего загружено: ', len(reviews))
-        reviews = reviews[:1]
-        print(len(reviews))
-        for review in reviews:
-            print(review.get_attribute('innerHTML'))
+    def get_page_review_button(self):
+        try:
+            wait = WebDriverWait(self.driver, 10)
+            wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Yr7JMd-pane-hSRGPd')))
+            review_button = self.driver.find_element_by_class_name('Yr7JMd-pane-hSRGPd')
+            clicked_object(review_button, 10)
+        except Exception as e:
+            print('Ошибка при получении кнопки по отзывам', e.__class__.__name__)
+
+    def get_reviews_objects(self):
+        try:
+            wait = WebDriverWait(self.driver, 10)
+            wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
+            reviews = self.driver.find_elements_by_class_name('ODSEW-ShBeI')
+            print(len(reviews))
+            time.sleep(1)
+            return reviews
+        except Exception as e:
+            print('-- Ошибка при получении первых отзывов', e.__class__.__name__)
+
+    def scrolled_driver(self,):
+        try:
+            self.driver.execute_script(
+                'let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
+                'a.scrollTo(0, a.scrollHeight);')
+            time.sleep(1)
+            reviews = self.get_reviews_objects()
+            print('Всего загружено: ', len(reviews))
+            reviews = reviews[:5]
+            print(len(reviews))
+            return reviews
+        except Exception as e:
+            print('--- Ошибка при скролле по отзывам')
+
+    def check_review(self, review):
+        try:
+            try:
+                author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute(
+                    'innerText')
+            except (NoSuchElementException, StaleElementReferenceException):
+                author_name = ''
+            rating = get_review_rating(review)
+            text = get_review_text(self.driver, review)
+            print(author_name, text[:40])
+            self.review_list.append({
+                'author_name': author_name,
+                'rating': rating,
+                'text': text
+            })
+            return True
+        except Exception as e:
+            print('-- Ошибка при назначении атрибутов отзыву', e.__class__.__name__)
+            time.sleep(1)
+            return False
+
+    def review_detail(self, review):
+        try:
             exception = 0
-            print()
             while exception < 3:
-                try:
-                    try:
-                        author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
-                    except (NoSuchElementException, StaleElementReferenceException):
-                        author_name = ''
-                    rating = get_review_rating(review)
-                    text = get_review_text(driver, review)
-                    print(author_name, rating, text)
-                    review_list.append({
-                        'author_name': author_name,
-                        'rating': rating,
-                        'text': text
-                    })
+                checked = self.check_review(review)
+                if checked:
                     break
-                except StaleElementReferenceException:
+                else:
                     exception += 1
-                    print('Перехватил отзыв')
-                    time.sleep(1)
-    except Exception as e:
-        print('Ошибка при получении отзывов: ', e.__class__.__name__)
-    return review_list
+        except Exception as e:
+            print('Ошибка при получении детального отзыва', e.__class__.__name__)
+
+    def get_reviews(self):
+        try:
+            self.get_page_review_button()
+            reviews = self.get_reviews_objects()
+            reviews = self.scrolled_driver()
+            for review in reviews:
+                self.review_detail(review)
+        except Exception as e:
+            print('Ошибка при получении отзывов: ', e.__class__.__name__)
+        return self.review_list
+
 
 def get_this_page_reviews(driver):
     review_list = []
@@ -345,6 +408,8 @@ def get_this_page_reviews(driver):
 
 
 def set_reviews(review_list, place):
+    if len(review_list) == 0:
+        return None
     try:
         place.reviews_google.all().delete()
         for review in review_list:
@@ -513,14 +578,15 @@ def place_create_driver(cid, query_id):
         # attractions = get_attractions(driver)                     # class Attraction - manyToMany
         # print(' --------- Информация о месте: ')
         # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
-        # photos = get_photos(driver)                                 # class PlacePhoto
+        photos = get_photos(driver)                                 # class PlacePhoto
         print(' --------- Отзывы: ')
-        # reviews = get_reviews(driver)
-        reviews = get_this_page_reviews(driver)
-        if reviews == 0 and rating_user_count>0:
-            reviews = get_reviews(driver)
-        print('Отзывы готовы', reviews)
-        set_reviews(reviews, place)
+        # reviews = GetReviews(driver).get_reviews()
+        # reviews = get_this_page_reviews(driver)
+        # if reviews == [] and rating_user_count > 0:
+        #     print('Отзывы со страницы отзывов')
+        # #     reviews = GetReviews(driver).get_reviews()
+        # print('Отзывы готовы', reviews)
+        # set_reviews(reviews, place)
         print(title)
         print('Закрыто')
         print('----------------')
@@ -667,6 +733,7 @@ def get_pagination(driver, page):
 @shared_task
 def startParsing(query_name, query_id, pages=None):
     display = None
+    print(CUSTOM_URL.format(query_name))
     if IS_LINUX:
         # from xvfbwrapper import Xvfb
         # with Xvfb() as xvfb:
@@ -675,11 +742,12 @@ def startParsing(query_name, query_id, pages=None):
         from pyvirtualdisplay import Display
         display = Display(visible=False, size=(800, 600))
         display.start()
-
+        driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+    else:
+        driver = startFireFox(url=CUSTOM_URL.format(query_name))
     # print(1)
-    print(CUSTOM_URL.format(query_name))
     # driver = startFireFox(url=CUSTOM_URL.format(query_name))
-    driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+
     # print(2)
     try:
         if pages:

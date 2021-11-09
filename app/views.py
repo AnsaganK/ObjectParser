@@ -167,10 +167,12 @@ def query_file_generate(request, pk):
     file = generate_file(slug, places)
     return file
 
+
 def queries(request):
     queries = Query.objects.all()
     queries = get_paginator(request, queries, 16)
     return render(request, 'app/query/queries.html', {'queries': queries})
+
 
 def places(request, slug):
     places_letter = {
