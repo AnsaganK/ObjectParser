@@ -249,7 +249,7 @@ def get_photo(driver):
 def set_photo_url(img_url, place_id, base=True):
     place = Place.objects.filter(id=place_id).first()
     if place and img_url:
-        r = requests.get(img_url)
+        r = requests.get(img_url, timeout=10)
         if r.status_code == 200:
             content = r.content
             if base:
@@ -605,7 +605,7 @@ def place_create_driver(cid, query_id):
         reviews = get_this_page_reviews(driver)
         if reviews == [] and rating_user_count > 0:
             print('Отзывы со страницы отзывов')
-        #     reviews = GetReviews(driver).get_reviews()
+            reviews = GetReviews(driver).get_reviews()
         print('Отзывы готовы', reviews)
         set_reviews(reviews, place)
 
