@@ -181,9 +181,13 @@ class GetPhotos:
             url = photo_url.group()
             if url[:2] == '//':
                 url = url[2:]
-            url = url.split('=')[0]
             print(url)
-
+            url = url.split('=')
+            url.pop()
+            url = ''.join(url)
+            if not url.startswith('http'):
+                url = 'http://'+url
+            print(url)
             self.photo_list.append(url)
         except Exception as e:
             print('Ошибка при детальной фотографии: ', e.__class__.__name__)
@@ -600,12 +604,7 @@ def place_create_driver(cid, query_id):
         print(' --------- Главное фото: ')
         base_photo = get_photo(driver)
         set_photo_url(base_photo, place.id, base=True)
-        # print(' --------- Информация о месте: ')
-        # place_information = get_place_information(driver)
-        # print(' --------- Достопримечательности: ')
-        # attractions = get_attractions(driver)                     # class Attraction - manyToMany
-        # print(' --------- Информация о месте: ')
-        # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
+
         print(' --------- Отзывы: ')
         reviews = get_this_page_reviews(driver)
         if reviews == [] and rating_user_count > 0:
