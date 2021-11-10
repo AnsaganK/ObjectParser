@@ -155,6 +155,8 @@ class GetPhotos:
 
     def click_photo_button(self):
         try:
+            wait = WebDriverWait(self.driver, 10)
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')))
             self.driver.execute_script('let photo_button = document.getElementsByClassName("a4izxd-tUdTXb-xJzy8c-haAclf-UDotu");photo_button[0].click()')
         except Exception as e:
             print('Ошибка при нажатии на кнопку ВСЕ ФОТО: ', e.__class__.__name__)
@@ -247,22 +249,25 @@ def get_photo(driver):
         return None
 
 def set_photo_url(img_url, place_id, base=True):
-    place = Place.objects.filter(id=place_id).first()
-    if place and img_url:
-        r = requests.get(img_url, timeout=10)
-        if r.status_code == 200:
-            content = r.content
-            if base:
-                place.img_url = img_url
-                place.img.save(os.path.basename(img_url), ContentFile(content))
-                place.save()
-            else:
-                photo = PlacePhoto(place=place)
-                photo.img.save(os.path.basename(img_url), ContentFile(content))
-                photo.save()
-            return 'Фото назначено для {}'.format(place_id)
-    return 'Фото не назначено {}'.format(place_id)
-
+    try:
+        print(img_url)
+        place = Place.objects.filter(id=place_id).first()
+        if place and img_url:
+            r = requests.get(img_url, timeout=10)
+            if r.status_code == 200:
+                content = r.content
+                if base:
+                    place.img_url = img_url
+                    place.img.save(os.path.basename(img_url), ContentFile(content))
+                    place.save()
+                else:
+                    photo = PlacePhoto(place=place)
+                    photo.img.save(os.path.basename(img_url), ContentFile(content))
+                    photo.save()
+                return 'Фото назначено для {}'.format(place_id)
+        return 'Фото не назначено {}'.format(place_id)
+    except Exception as e:
+        print(f'Ошиька при назначении фото: {img_url}', e.__class__.__name__)
 
 def set_photo_content(content, place_id, file_name='no_name'):
     place = Place.objects.filter(id=place_id).first()
