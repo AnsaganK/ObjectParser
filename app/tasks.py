@@ -150,48 +150,64 @@ def get_attractions(driver):
 
 class GetPhotos:
     def __init__(self, driver):
+        self.photo_list = []
         self.driver = driver
 
-    def click_photo_buttons(self):
-        photo_buttons = self.driver.find_elements_by_class_name('a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')
-        photo_buttons[0].click()
+    def click_photo_button(self):
+        try:
+            self.driver.execute_script('let photo_button = document.getElementsByClassName("a4izxd-tUdTXb-xJzy8c-haAclf-UDotu");photo_button[0].click()')
+        except Exception as e:
+            print('Ошибка при нажатии на кнопку ВСЕ ФОТО: ', e.__class__.__name__)
+
+    def finds_photo_elements(self):
+        try:
+            wait = WebDriverWait(self.driver, 10)
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'cYB2Ge-ti6hGc')))
+            photos_block = self.driver.find_element_by_class_name('cYB2Ge-ti6hGc')
+            photos = photos_block.find_elements_by_class_name('mWq4Rd-eEDwDf')
+            print(len(photos))
+            return photos
+        except Exception as e:
+            print('Ошибка при получении объектов фотографии: ', e.__class__.__name__)
+            return None
+
+    def check_photo(self, photo):
+        try:
+            photo = photo.get_attribute('innerHTML')
+            pattern = r'(?<=image: url\(&quot;)(.+?)(?=&quot;\))'
+            photo_url = re.search(pattern, photo)
+            url = photo_url.group()
+            if url[:2] == '//':
+                url = url[2:]
+            url = url.split('=')[0]
+            print(url)
+
+            self.photo_list.append(url)
+        except Exception as e:
+            print('Ошибка при детальной фотографии: ', e.__class__.__name__)
 
     def get_photos(self):
         try:
-            wait = WebDriverWait(self.driver, 10)
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'mWq4Rd-HiaYvf-CNusmb-gevUs')))
-            photos = self.driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:2]
-            print(len(photos))
+            self.click_photo_button()
             time.sleep(3)
-            for i in photos:
-                print(i)
-                photo = i.find_element_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs').get_attribute('innerHTML')
-                pattern = r'(?<=image:url\(")(.+?)(?="\))'
-                photo_url = re.search(pattern, photo)
-                print(photo_url.group())
+            photos = self.finds_photo_elements()
+            print(len(photos))
+            if photos:
+                photos = photos[:5]
+            for photo in photos:
+                self.check_photo(photo)
+            print(self.photo_list)
+            return self.photo_list
         except Exception as e:
             print('Ошибка при получении фотографии: ', e.__class__.__name__)
             pass
 
-def get_photos(driver):
-    try:
-        photo_buttons = driver.find_elements_by_class_name('a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')
-        photo_buttons[0].click()
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'mWq4Rd-HiaYvf-CNusmb-gevUs')))
-        photos = driver.find_elements_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs')[:2]
-        print(len(photos))
-        time.sleep(3)
-        for i in photos:
-            print(i)
-            photo = i.find_element_by_class_name('mWq4Rd-HiaYvf-CNusmb-gevUs').get_attribute('innerHTML')
-            pattern = r'(?<=image:url\(")(.+?)(?="\))'
-            photo_url = re.search(pattern, photo)
-            print(photo_url.group())
-    except Exception as e:
-        print('Ошибка при получении фотографии: ', e.__class__.__name__)
-        pass
 
+def set_photos(photos_list, place_id):
+    place = Place.objects.filter(id=place_id).first()
+    place.photos.all().delete()
+    for photo_url in photos_list:
+        set_photo_url(photo_url, place_id, base=False)
 
 def get_place_information(driver):
     try:
@@ -373,6 +389,13 @@ class GetReviews:
         except Exception as e:
             print('Ошибка при получении детального отзыва', e.__class__.__name__)
 
+    def close_review_pages(self):
+        try:
+            self.driver.execute_script('let close_b = document.getElementsByClassName("VfPpkd-icon-Jh9lGc"); close_b[0].click()')
+        except Exception as e:
+            print('Ошибка при закрытии отзывов', e.__class__.__name__)
+
+
     def get_reviews(self):
         try:
             self.get_page_review_button()
@@ -382,6 +405,7 @@ class GetReviews:
                 self.review_detail(review)
         except Exception as e:
             print('Ошибка при получении отзывов: ', e.__class__.__name__)
+        self.close_review_pages()
         return self.review_list
 
 
@@ -577,15 +601,19 @@ def place_create_driver(cid, query_id):
         # attractions = get_attractions(driver)                     # class Attraction - manyToMany
         # print(' --------- Информация о месте: ')
         # location_information = get_location_information(driver)     # class LocationInfo, class Location - ForeignKey
-        # photos = get_photos(driver)                                 # class PlacePhoto
         print(' --------- Отзывы: ')
-        # reviews = GetReviews(driver).get_reviews()
         reviews = get_this_page_reviews(driver)
         if reviews == [] and rating_user_count > 0:
             print('Отзывы со страницы отзывов')
         #     reviews = GetReviews(driver).get_reviews()
         print('Отзывы готовы', reviews)
         set_reviews(reviews, place)
+
+        print(' --------- Фотографии')
+        photos = GetPhotos(driver).get_photos()  # class PlacePhoto
+        set_photos(photos, place.id)
+        print(photos)
+
         print(title)
         print('Закрыто')
         print('----------------')
