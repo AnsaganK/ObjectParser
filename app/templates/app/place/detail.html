@@ -57,26 +57,36 @@
                 <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
-                <p><span>Телефон:</span> <span><a href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
+                <p><span>Телефон:</span> <span><a
+                        href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
                 <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>
+                {% if place.photos.count > 3 %}
 
-                <section class="" style="max-width: 1000px">
-                    <div class="is-clipped">
-                        <div id="slider">
-                            {% for photo in place.photos.all %}
-                                <div class="card">
-                                    <div class="card-image">
-                                        <figure class="image is-16by9 is-covered">
-                                            <img src="{{ photo.img.url }}" alt=""
-                                                 style="width: 200px !important; height: 200px !important;">
-                                        </figure>
+                    <section class="" style="max-width: 1000px">
+                        <div class="is-clipped">
+                            <div id="slider">
+                                {% for photo in place.photos.all %}
+                                    <div class="card">
+                                        <div class="card-image">
+                                            <figure class="image is-16by9 is-covered">
+                                                <img src="{{ photo.img.url }}" alt=""
+                                                     style="width: 200px !important; height: 200px !important;">
+                                            </figure>
+                                        </div>
                                     </div>
-                                </div>
-                            {% endfor %}
+                                {% endfor %}
 
+                            </div>
                         </div>
+                    </section>
+                {% else %}
+                    <div style="display: flex; justify-content: center;flex-wrap: wrap; ">
+                    {% for photo in place.photos.all %}
+                        <img src="{{ photo.img.url }}" alt=""
+                                                     style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;">
+                    {% endfor %}
                     </div>
-                </section>
+                {% endif %}
                 <h4 class="block_title">Отзывы</h4>
                 {% for review in place.reviews_google.all %}
                     <div class="columns is-centered">
