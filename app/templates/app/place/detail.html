@@ -57,6 +57,8 @@
                 <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
+
+                <p>{{ place.coordinate_html|safe }}</p>
                 <p><span>Телефон:</span> <span><a
                         href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
                 <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>

@@ -564,9 +564,45 @@ def cid_to_place_id(cid):
     return None
 
 
+def get_coordinate(driver):
+    try:
+        time.sleep(1)
+        print(1)
+        driver.execute_script('''
+                let share_buttons = document.getElementsByClassName('etWJQ etWJQ-text csAe4e-y1XlWb-QBLLGd vqxL8-haDnnc');
+                let share_button = share_buttons[share_buttons.length-1];
+                share_button.children[0].click();
+        ''')
+        print(2)
+        time.sleep(1)
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 's4ghve-AznF2e-ZMv3u-AznF2e-uqeOfd')))
+        driver.execute_script(
+            '''
+                let card_button = document.getElementsByClassName('s4ghve-AznF2e-ZMv3u-AznF2e NIyLF-haAclf s4ghve-AznF2e-ZMv3u-AznF2e-uqeOfd')[0];
+                card_button.click();
+            '''
+        )
+        print(3)
+        input_coordinate = driver.find_element_by_class_name('GALvsc-e1YmVc-map-YPqjbf')
+        coordinate = input_coordinate.get_attribute('value')
+        print(4)
+        driver.execute_script('''
+                let coordinate_close_button = document.getElementsByClassName('OFhamd-LgbsSe OFhamd-LgbsSe-white-LkdAo')[0];
+                coordinate_close_button.click();
+        ''')
+        return coordinate
+    except Exception as e:
+        print('Ошибка при взятии', e.__class__.__name__)
+        return None
+
+def set_coordinate(data, place):
+    if data:
+        place.coordinate_html = data
+        place.save()
+
 def place_create_driver(cid, query_id):
     url = CID_URL.format(cid)
-    # driver = startChrome(url=url)
     try:
         if IS_LINUX:
             driver = startChrome(url=url, path=CHROME_PATH)
@@ -605,6 +641,11 @@ def place_create_driver(cid, query_id):
         base_photo = get_photo(driver)
         set_photo_url(base_photo, place.id, base=True)
 
+
+        print(' --------- Беру координаты ')
+        coordinate = get_coordinate(driver)
+        set_coordinate(coordinate, place)
+
         print(' --------- Отзывы: ')
         reviews = get_this_page_reviews(driver)
         if reviews == [] and rating_user_count > 0:
@@ -612,6 +653,7 @@ def place_create_driver(cid, query_id):
             reviews = GetReviews(driver).get_reviews()
         print('Отзывы готовы', reviews)
         set_reviews(reviews, place)
+
 
         print(' --------- Фотографии')
         photos = GetPhotos(driver).get_photos()  # class PlacePhoto
@@ -693,12 +735,6 @@ def place_create_api(cid, query_id, api_data):
     set_reviews(reviews, place)
 
 def place_detail(cid, query_id):
-    # api_data = cid_to_place_id(cid)
-    # if api_data:
-    #     print(1)
-    #     place_create_api(cid, query_id, api_data['result'])
-    # else:
-    #     print(f'Тут нужен драйвер {cid}')
     place_create_driver(cid, query_id)
 
 
@@ -752,7 +788,7 @@ def get_pagination(driver, page):
                             return True
                     except Exception as e:
                         print('Ошибка в пагинации1: ', e.__class__.__name__)
-                        return False
+                        # return False
                     time.sleep(1)
                 time.sleep(1)
                 break
