@@ -8,6 +8,14 @@
     {% if place.meta %}
         {{ place.meta|safe }}
     {% endif %}
+    <style>
+    .iframe_wrap iframe{
+        box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
+        border-radius: 5px;
+        display: block;
+        margin: auto;
+    }
+    </style>
 {% endblock %}
 
 {% block breadcrumb %}
@@ -51,6 +59,8 @@
                 <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
                 <p><span>Сайт:</span> <span><a
                         href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
+                <p><span>Телефон:</span> <span><a
+                        href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
                 <p><span>Рейтинг:</span> <span>{{ place.rating }} (<span
                         style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
                 </p>
@@ -58,9 +68,7 @@
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
 
-                <p>{{ place.coordinate_html|safe }}</p>
-                <p><span>Телефон:</span> <span><a
-                        href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
+                <p class="iframe_wrap">{{ place.coordinate_html|safe }}</p>
                 <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>
                 {% if place.photos.count > 3 %}
 

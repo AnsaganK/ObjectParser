@@ -584,6 +584,8 @@ def get_coordinate(driver):
             '''
         )
         print(3)
+        wait2 = WebDriverWait(driver, 10)
+        wait2.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'GALvsc-e1YmVc-map-YPqjbf')))
         input_coordinate = driver.find_element_by_class_name('GALvsc-e1YmVc-map-YPqjbf')
         coordinate = input_coordinate.get_attribute('value')
         print(4)
