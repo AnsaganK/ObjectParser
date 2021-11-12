@@ -9,12 +9,12 @@
         {{ place.meta|safe }}
     {% endif %}
     <style>
-    .iframe_wrap iframe{
-        box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
-        border-radius: 5px;
-        display: block;
-        margin: auto;
-    }
+        .iframe_wrap iframe {
+            box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
+            border-radius: 5px;
+            display: block;
+            margin: auto;
+        }
     </style>
 {% endblock %}
 
@@ -30,6 +30,15 @@
 {% endblock %}
 
 {% block content %}
+    <div class="modal" id="modal"  onclick="closeModal()">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <p class="image is-4by3">
+                <img src="" alt="" id="place_image">
+            </p>
+        </div>
+        <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
+    </div>
     <h4 class="centered_link">{{ place.data.name }}</h4>
     {#    <div class="box block_data show" id="basic_data">#}
     {#        <span>{{ place.date_create }}</span>#}
@@ -80,7 +89,7 @@
                                         <div class="card-image">
                                             <figure class="image is-16by9 is-covered">
                                                 <img src="{{ photo.img.url }}" alt=""
-                                                     style="width: 200px !important; height: 200px !important;">
+                                                     style="width: 200px !important; height: 200px !important;" onclick="showModalImg('{{ photo.img.url }}')">
                                             </figure>
                                         </div>
                                     </div>
@@ -91,10 +100,10 @@
                     </section>
                 {% else %}
                     <div style="display: flex; justify-content: center;flex-wrap: wrap; ">
-                    {% for photo in place.photos.all %}
-                        <img src="{{ photo.img.url }}" alt=""
-                                                     style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;">
-                    {% endfor %}
+                        {% for photo in place.photos.all %}
+                            <img src="{{ photo.img.url }}" alt=""
+                                 style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;" onclick="showModalImg('{{ photo.img.url }}')">
+                        {% endfor %}
                     </div>
                 {% endif %}
                 <h4 class="block_title">Отзывы</h4>
@@ -196,6 +205,18 @@
 {% endblock %}
 
 {% block script %}
+    <script>
+    function showModalImg(url){
+        let modal = document.getElementById('modal');
+        let img = document.getElementById('place_image');
+        img.setAttribute('src', url);
+        modal.classList.toggle('is-active');
+    }
+    function closeModal(){
+        let modal = document.getElementById('modal');
+        modal.classList.toggle('is-active');
+    }
+    </script>
     {#    <script>#}
     {#        function toggleActive(elem) {#}
     {#            if (!elem.classList.contains('is-active')) {#}
