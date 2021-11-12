@@ -58,7 +58,8 @@ def isValue(value):
 def getImg(img):
     if img:
         return img.url
-    return '/static/img/not_found.png'
+    return '/static/img/not_found_place.png'
+
 
 @register.filter(name="getBaseImg")
 def getBaseImg(query):
@@ -70,7 +71,8 @@ def getBaseImg(query):
                 return first_place.img.url
         except:
             pass
-    return '/static/img/not_found.png'
+    return '/static/img/not_found_place.png'
+
 
 @register.filter(name="getMetaText")
 def getMetaText(meta):

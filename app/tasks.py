@@ -236,8 +236,11 @@ def get_location_information(driver):
         print('Ошибка при получении информации о местности: ', e.__class__.__name__)
         return None
 
+
 def get_photo(driver):
     try:
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'F8J9Nb-LfntMc-header-HiaYvf-LfntMc')))
         photo = is_find_object(driver, 'F8J9Nb-LfntMc-header-HiaYvf-LfntMc')
         button = photo.find_element_by_tag_name('img')
         src = button.get_attribute('src')
@@ -639,6 +642,8 @@ def place_create_driver(cid, query_id):
         data = get_info(driver)
         print(data)
         set_info(data, place)
+
+
         print(' --------- Главное фото: ')
         base_photo = get_photo(driver)
         set_photo_url(base_photo, place.id, base=True)
