@@ -81,7 +81,7 @@ class Place(models.Model):
     site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     meta = models.TextField(null=True, blank=True)
-    attractions = models.ManyToManyField('Attraction', related_name='places')
+    attractions = models.ManyToManyField('Attraction',null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
     rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)

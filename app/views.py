@@ -4,6 +4,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from pytils.translit import slugify
 from rest_framework import status
@@ -182,6 +183,7 @@ def places(request, slug):
     if not query:
         return redirect('app:index')
     places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
+    top_places = places.exclude(Q(address=None) | Q(address='')).exclude(Q(description=None) | Q(description=''))[:20]
     for i in places:
         first_letter = i.name[0]
         if first_letter in places_letter:
@@ -194,6 +196,7 @@ def places(request, slug):
     letters = list(places_letter.keys())
     letters = sorted(letters)
     return render(request, 'app/query/places.html', {'query': query,
+                                                     'top_places': top_places,
                                                      'places': places,
                                                      'places_letter': places_letter,
                                                      'letters': letters})

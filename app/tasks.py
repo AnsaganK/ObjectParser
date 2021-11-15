@@ -362,7 +362,7 @@ class GetReviews:
             time.sleep(1)
             reviews = self.get_reviews_objects()
             print('Всего загружено: ', len(reviews))
-            reviews = reviews[:5]
+            reviews = reviews[:20]
             print(len(reviews))
             return reviews
         except Exception as e:
@@ -643,15 +643,13 @@ def place_create_driver(cid, query_id):
         print(data)
         set_info(data, place)
 
+        print(' --------- Беру координаты ')
+        coordinate = get_coordinate(driver)
+        set_coordinate(coordinate, place)
 
         print(' --------- Главное фото: ')
         base_photo = get_photo(driver)
         set_photo_url(base_photo, place.id, base=True)
-
-
-        print(' --------- Беру координаты ')
-        coordinate = get_coordinate(driver)
-        set_coordinate(coordinate, place)
 
         print(' --------- Отзывы: ')
         reviews = get_this_page_reviews(driver)

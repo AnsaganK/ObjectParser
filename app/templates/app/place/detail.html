@@ -77,7 +77,7 @@
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
 
-                <p class="iframe_wrap">{{ place.coordinate_html|safe }}</p>
+                <p class="iframe_wrap">{% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% else %}Карты нет{% endif %}</p>
                 <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>
                 {% if place.photos.count > 3 %}
 
