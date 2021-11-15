@@ -33,7 +33,7 @@
 {% endblock %}
 {% block content %}
     <h4 class="block_title"> {{ query.name }} </h4>
-    {% for place in places|slice:":20" %}
+    {% for place in top_places %}
         <div class="columns is-centered">
             <div class="column is-9 " style="padding: 10px; box-sizing: border-box">
                 <div class="box place_little_card">
