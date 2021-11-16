@@ -183,7 +183,7 @@ def places(request, slug):
     if not query:
         return redirect('app:index')
     places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
-    top_places = places.exclude(address=None).exclude(meta=None)[:20]
+    top_places = places.exclude(address=None)[:20]
     for i in places:
         first_letter = i.name[0]
         if first_letter in places_letter:
