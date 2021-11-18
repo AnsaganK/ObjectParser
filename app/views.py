@@ -439,8 +439,8 @@ class QueryPlaces(APIView):
 
         serializer = PlaceSerializer(places, many=True)
         places_data = serializer.data
-        query = QuerySerializer(query, many=False)
-        query_data = serializer.data
+        query_serializer = QuerySerializer(query, many=False)
+        query_data = query_serializer.data
         data = {
             'places': places_data,
             'letters': letters,
