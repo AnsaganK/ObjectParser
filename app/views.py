@@ -438,11 +438,14 @@ class QueryPlaces(APIView):
         letters = sorted(letters)
 
         serializer = PlaceSerializer(places, many=True)
-        ser = serializer.data
+        places_data = serializer.data
+        query = QuerySerializer(query, many=False)
+        query_data = serializer.data
         data = {
-            'places': ser,
+            'places': places_data,
             'letters': letters,
-            'places_letter': places_letter
+            'places_letter': places_letter,
+            'query': query_data
         }
         return Response(data, status.HTTP_200_OK)
 
