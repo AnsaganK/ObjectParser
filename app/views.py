@@ -456,4 +456,5 @@ class PlaceDetail(APIView):
         if not place:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         serializer = PlaceSerializer(place)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer_data = serializer.data
+        return Response(serializer_data, status=status.HTTP_200_OK)

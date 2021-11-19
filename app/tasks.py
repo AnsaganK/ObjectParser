@@ -360,6 +360,10 @@ class GetReviews:
                 'let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
                 'a.scrollTo(0, a.scrollHeight);')
             time.sleep(1)
+            self.driver.execute_script(
+                'let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
+                'a.scrollTo(0, a.scrollHeight);')
+            time.sleep(1)
             reviews = self.get_reviews_objects()
             print('Всего загружено: ', len(reviews))
             reviews = reviews[:20]
@@ -652,8 +656,9 @@ def place_create_driver(cid, query_id):
         set_photo_url(base_photo, place.id, base=True)
 
         print(' --------- Отзывы: ')
-        reviews = get_this_page_reviews(driver)
-        if reviews == [] and rating_user_count > 0:
+        reviews = []
+        # reviews = get_this_page_reviews(driver)
+        if rating_user_count > 0:
             print('Отзывы со страницы отзывов')
             reviews = GetReviews(driver).get_reviews()
         print('Отзывы готовы', reviews)
