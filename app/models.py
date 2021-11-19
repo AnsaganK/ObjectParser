@@ -21,6 +21,7 @@ class Query(models.Model):
     name = models.CharField(max_length=1000, verbose_name='Название')
     slug = models.SlugField(null=True, blank=True, unique=True)
     page = models.IntegerField(null=True, blank=True)
+    content = models.TextField(null=True, blank=True, verbose_name='Контент')
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     status_choices = (
         ('wait', 'wait'),
