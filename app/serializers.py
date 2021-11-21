@@ -54,7 +54,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         model = Place
         fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site',
                   'description', 'meta', 'date_create', 'get_meta_description', 'reviews_google',
-                  'photos', 'rating_user_count']
+                  'photos', 'rating_user_count', 'title']
 
 class PlaceMinSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
