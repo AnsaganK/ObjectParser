@@ -13,7 +13,7 @@
                 Title объекта
             </label>
             <div class="control">
-                <input type="text" required class="input" name="title" placeholder="Title" value="{{ place.title }}">
+                <input type="text" required class="input" name="title" placeholder="Title" value="{% if place.title %}{{ place.title }}{% else %}{{ place.name }}{% endif %}">
             </div>
         </div>
         <div class="field">
@@ -21,7 +21,7 @@
                 Meta объекта
             </label>
             <div class="control">
-                <textarea type="text" required class="textarea" name="meta" placeholder='<meta name="description" content="content">'>{{ place.meta }}</textarea>
+                <textarea type="text" required class="textarea" name="meta" placeholder='<meta name="description" content="content">'>{% if place.meta %}{{ place.meta }}{% else %}<meta>{% endif %}</textarea>
             </div>
         </div>
         <div class="field">
