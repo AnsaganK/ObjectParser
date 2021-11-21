@@ -53,15 +53,17 @@
                             <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
                             <span><b>Телефон</b>: <a
                                     href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
-                            <span><b>Описание</b>: {{ place.get_meta_description|truncatechars:'300' }}</span><br>
+                            <span><b>Описание</b>:
+                                {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
+                                    {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
 
                         </div>
                     </div>
                     {% with place.reviews_google|getMoreText as review %}
                         {% if review %}
                             <div style="margin: 10px auto">
-                            <b>Отзыв: </b>
-                            <span style="border-bottom: 1px dashed lightgray;border-top:1px dashed lightgray; padding: 10px;width: 100%;display:block;">
+                                <b>Отзыв: </b>
+                                <span style="border-bottom: 1px dashed lightgray;border-top:1px dashed lightgray; padding: 10px;width: 100%;display:block;">
 
                                         <div class="columns">
                                             <div class="column ">
