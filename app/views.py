@@ -480,9 +480,9 @@ class PlaceDetail(APIView):
         if not place:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         data = request.data
-        place.title = data['title']
-        place.meta = data['meta']
-        place.name = data['name']
-        place.description = data['description']
+        place.title = data['title'] if 'title' in data else place.title
+        place.meta = data['meta'] if 'meta' in data else place.meta
+        place.name = data['name'] if 'name' in data else place.name
+        place.description = data['description'] if 'description' in data else place.description
         place.save()
-        return Response({'status':'success'}, status=status.HTTP_200_OK)
+        return Response({'status': 'success'}, status=status.HTTP_200_OK)
