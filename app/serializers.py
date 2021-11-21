@@ -70,7 +70,7 @@ class PlaceMinSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'meta', 'get_meta_description']
+        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'meta', 'get_meta_description', 'description']
 
 
 

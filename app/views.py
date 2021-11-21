@@ -473,3 +473,16 @@ class PlaceDetail(APIView):
         serializer = PlaceSerializer(place)
         serializer_data = serializer.data
         return Response(serializer_data, status=status.HTTP_200_OK)
+
+
+    def post(self, request, slug, format=None):
+        place = Place.objects.filter(slug=slug).first()
+        if not place:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        place.title = data['title']
+        place.meta = data['meta']
+        place.name = data['name']
+        place.description = data['description']
+        place.save()
+        return Response({'status':'success'}, status=status.HTTP_200_OK)
