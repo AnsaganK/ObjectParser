@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from app.models import Review
+from app.models import Review, Place
 
 
 class QueryForm(forms.Form):
@@ -34,3 +34,9 @@ class UserDetailForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'groups']
+
+
+class PlaceForm(forms.ModelForm):
+    class Meta:
+        model = Place
+        fields = ['name', 'description', 'meta', 'title']

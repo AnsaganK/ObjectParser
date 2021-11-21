@@ -72,6 +72,7 @@ class QueryPlace(models.Model):
 
 class Place(models.Model):
     place_id = models.TextField(verbose_name='Идентификатор в гугл картах', null=True, blank=True)
+    title = models.TextField(null=True, blank=True, default='', verbose_name='Title')
     name = models.CharField(max_length=1000, null=True, blank=True)
     slug = models.SlugField(max_length=1000, null=True, blank=True)
     cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True, unique=True)

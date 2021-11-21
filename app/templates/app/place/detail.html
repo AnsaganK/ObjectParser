@@ -1,13 +1,14 @@
 {% extends 'app/base.html' %}
 {% load app_tags %}
 {% block title %}
-    {{ place.name }} | {{ place.cid }}
+    {% if place.title %}
+        {{ place.title }}
+    {% else %}
+        {{ place.name }}
+    {% endif %}
 {% endblock %}
 
 {% block style %}
-    {% if place.meta %}
-        {{ place.meta|safe }}
-    {% endif %}
     <style>
         .iframe_wrap iframe {
             box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
@@ -16,6 +17,12 @@
             margin: auto;
         }
     </style>
+{% endblock %}
+
+{% block meta %}
+    {% if place.meta %}
+        {{ place.meta|safe }}
+    {% endif %}
 {% endblock %}
 
 {% block breadcrumb %}
@@ -30,7 +37,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="modal" id="modal"  onclick="closeModal()">
+    <div class="modal" id="modal" onclick="closeModal()">
         <div class="modal-background"></div>
         <div class="modal-content">
             <p class="image is-4by3">
@@ -56,7 +63,9 @@
         <h4 style="color: #64b5f6; text-align: center">{{ place.name }} <br><span
                 style="color:grey; font-size: 11px; ">{{ place.date_update }}</span></h4>
         {% if request.user|hasGroup:'Администратор' %}
-            <a href="{% url 'app:place_update' place.pk %}" class="button_add button is-info">
+            <a href="{% url 'app:place_edit' place.cid %}" class="button_add button is-warning">
+                Редактировать данные</a>
+            <a href="{% url 'app:place_update' place.pk %}" style="margin-top: 50px" class="button_add button is-info">
                 Обновить данные</a>
         {% endif %}
         <div style="display:flex;">
@@ -77,8 +86,17 @@
                                                             target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
                 </p>
 
-                <p class="iframe_wrap">{% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% else %}Карты нет{% endif %}</p>
-                <p><span>Описание:</span> <span>{{ place.get_meta_description }}</span></p>
+                <p class="iframe_wrap">{% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% else %}Карты
+                    нет{% endif %}</p>
+                <p><span>Описание:</span>
+                    <span>
+                        {% if place.description %}
+                            {{ place.description }}
+                        {% else %}
+                            {{ place.get_meta_description }}
+                        {% endif %}
+                </span>
+                </p>
                 {% if place.photos.count > 3 %}
 
                     <section class="" style="max-width: 1000px">
@@ -89,7 +107,8 @@
                                         <div class="card-image">
                                             <figure class="image is-16by9 is-covered">
                                                 <img src="{{ photo.img.url }}" alt=""
-                                                     style="width: 200px !important; height: 200px !important;" onclick="showModalImg('{{ photo.img.url }}')">
+                                                     style="width: 200px !important; height: 200px !important;"
+                                                     onclick="showModalImg('{{ photo.img.url }}')">
                                             </figure>
                                         </div>
                                     </div>
@@ -102,7 +121,8 @@
                     <div style="display: flex; justify-content: center;flex-wrap: wrap; ">
                         {% for photo in place.photos.all %}
                             <img src="{{ photo.img.url }}" alt=""
-                                 style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;" onclick="showModalImg('{{ photo.img.url }}')">
+                                 style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;"
+                                 onclick="showModalImg('{{ photo.img.url }}')">
                         {% endfor %}
                     </div>
                 {% endif %}
@@ -206,16 +226,17 @@
 
 {% block script %}
     <script>
-    function showModalImg(url){
-        let modal = document.getElementById('modal');
-        let img = document.getElementById('place_image');
-        img.setAttribute('src', url);
-        modal.classList.toggle('is-active');
-    }
-    function closeModal(){
-        let modal = document.getElementById('modal');
-        modal.classList.toggle('is-active');
-    }
+        function showModalImg(url) {
+            let modal = document.getElementById('modal');
+            let img = document.getElementById('place_image');
+            img.setAttribute('src', url);
+            modal.classList.toggle('is-active');
+        }
+
+        function closeModal() {
+            let modal = document.getElementById('modal');
+            modal.classList.toggle('is-active');
+        }
     </script>
     {#    <script>#}
     {#        function toggleActive(elem) {#}

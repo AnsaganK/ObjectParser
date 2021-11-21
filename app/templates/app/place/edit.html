@@ -1,0 +1,50 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    Place edit
+{% endblock %}
+
+{% block content %}
+    <h4 class="centered_link">{{ place.data.name }}</h4>
+    <form action="" method="post" class="custom_form">
+        {% csrf_token %}
+        <div class="field">
+            <label for="" class="label">
+                Title объекта
+            </label>
+            <div class="control">
+                <input type="text" required class="input" name="title" placeholder="Title" value="{{ place.title }}">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Meta объекта
+            </label>
+            <div class="control">
+                <textarea type="text" required class="textarea" name="meta" placeholder='<meta name="description" content="content">'>{{ place.meta }}</textarea>
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Название объекта
+            </label>
+            <div class="control">
+                <input type="text" required class="input" name="name" placeholder="Name" value="{{ place.name }}">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Описание объекта
+            </label>
+            <div class="control">
+                <textarea type="text" required class="textarea" name="description" placeholder="">{% if place.description %}{{ place.description }}{% else %}{{ place.get_meta_description }}{% endif %}</textarea>
+            </div>
+        </div>
+
+        {#        <label class="checkbox">#}
+        {#            <input class="checkbox" type="checkbox" name="detail">#}
+        {#            Детальный поиск#}
+        {#        </label>#}
+        <button type="submit" class="button is-info centered">Редактировать</button>
+    </form>
+{% endblock %}

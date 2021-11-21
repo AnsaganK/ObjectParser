@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm
+from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm
 from app.models import Query, Place, Review
 from django.contrib import messages
 
@@ -208,6 +208,21 @@ def place_detail(request, slug):
     reviews = get_paginator(request, reviews, 10)
     my_review = Review.objects.filter(place=place).filter(user=request.user).first()
     return render(request, 'app/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
+
+
+@login_required()
+def place_edit(request, cid):
+    place = get_object_or_404(Place, cid=cid)
+    if request.method == 'POST':
+        form = PlaceForm(request.POST, instance=place)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Объект изменен')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(place.get_absolute_url())
+    return render(request, 'app/place/edit.html', {'place': place})
+
 
 @login_required()
 def review_add(request, cid):
