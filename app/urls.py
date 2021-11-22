@@ -15,6 +15,7 @@ urlpatterns = [
 
     path('queries/', views.queries, name='queries'),
     path('query/<slug:slug>/places/', views.places, name='places'),
+    path('query/<slug:slug>/edit/', views.query_edit, name='query_edit'),
 
     path('place/<str:cid>/review/add', views.review_add, name="review_add"),
     path('place/<str:cid>/edit', views.place_edit, name="place_edit"),
@@ -28,6 +29,10 @@ urlpatterns = [
     path('registration/', views.registration, name="registration"),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
+
+    path('admin_dashboard/tags', views.tags, name='tags'),
+    path('admin_dashboard/tags/<slug:slug>/edit', views.tag_edit, name='tag_edit'),
+    path('admin_dashboard/tags/<slug:slug>/delete', views.tag_delete, name='tag_delete'),
 
     path('admin_dashboard/groups/', views.group_list, name="group_list"),
     path('admin_dashboard/groups/not', views.group_not, name="group_not"),

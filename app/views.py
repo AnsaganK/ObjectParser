@@ -11,8 +11,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm
-from app.models import Query, Place, Review
+from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
+    QueryContentForm
+from app.models import Query, Place, Review, Tag
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
@@ -110,6 +111,30 @@ def query_add(request):
     return render(request, 'app/query/add.html')
 
 @login_required()
+def query_edit(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    if request.method == 'POST':
+        form = QueryContentForm(request.POST, instance=query)
+        if form.is_valid():
+            query = form.save()
+
+            post = request.POST
+            query.tags.clear()
+            for i in post:
+                if i.split('_')[0] == 'tag':
+                    tag_id = int(i.split('_')[-1])
+                    tag = Tag.objects.filter(id=tag_id).first()
+                    if tag:
+                        query.tags.add(tag)
+
+            messages.success(request, 'Описание изменено')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:places', args=[query.slug]))
+    tags = Tag.objects.all()
+    return render(request, 'app/query/edit.html', {'query': query, 'tags': tags})
+
+@login_required()
 def query_all(request):
     user = request.user
     if not has_group(user, 'Суперадминистратор'):
@@ -174,6 +199,51 @@ def queries(request):
     queries = get_paginator(request, queries, 16)
     return render(request, 'app/query/queries.html', {'queries': queries})
 
+
+def add_slug_for_tag(form, tag):
+    cd = form.cleaned_data
+    name = cd['name']
+    slug = slugify(name)
+    tag.slug = slug
+    tag.save()
+
+@login_required()
+def tags(request):
+    tags = Tag.objects.all()
+    if request.method == 'POST':
+        form = TagForm(request.POST)
+        if form.is_valid():
+            tag = form.save(commit=False)
+            add_slug_for_tag(form, tag)
+            messages.success(request, 'Тэг создан')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:tags'))
+    return render(request, 'app/tag/list.html', {'tags': tags})
+
+
+@login_required()
+def tag_edit(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    if request.method == 'POST':
+        form = TagForm(request.POST, instance=tag)
+        if form.is_valid():
+            tag = form.save(commit=False)
+            add_slug_for_tag(form, tag)
+            tag.save()
+            messages.success(request, 'Тэг изменен')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:tags'))
+    return render(request, 'app/tag/edit.html', {'tag': tag})
+
+
+@login_required()
+def tag_delete(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    tag.delete()
+    messages.success(request, 'Тэг удален')
+    return redirect(reverse('app:tags'))
 
 def places(request, slug):
     places_letter = {

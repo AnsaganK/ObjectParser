@@ -49,10 +49,10 @@ def toString(variable):
     return str(variable)
 
 @register.filter(name="isValue")
-def isValue(value):
+def isValue(value, returned=' - '):
     if value:
         return value
-    return ' - '
+    return returned
 
 @register.filter(name="getImg")
 def getImg(img):

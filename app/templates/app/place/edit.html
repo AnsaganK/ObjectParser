@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <h4 class="centered_link">{{ place.data.name }}</h4>
+    <h4 class="centered_link">{{ place.name }}</h4>
     <form action="" method="post" class="custom_form">
         {% csrf_token %}
         <div class="field">

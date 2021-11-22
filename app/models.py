@@ -16,12 +16,25 @@ from django.shortcuts import reverse
 from django.utils.text import slugify
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=1000, null=True, blank=True, unique=True)
+    slug = models.SlugField(max_length=1000, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Тэг'
+        verbose_name_plural = 'Тэги'
+        ordering = ['-pk']
+
 class Query(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='queries', verbose_name='Пользователь')
     name = models.CharField(max_length=1000, verbose_name='Название')
     slug = models.SlugField(null=True, blank=True, unique=True)
     page = models.IntegerField(null=True, blank=True)
     content = models.TextField(null=True, blank=True, verbose_name='Контент')
+    tags = models.ManyToManyField(Tag, related_name='queries')
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     status_choices = (
         ('wait', 'wait'),
