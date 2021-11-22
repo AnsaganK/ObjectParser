@@ -1,12 +1,18 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from app.models import Query, Place, QueryPlace, ReviewGoogle, PlacePhoto
+from app.models import Query, Place, QueryPlace, ReviewGoogle, PlacePhoto, Tag
 import re
 
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
 
 class QuerySerializer(serializers.ModelSerializer):
     places_count = serializers.SerializerMethodField('places_count')
     base_img = serializers.SerializerMethodField('base_img')
+    tags = TagSerializer(many=True)
 
     def base_img(self, obj):
         places = obj.places.all()
@@ -21,7 +27,7 @@ class QuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Query
-        fields = ['name', 'slug', 'places_count', 'base_img']
+        fields = ['name', 'slug', 'places_count', 'base_img', 'tags']
 
 
 class ReviewGoogleSerializer(serializers.ModelSerializer):
@@ -86,3 +92,5 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'first_name', 'last_name', 'email')
+
+

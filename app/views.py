@@ -530,7 +530,7 @@ class QueryPlaces(APIView):
             'places': places_data,
             'letters': letters,
             'places_letter': places_letter,
-            'query': query_data
+            'query': query_data,
         }
         return Response(data, status.HTTP_200_OK)
 
