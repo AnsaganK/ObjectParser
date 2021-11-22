@@ -540,8 +540,16 @@ class PlaceDetail(APIView):
         place = Place.objects.filter(slug=slug).first()
         if not place:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+        query_serializer_data = {}
+        query_place = place.queries.first()
+        if query_place:
+            query = query_place.query
+            query_serializer_data = QuerySerializer(query, many=False).data
+
         serializer = PlaceSerializer(place)
         serializer_data = serializer.data
+        serializer_data['query'] = query_serializer_data
         return Response(serializer_data, status=status.HTTP_200_OK)
 
 
