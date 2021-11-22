@@ -558,9 +558,21 @@ class PlaceDetail(APIView):
         if not place:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         data = request.data
-        place.title = data['title'] if 'title' in data else place.title
-        place.meta = data['meta'] if 'meta' in data else place.meta
-        place.name = data['name'] if 'name' in data else place.name
-        place.description = data['description'] if 'description' in data else place.description
-        place.save()
-        return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        form = PlaceForm(data, instance=place)
+        if form.is_valid():
+            form.save()
+            return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class QueryEdit(APIView):
+    def post(self, request, slug, format=None):
+        query = Query.objects.filter(slug=slug).first()
+        if not query:
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
+        data = request.data
+        form = QueryContentForm(data, instance=query)
+        if form.is_valid():
+            form.save()
+            return Response({'status': 'success'}, status=status.HTTP_200_OK)
+        return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
