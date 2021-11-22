@@ -27,7 +27,7 @@ class QuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Query
-        fields = ['name', 'slug', 'places_count', 'base_img', 'tags']
+        fields = ['name', 'slug', 'places_count', 'base_img', 'tags', 'content']
 
 
 class ReviewGoogleSerializer(serializers.ModelSerializer):
