@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from pytils.translit import slugify
 from rest_framework import status
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,7 +18,7 @@ from app.models import Query, Place, Review, Tag
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
-from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer
+from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer
 from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
 
@@ -117,16 +118,6 @@ def query_edit(request, slug):
         form = QueryContentForm(request.POST, instance=query)
         if form.is_valid():
             query = form.save()
-
-            post = request.POST
-            query.tags.clear()
-            for i in post:
-                if i.split('_')[0] == 'tag':
-                    tag_id = int(i.split('_')[-1])
-                    tag = Tag.objects.filter(id=tag_id).first()
-                    if tag:
-                        query.tags.add(tag)
-
             messages.success(request, 'Описание изменено')
         else:
             show_form_errors(request, form.errors)
@@ -535,6 +526,13 @@ class QueryPlaces(APIView):
         return Response(data, status.HTTP_200_OK)
 
 
+class QueryDetail(RetrieveAPIView):
+    model = Query
+    serializer_class = QuerySerializer
+    queryset = model.objects.all()
+    lookup_field = 'slug'
+
+
 class PlaceDetail(APIView):
     def get(self, request, slug, format=None):
         place = Place.objects.filter(slug=slug).first()
@@ -576,3 +574,9 @@ class QueryEdit(APIView):
             form.save()
             return Response({'status': 'success'}, status=status.HTTP_200_OK)
         return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TagList(ListAPIView):
+    model = Tag
+    serializer_class = TagSerializer
+    queryset = model.objects.all()

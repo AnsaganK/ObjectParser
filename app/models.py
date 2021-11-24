@@ -28,13 +28,15 @@ class Tag(models.Model):
         verbose_name_plural = 'Тэги'
         ordering = ['-pk']
 
+
 class Query(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='queries', verbose_name='Пользователь')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='queries',
+                             verbose_name='Пользователь')
     name = models.CharField(max_length=1000, verbose_name='Название')
     slug = models.SlugField(null=True, blank=True, unique=True)
     page = models.IntegerField(null=True, blank=True)
     content = models.TextField(null=True, blank=True, verbose_name='Контент')
-    tags = models.ManyToManyField(Tag, related_name='queries')
+    tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='queries')
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     status_choices = (
         ('wait', 'wait'),
@@ -46,7 +48,6 @@ class Query(models.Model):
 
     def __str__(self):
         return self.name
-
 
     class Meta:
         verbose_name = 'Название запроса'
@@ -69,6 +70,7 @@ class Query(models.Model):
             if place and place.img:
                 return f'{host}{place.img.url}'
         return f'{host}/static/img/not_found.png'
+
 
 class QueryPlace(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True, related_name='places')
@@ -96,7 +98,7 @@ class Place(models.Model):
     site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     meta = models.TextField(null=True, blank=True)
-    attractions = models.ManyToManyField('Attraction',null=True, blank=True, related_name='places')
+    attractions = models.ManyToManyField('Attraction', null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
     rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
@@ -143,6 +145,7 @@ class Place(models.Model):
     def get_absolute_url(self):
         return reverse('app:place_detail', args=[self.slug])
 
+
 class PlacePhoto(models.Model):
     img = models.ImageField(upload_to='place_photos', null=True, blank=True)
     place = models.ForeignKey(Place, on_delete=models.CASCADE, null=True, blank=True, related_name='photos')
@@ -165,7 +168,6 @@ class Review(models.Model):
     is_edit = models.BooleanField(default=False)
     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
-
 
     def __str__(self):
         return self.place.data['name']
@@ -192,7 +194,6 @@ class ReviewGoogle(models.Model):
         ordering = ['-text']
 
 
-
 class AttractionImage(models.Model):
     url = models.URLField()
     img = models.ImageField(upload_to='attractions')
@@ -208,7 +209,6 @@ class AttractionImage(models.Model):
 class Attraction(models.Model):
     name = models.CharField(max_length=250)
     img = models.ForeignKey(AttractionImage, on_delete=models.DO_NOTHING, related_name='attractions')
-
 
     def __str__(self):
         return self.name

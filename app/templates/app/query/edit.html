@@ -46,7 +46,7 @@
         <div class="tag_items">
             {% for tag in tags %}
                 <div class="tag_item">
-                    <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tag_{{ tag.id }}" {% if tag in query.tags.all %}checked{% endif %}>
+                    <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tags" value="{{ tag.id }}" {% if tag in query.tags.all %}checked{% endif %}>
                     <label for="tag_{{ tag.id }}" class="button is-success is-outlined"
                            style="margin: 3px">{{ tag.name }}</label>
                 </div>

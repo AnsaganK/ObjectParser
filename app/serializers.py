@@ -7,7 +7,7 @@ import re
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['name']
+        fields = ['name', 'id']
 
 class QuerySerializer(serializers.ModelSerializer):
     places_count = serializers.SerializerMethodField('places_count')
