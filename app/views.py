@@ -13,8 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
-    QueryContentForm
-from app.models import Query, Place, Review, Tag
+    QueryContentForm, ReviewTypeForm
+from app.models import Query, Place, Review, Tag, ReviewType, ReviewPart
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
@@ -236,6 +236,32 @@ def tag_delete(request, slug):
     messages.success(request, 'Тэг удален')
     return redirect(reverse('app:tags'))
 
+
+def review_types(request):
+    review_types = ReviewType.objects.all()
+    if request.method == 'POST':
+        form = ReviewTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Тип отзыва создан')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:review_types'))
+    return render(request, 'app/admin_dashboard/review_type/list.html', {'review_types': review_types})
+
+
+def review_type_edit(request, pk):
+    review_type = get_object_or_404(ReviewType, pk=pk)
+    if request.method == 'POST':
+        form = ReviewTypeForm(request.POST, instance=review_type)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Тип отзыва изменен')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:review_types'))
+    return render(request, 'app/admin_dashboard/review_type/edit.html', {'review_type': review_type})
+
 def places(request, slug):
     places_letter = {
 
@@ -262,13 +288,41 @@ def places(request, slug):
                                                      'places_letter': places_letter,
                                                      'letters': letters})
 
+def create_or_update_review_types(post, review):
+    for i in post:
+        if 'review_type' in i:
+            review_type_id = int(i.split('_')[-1])
+            review_type = ReviewType.objects.filter(pk=review_type_id).first()
+            review_part = ReviewPart.objects.update_or_create(review_type=review_type, review=review)[0]
+            review_part.rating = int(post[i])
+            review_part.save()
+
+
 @login_required()
 def place_detail(request, slug):
-    place = Place.objects.filter(slug=slug).first()
+    place = get_object_or_404(Place, slug=slug)
+    if request.method == 'POST':
+        if Review.objects.filter(user=request.user).filter(place=place).first():
+            messages.error(request, 'Вы не можете оставить более одного отзыва')
+            return redirect(place.get_absolute_url())
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.place = place
+            review.save()
+            create_or_update_review_types(request.POST, review)
+            messages.success(request, 'Ваш отзыв сохранен')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(place.get_absolute_url())
+
     reviews = place.reviews.all()
     reviews = get_paginator(request, reviews, 10)
+    review_types = ReviewType.objects.all()
     my_review = Review.objects.filter(place=place).filter(user=request.user).first()
-    return render(request, 'app/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
+    return render(request, 'app/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review,
+                                                     'review_types': review_types})
 
 
 @login_required()
@@ -285,25 +339,7 @@ def place_edit(request, cid):
     return render(request, 'app/place/edit.html', {'place': place})
 
 
-@login_required()
-def review_add(request, cid):
-    place = Place.objects.filter(cid=cid).first()
-    if Review.objects.filter(user=request.user).filter(place=place).first():
-        messages.error(request, 'Вы не можете оставить более одного отзыва')
-        return redirect(place.get_absolute_url())
-    if not place:
-        return render(request, '404.html')
-    if request.method == 'POST':
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.user = request.user
-            review.place = place
-            review.save()
-            messages.success(request, 'Ваш отзыв сохранен')
-        else:
-            show_form_errors(request, form.errors)
-    return redirect(place.get_absolute_url())
+
 
 
 @login_required()
@@ -333,6 +369,11 @@ def profile(request):
     return render(request, 'app/user/profile.html', {'user': user})
 
 @login_required()
+def public_cabinet(request, username):
+    user = get_object_or_404(User, username=username)
+    return render(request, 'app/user/public_cabinet.html', {'user': user})
+
+@login_required()
 def all_reviews(request):
     if not has_group(request.user, 'Редактор'):
         return redirect('app:index')
@@ -359,11 +400,16 @@ def my_review_edit(request, pk):
             review = form.save(commit=False)
             review.is_edit = True
             review.save()
+            create_or_update_review_types(request.POST, review)
             messages.success(request, 'Отзыв успешно отредактирован')
         else:
             show_form_errors(request, form.errors)
-        return redirect('app:my_reviews')
-    return render(request, 'app/reviews/review_edit.html', {'review': review})
+        return redirect(reverse('app:my_review_edit', args=[review.id]))
+
+    review_types = ReviewType.objects.filter(reviews__review=review)
+    review_parts = ReviewPart.objects.values('review_type', 'rating').filter(review=review)
+    print(review_parts)
+    return render(request, 'app/reviews/review_edit.html', {'review': review, 'review_types': review_types, 'review_parts': review_parts})
 
 
 

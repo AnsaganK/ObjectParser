@@ -1,3 +1,4 @@
+import math
 import re
 
 from django import template
@@ -16,7 +17,7 @@ GROUPS = {'Пользователь': 1,
 @register.filter(name="getRating")
 def getRating(rating):
     stars = ''
-    rating = int(rating)
+    rating = round(rating)
     for i in range(rating):
         stars += '<span style="color:gold;"><i class="fa fa-star"></i></span>'
     for i in range(5 - rating):

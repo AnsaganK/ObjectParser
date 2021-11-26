@@ -79,7 +79,7 @@
                             </div>
                         {% endif %}
                     {% endwith %}
-                    <span>Отзывов: {{ place.reviews_google.count|add:place.reviews.count }}</span>
+                    <span>Отзывов: {{ place.reviews.count }}</span>
                 </div>
             </div>
         {% endfor %}

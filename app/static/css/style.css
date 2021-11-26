@@ -1,0 +1,27 @@
+.rating_parts {
+    display: flex;
+    justify-content: end;
+    flex-wrap: wrap;
+}
+
+.rating_part {
+    padding: 10px;
+    margin: 6px;
+    border: 1px solid lightgrey;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.base_rating_area {
+    display: block;
+    margin: 10px auto;
+    width: fit-content;
+}
+
+#base_rating {
+    font-size: 27px;
+    color: gold;
+    font-weight: 600;
+}

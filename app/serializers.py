@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from app.models import Query, Place, QueryPlace, ReviewGoogle, PlacePhoto, Tag
+from app.models import Query, Place, QueryPlace, PlacePhoto, Tag, Review
 import re
 
 
@@ -30,10 +30,10 @@ class QuerySerializer(serializers.ModelSerializer):
         fields = ['name', 'slug', 'places_count', 'base_img', 'tags', 'content']
 
 
-class ReviewGoogleSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ReviewGoogle
-        fields = ['author_name', 'rating', 'text']
+        model = Review
+        fields = ['author_name', 'rating', 'text', 'user', 'is_google']
 
 
 class PlacePhotoSerializer(serializers.ModelSerializer):
@@ -44,7 +44,7 @@ class PlacePhotoSerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
-    reviews_google = ReviewGoogleSerializer(many=True)
+    reviews_google = ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
 
     def get_meta_description(self, obj):

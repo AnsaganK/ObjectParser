@@ -1,0 +1,9 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ user.last_name }} {{ user.first_name }}
+{% endblock %}
+
+{% block content %}
+    {{ request.user.username }}
+{% endblock %}

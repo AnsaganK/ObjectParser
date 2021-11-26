@@ -2,6 +2,8 @@ import re
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Count, Sum
+from django.db.models.functions import Round
 from django.urls import reverse
 
 from django.db.models.signals import post_save
@@ -97,7 +99,7 @@ class Place(models.Model):
     phone_number = models.CharField(max_length=500, null=True, blank=True)
     site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
-    meta = models.TextField(null=True, blank=True)
+    meta = models.TextField(null=True, blank=True, default='<meta>')
     attractions = models.ManyToManyField('Attraction', null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
@@ -158,19 +160,66 @@ class PlacePhoto(models.Model):
         verbose_name_plural = 'Фотографии'
 
 
+class ReviewType(models.Model):
+    name = models.CharField(max_length=200, verbose_name='Название типа')
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'Тип отзыва'
+        verbose_name_plural = 'Типы отзывов'
+        ordering = ['-pk']
+
+
+class ReviewPart(models.Model):
+    review_type = models.ForeignKey(ReviewType, on_delete=models.CASCADE, related_name='reviews')
+    review = models.ForeignKey('Review', on_delete=models.CASCADE, related_name='parts')
+    stars_choices = ((i, i) for i in range(1, 6))
+    rating = models.IntegerField(default=1, choices=stars_choices)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'Часть отзыва'
+        verbose_name_plural = 'Части отзыва'
+        ordering = ['-pk']
+
+
 class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='reviews')
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField()
+
+    author_link = models.TextField(null=True, blank=True)
+    author_name = models.CharField(max_length=500, null=True, blank=True)
+    author_img_link = models.TextField(null=True, blank=True)
     stars_choices = ((i, i) for i in range(1, 6))
-    rating = models.IntegerField(default=5, choices=stars_choices)
+    rating = models.IntegerField(default=1, choices=stars_choices, null=True, blank=True)
 
     is_edit = models.BooleanField(default=False)
     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
 
+    is_google = models.BooleanField(default=False)
+
     def __str__(self):
-        return self.place.data['name']
+        return self.text[:30]
+
+    @property
+    def get_user_name(self):
+        if self.user:
+            return f'{self.user.last_name} {self.user.first_name}'
+        return self.author_name
+
+    @property
+    def get_rating(self):
+        if self.parts.exists():
+            r = self.parts.all().aggregate(rating=Sum('rating'))
+            c = self.parts.all().aggregate(count=Count('rating'))
+            return round(r['rating']/c['count'], 1)
+        return self.rating
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -178,20 +227,22 @@ class Review(models.Model):
         ordering = ['-pk']
 
 
-class ReviewGoogle(models.Model):
-    author_name = models.CharField(max_length=500, null=True, blank=True)
-    rating = models.IntegerField(null=True, blank=True)
-    text = models.TextField(null=True, blank=True)
-
-    place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews_google')
-
-    def __str__(self):
-        return self.author_name
-
-    class Meta:
-        verbose_name = 'Отзыв с Google'
-        verbose_name_plural = 'Отзывы с Google'
-        ordering = ['-text']
+# class ReviewGoogle(models.Model):
+#     author_name = models.CharField(max_length=500, null=True, blank=True)
+#     rating = models.IntegerField(null=True, blank=True)
+#     text = models.TextField(null=True, blank=True)
+#
+#     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews_google')
+#     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+#     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
+#
+#     def __str__(self):
+#         return self.author_name
+#
+#     class Meta:
+#         verbose_name = 'Отзыв с Google'
+#         verbose_name_plural = 'Отзывы с Google'
+#         ordering = ['-text']
 
 
 class AttractionImage(models.Model):
@@ -235,7 +286,15 @@ class Location(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    img = models.ImageField(upload_to='user_avatars', null=True, blank=True)
 
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+        verbose_name = 'Профиль'
+        verbose_name_plural = 'Профили'
+        ordering = ['-pk']
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

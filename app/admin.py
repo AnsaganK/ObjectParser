@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Query, Place, Profile, QueryPlace, Review, Tag
+from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart
 
 
 @admin.register(Query)
@@ -20,6 +20,16 @@ class PlaceAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug']
     prepopulated_fields = {'slug': ('name',)}
+
+
+@admin.register(ReviewType)
+class ReviewTypeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+
+
+@admin.register(ReviewPart)
+class ReviewPartAdmin(admin.ModelAdmin):
+    list_display = ['id', 'rating']
 
 
 admin.site.register(Profile)

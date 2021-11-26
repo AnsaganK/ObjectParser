@@ -14,6 +14,7 @@
     {% endblock %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <link rel="stylesheet" href="{% static 'css/bulma/bulma-switch.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-carousel@4.0.3/dist/css/bulma-carousel.min.css">
 
     <link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
@@ -404,7 +405,7 @@
                         <a class="navbar-item" href="{% url 'app:group_list' %}">Роли</a>
                         <a class="navbar-item" href="{% url 'app:user_list' %}">Пользователи</a>
                         <a class="navbar-item" href="{% url 'app:tags' %}">Тэги</a>
-                        <a class="navbar-item" href="{% url 'app:user_list' %}">Модули</a>
+                        <a class="navbar-item" href="{% url 'app:review_types' %}">Типы отзывов</a>
                         <hr class="navbar-divider">
                         <a class="navbar-item" href="#">Настройки</a>
                     </div>
@@ -467,6 +468,7 @@
         infinite: true,
     });
 </script>
+
 {% block script %}
 
 {% endblock %}

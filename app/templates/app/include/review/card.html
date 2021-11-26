@@ -1,0 +1,91 @@
+{% load app_tags static %}
+
+{% if review.is_google %}
+    <div class="columns is-centered" style="margin-bottom: 30px">
+        <div class="column is-8 box">
+            <div style="display: flex; justify-content: space-between; width:auto; margin-bottom: 5px">
+                <div style="display: flex; justify-content: center; align-items: center">
+                    <img src="{% if review.author_img_link %}
+                            {{ review.author_img_link }}
+                      {% else %}
+                            {% static 'img/not_avatar.svg' %}
+                      {% endif %}" style="display: inline; width: 30px; height: 30px; margin-right: 10px" alt="">
+                    <a {% if review.author_link %}class="link"
+                       href="{{ review.author_link }}"{% endif %}>{{ review.author_name }}</a>
+                </div>
+
+                <span style="display: flex; align-items: end; flex-direction: column">
+                    <div>
+                        {{ review.rating|getRating|safe }}
+                    </div>
+                    {% if review.user == request.user or request.user|hasGroup:'Редактор' %}
+                        <a href="{% url 'app:my_review_edit' review.pk %}"
+                           style="display:block; width: 100%; text-align: end;">
+                    {% if review.is_edit %}
+                        <span style="color: grey">Было ред.:{{ review.date_update }}</span>
+                    {% endif %}
+                            <span class="icon" style="color: orange">
+                            <i class="fas fa-edit"></i>
+                        </span></a>
+                    {% else %}
+                        <p></p>
+                    {% endif %}
+                </span>
+            </div>
+
+
+            <span style="color: grey;">{{ review.text }}</span>
+        </div>
+    </div>
+{% else %}
+    <div class="columns is-centered" style="margin-bottom: 30px">
+        <div class="box column is-8">
+            <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
+                    <span style="display: flex; justify-content: center; align-items: center">
+                        <img src="
+
+
+
+
+
+
+                                {% if review.user.profile.img %}{{ review.user.profile.img.url }}{% else %}{% static 'img/not_avatar.svg' %}{% endif %}"
+                             style="width: 30px; height: 30px; margin-right: 10px" alt="">
+                        <a class="link"
+                           href="{% url 'app:public_cabinet' review.user.username %}">{{ review.get_user_name }}</a>
+                <span style="color:grey;">({{ review.date_create }})</span>
+                    </span>
+                {% if review.user == request.user or request.user|hasGroup:'Редактор' %}
+                    <a href="{% url 'app:my_review_edit' review.pk %}">
+                        {% if review.is_edit %}
+                            <span style="color: grey">Было ред.:{{ review.date_update }}</span>
+                        {% endif %}
+                        <span class="icon" style="color: orange">
+                            <i class="fas fa-edit"></i>
+                        </span>
+                    </a>
+                {% else %}
+                    <p></p>
+                {% endif %}
+            </p>
+            {% if review.parts.exists %}
+                <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
+                    <div style="width: 10%;font-size: 40px; color: gold; font-weight: 600;">{{ review.get_rating }}</div>
+                    <div class="rating_parts">
+                        {% for part in review.parts.all %}
+                            <div class="rating_part">
+                                {{ part.review_type.name }}
+                                <div>
+                                    {{ part.rating|getRating|safe }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                {{ review.rating|getRating|safe }}
+            {% endif %}
+            <p>{{ review.text }}</p>
+        </div>
+    </div>
+{% endif %}

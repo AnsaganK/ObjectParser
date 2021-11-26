@@ -1,5 +1,5 @@
 {% extends 'app/base.html' %}
-{% load app_tags %}
+{% load app_tags static %}
 
 {% block title %}
     {{ review.text|truncatechars:20 }}
@@ -10,26 +10,11 @@
                                                  class="link">{{ review.place.name }}</a></h4>
     <div class="columns is-centered">
         <div class="box column is-8">
-            <form action="" method="post">
-                {% csrf_token %}
-                <div class="rating-area">
-                    {% for i in '54321'|make_list %}
-                        <input type="radio" id="star-{{ i }}" name="rating" value="{{ i }}" data-check="{{ i }}">
-                        <label for="star-{{ i }}" title="Оценка «{{ i }}»"></label>
-                    {% endfor %}
-                </div>
-                {% if request.user|hasGroup:'Редактор' %}Изменить отзыв как: {{ review.user.last_name }} {{ review.user.first_name }}{% endif %}
-                <textarea name="text" id="" cols="" rows="" class="textarea">{{ review.text }}</textarea>
-                <button type="submit" class="button is-info block_centered">Изменить</button>
-            </form>
+            {% include 'app/include/review/form.html' %}
         </div>
     </div>
 {% endblock %}
 
 {% block script %}
-    <script>
-        let rating_input = document.getElementById('star-{{ review.rating }}');
-        console.log(rating_input)
-        rating_input.checked = true;
-    </script>
+    <script src="{% static 'js/rating_check.js' %}"></script>
 {% endblock %}

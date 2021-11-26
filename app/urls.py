@@ -17,11 +17,11 @@ urlpatterns = [
     path('query/<slug:slug>/places/', views.places, name='places'),
     path('query/<slug:slug>/edit/', views.query_edit, name='query_edit'),
 
-    path('place/<str:cid>/review/add', views.review_add, name="review_add"),
     path('place/<str:cid>/edit', views.place_edit, name="place_edit"),
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 
+    path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
     path('profile/', views.profile, name="profile"),
     path('reviews/', views.all_reviews, name="all_reviews"),
     path('my/reviews', views.my_reviews, name="my_reviews"),
@@ -37,6 +37,9 @@ urlpatterns = [
     path('admin_dashboard/groups/', views.group_list, name="group_list"),
     path('admin_dashboard/groups/not', views.group_not, name="group_not"),
     path('admin_dashboard/groups/<int:pk>', views.group_detail, name="group_detail"),
+
+    path('admin_dashboard/review/types', views.review_types, name="review_types"),
+    path('admin_dashboard/review/types/<int:pk>/edit', views.review_type_edit, name="review_type_edit"),
 
     path('admin_dashboard/users/', views.user_list, name="user_list"),
     path('admin_dashboard/users/<int:pk>', views.user_detail, name="user_detail"),

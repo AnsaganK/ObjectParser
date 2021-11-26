@@ -1,5 +1,5 @@
 {% extends 'app/base.html' %}
-{% load app_tags %}
+{% load app_tags static %}
 {% block title %}
     {% if place.title %}
         {{ place.title }}
@@ -15,6 +15,18 @@
             border-radius: 5px;
             display: block;
             margin: auto;
+        }
+
+        .base_rating_area {
+            display: block;
+            margin: 10px auto;
+            width: fit-content;
+        }
+
+        #base_rating {
+            font-size: 27px;
+            color: gold;
+            font-weight: 600;
         }
     </style>
 {% endblock %}
@@ -58,7 +70,7 @@
     {##}
     {#        </div>#}
     {#    </div>#}
-    <div class="box" id="detail_data">
+    <div class="box" id="detail_data" style="padding-bottom: 50px">
         <h4 style="color: #64b5f6; text-align: center">{{ place.name }} <br><span
                 style="color:grey; font-size: 11px; ">{{ place.date_update }}</span></h4>
         {% if request.user|hasGroup:'Администратор' %}
@@ -125,19 +137,6 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-                <h4 class="block_title">Отзывы</h4>
-                {% for review in place.reviews_google.all %}
-                    <div class="columns is-centered">
-                        <div class="column is-8 box">
-                            <span class="author"
-                                  style="display: flex; justify-content: space-between; width:auto;">{{ review.author_name }} <span>{{ review.rating|getRating|safe }}</span></span>
-                            <span class="text">{{ review.text }}</span>
-                        </div>
-                    </div>
-                    <br>
-                {% empty %}
-                    <p class="empty">Пока никто не оставил отзывов</p>
-                {% endfor %}
             </div>
         </div>
     </div>
@@ -165,26 +164,7 @@
     <div class="columns is-centered">
         <div class="review_form box column is-8">
             {% if not my_review %}
-
-                <form action="{% url 'app:review_add' place.cid %}" method="post">
-                    {% csrf_token %}
-                    <div class="rating-area">
-                        <input type="radio" id="star-5" name="rating" value="5">
-                        <label for="star-5" title="Оценка «5»"></label>
-                        <input type="radio" id="star-4" name="rating" value="4">
-                        <label for="star-4" title="Оценка «4»"></label>
-                        <input type="radio" id="star-3" name="rating" value="3">
-                        <label for="star-3" title="Оценка «3»"></label>
-                        <input type="radio" id="star-2" name="rating" value="2">
-                        <label for="star-2" title="Оценка «2»"></label>
-                        <input type="radio" id="star-1" checked name="rating" value="1">
-                        <label for="star-1" title="Оценка «1»"></label>
-                    </div>
-                    <i class="fa fa-star-o"></i>
-                    Оставить отзыв как: {{ request.user.last_name }} {{ request.user.first_name }}
-                    <textarea name="text" class="textarea" id="" cols="" rows=""></textarea>
-                    <button type="submit" class="button is-info block_centered">Отправить</button>
-                </form>
+                {% include 'app/include/review/form.html' %}
             {% else %}
                 <p class="text_centered" style="color:lightgreen;">Ваш отзыв сохранен</p>
             {% endif %}
@@ -192,32 +172,7 @@
     </div>
     <br>
     {% for review in reviews %}
-        <div class="columns is-centered">
-            <div class="box column is-8">
-                <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
-                    <span>{{ review.user.last_name }} {{ review.user.first_name }}
-                <span style="color:grey;">({{ review.date_create }})</span>
-                    </span>
-                    {% if review.user == request.user or request.user|hasGroup:'Редактор' %}
-                        <a href="{% url 'app:my_review_edit' review.pk %}">
-                            {% if review.is_edit %}
-                                <span style="color: grey">Было ред.:{{ review.date_update }}</span>
-                            {% endif %}
-                            <span class="icon" style="color: orange">
-                            <i class="fas fa-edit"></i>
-                        </span>
-                        </a>
-                    {% else %}
-                        <p></p>
-                    {% endif %}
-                </p>
-                <span>{{ review.rating|getRating|safe }}</span>
-                <p>{{ review.text }}</p>
-            </div>
-
-        </div>
-
-        <br>
+        {% include 'app/include/review/card.html' with review=review %}
     {% endfor %}
     {% include 'app/include/pagination.html' with page=reviews %}
 
@@ -237,6 +192,7 @@
             modal.classList.toggle('is-active');
         }
     </script>
+    <script src="{% static 'js/rating_check.js' %}"></script>
     {#    <script>#}
     {#        function toggleActive(elem) {#}
     {#            if (!elem.classList.contains('is-active')) {#}

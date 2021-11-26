@@ -2,7 +2,7 @@ import base64
 import csv
 import os
 from io import BytesIO
-
+import random
 import googlemaps
 from celery import shared_task
 from django.core.files import File
@@ -11,7 +11,7 @@ from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
 from pytils.translit import slugify
 
-from .models import Place, Query, QueryPlace, ReviewGoogle, PlacePhoto
+from .models import Place, Query, QueryPlace, PlacePhoto, Review
 
 
 @shared_task
@@ -366,7 +366,8 @@ class GetReviews:
             time.sleep(1)
             reviews = self.get_reviews_objects()
             print('Всего загружено: ', len(reviews))
-            reviews = reviews[:20]
+            random_number = random.randint(10, 20)
+            reviews = reviews[:random_number]
             print(len(reviews))
             return reviews
         except Exception as e:
@@ -379,11 +380,23 @@ class GetReviews:
                     'innerText')
             except (NoSuchElementException, StaleElementReferenceException):
                 author_name = ''
+            try:
+                author_link = review.find_element_by_class_name('ODSEW-ShBeI-tXxcle-SfQLQb-menu').find_element_by_tag_name('a').get_attribute(
+                    'href'
+                )
+            except:
+                author_link = ''
+            try:
+                author_img_link = review.find_element_by_class_name('ODSEW-ShBeI-t1uDwd-HiaYvf').get_attribute('src')
+            except:
+                author_img_link = ''
             rating = get_review_rating(review)
             text = get_review_text(self.driver, review)
             print(author_name, text[:40])
             self.review_list.append({
                 'author_name': author_name,
+                'author_link': author_link,
+                'author_img_link': author_img_link,
                 'rating': rating,
                 'text': text
             })
@@ -424,39 +437,43 @@ class GetReviews:
         self.close_review_pages()
         return self.review_list
 
-
-def get_this_page_reviews(driver):
-    review_list = []
-    try:
-        reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')
-        for review in reviews:
-            try:
-                author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
-            except:
-                author_name = 'no_name'
-            rating = get_review_rating(review)
-            text = get_review_text(driver, review)
-            review_list.append({
-                'author_name': author_name,
-                'rating': rating,
-                'text': text
-            })
-    except Exception as e:
-        print('Ошибка при получении отзывов', e.__class__.__name__)
-    return review_list
+#
+# def get_this_page_reviews(driver):
+#     review_list = []
+#     try:
+#         reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')
+#         for review in reviews:
+#             try:
+#                 author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
+#             except:
+#                 author_name = 'no_name'
+#             rating = get_review_rating(review)
+#             text = get_review_text(driver, review)
+#             review_list.append({
+#                 'author_name': author_name,
+#                 'rating': rating,
+#                 'text': text
+#             })
+#     except Exception as e:
+#         print('Ошибка при получении отзывов', e.__class__.__name__)
+#     return review_list
 
 
 def set_reviews(review_list, place):
     if len(review_list) == 0:
         return None
     try:
-        place.reviews_google.all().delete()
+        place.reviews.all().delete()
         for review in review_list:
             if review['author_name']:
-                review_google = ReviewGoogle.objects.create(author_name=review['author_name'],
+                review_google = Review.objects.create(author_name=review['author_name'],
+                                                      author_link=review['author_link'],
+                                                      author_img_link=review['author_img_link'],
                                                             rating=review['rating'],
                                                             text=review['text'],
-                                                            place=place)
+                                                            place=place,
+                                                            is_google=True
+                                                      )
                 review_google.save()
     except Exception as e:
         print('Ошибка при назначении отзывов: ', e.__class__.__name__)
