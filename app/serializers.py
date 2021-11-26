@@ -44,7 +44,7 @@ class PlacePhotoSerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
-    reviews_google = ReviewSerializer(many=True)
+    reviews= ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
 
     def get_meta_description(self, obj):
@@ -59,7 +59,7 @@ class PlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Place
         fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site',
-                  'description', 'meta', 'date_create', 'get_meta_description', 'reviews_google',
+                  'description', 'meta', 'date_create', 'get_meta_description', 'reviews',
                   'photos', 'rating_user_count', 'title']
 
 class PlaceMinSerializer(serializers.ModelSerializer):

@@ -20537,9 +20537,9 @@ console.warn: SearchSettings: "get: No settings file exists, new profile?" (new 
 1637880822331	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 console.log: WebExtensions: reset-default-search: starting.
 console.log: WebExtensions: reset-default-search: No addons in our list are installed.
-\\firefox.exe" "--marionette" "-no-remote" "-profile" "C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileoTA5YR"
-1637880833816	Marionette	INFO	Marionette enabled
-console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileoTA5YR\\search.json.mozlz4", (void 0)))
+1637886706477	Marionette	INFO	Stopped listening on port 56340
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileoTA5YR\\search.json.mozlz4", (void 0)))
 1637880836227	Marionette	INFO	Listening on port 56442
 1637880836533	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 JavaScript warning: https://www.google.com/maps/_/js/k=maps.m.ru.D8XvZ1MlM2k.2019.O/m=sc2,per,mo,lp,ep,ti,ds,stx,pwd,ppl,log,std,b/am=t4hA/rt=j/d=1/rs=ACT90oGVn3_ipCK4jwIAcV99dFHqzi3L5Q, line 4474: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
@@ -20723,9 +20723,12 @@ JavaScript warning: , line 0: WebGL warning: texSubImage: Tex image TEXTURE_2D l
 JavaScript warning: , line 0: WebGL warning: texSubImage: Alpha-premult and y-flip are deprecated for non-DOM-Element uploads.
 console.log: WebExtensions: reset-default-search: starting.
 console.log: WebExtensions: reset-default-search: No addons in our list are installed.
-\\firefox.exe" "--marionette" "-no-remote" "-profile" "C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofile2vVrvp"
-1637881124580	Marionette	INFO	Marionette enabled
-console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofile2vVrvp\\search.json.mozlz4", (void 0)))
+1637886704014	Marionette	INFO	Stopped listening on port 57270
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+
+###!!! [Parent][RunMessage] Error: Channel closing: too late to send/recv, messages will be lost
+
+file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofile2vVrvp\\search.json.mozlz4", (void 0)))
 1637881126909	Marionette	INFO	Listening on port 57468
 1637881127356	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 console.log: WebExtensions: reset-default-search: starting.
