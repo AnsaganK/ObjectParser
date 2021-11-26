@@ -627,6 +627,9 @@ def set_coordinate(data, place):
         place.coordinate_html = data
         place.save()
 
+def place_update_driver(cid):
+    pass
+
 def place_create_driver(cid, query_id):
     url = CID_URL.format(cid)
     try:
