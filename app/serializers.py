@@ -37,7 +37,8 @@ class ReviewTypeSerializer(serializers.ModelSerializer):
 
 
 class ReviewPartSerializer(serializers.ModelSerializer):
-    review_type = ReviewTypeSerializer(many=True)
+    review_type = ReviewTypeSerializer()
+
     class Meta:
         model = ReviewPart
         fields = ['review_type', 'rating']
@@ -45,6 +46,7 @@ class ReviewPartSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     parts = ReviewPartSerializer(many=True)
+
     class Meta:
         model = Review
         fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google', 'parts']
