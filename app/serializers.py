@@ -33,7 +33,7 @@ class QuerySerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['author_name', 'rating', 'text', 'user', 'is_google']
+        fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google']
 
 
 class PlacePhotoSerializer(serializers.ModelSerializer):
