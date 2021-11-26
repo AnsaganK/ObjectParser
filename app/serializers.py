@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from app.models import Query, Place, QueryPlace, PlacePhoto, Tag, Review
+from app.models import Query, Place, QueryPlace, PlacePhoto, Tag, Review, ReviewPart, ReviewType
 import re
 
 
@@ -30,7 +30,21 @@ class QuerySerializer(serializers.ModelSerializer):
         fields = ['name', 'slug', 'places_count', 'base_img', 'tags', 'content']
 
 
+class ReviewTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReviewType
+        fields = ['name']
+
+
+class ReviewPartSerializer(serializers.ModelSerializer):
+    review_type = ReviewTypeSerializer(many=True)
+    class Meta:
+        model = ReviewPart
+        fields = ['review_type', 'rating']
+
+
 class ReviewSerializer(serializers.ModelSerializer):
+    parts = ReviewPartSerializer(many=True)
     class Meta:
         model = Review
         fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google']
