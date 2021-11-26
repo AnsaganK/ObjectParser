@@ -47,7 +47,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     parts = ReviewPartSerializer(many=True)
     class Meta:
         model = Review
-        fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google']
+        fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google', 'parts']
 
 
 class PlacePhotoSerializer(serializers.ModelSerializer):
