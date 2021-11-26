@@ -9,6 +9,7 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ['name', 'id']
 
+
 class QuerySerializer(serializers.ModelSerializer):
     places_count = serializers.SerializerMethodField('places_count')
     base_img = serializers.SerializerMethodField('base_img')
@@ -44,7 +45,14 @@ class ReviewPartSerializer(serializers.ModelSerializer):
         fields = ['review_type', 'rating']
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email')
+
+
 class ReviewSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     parts = ReviewPartSerializer(many=True)
 
     class Meta:
@@ -60,7 +68,7 @@ class PlacePhotoSerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
-    reviews= ReviewSerializer(many=True)
+    reviews = ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
 
     def get_meta_description(self, obj):
@@ -78,6 +86,7 @@ class PlaceSerializer(serializers.ModelSerializer):
                   'description', 'meta', 'date_create', 'get_meta_description', 'reviews',
                   'photos', 'rating_user_count', 'title']
 
+
 class PlaceMinSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.SerializerMethodField('get_meta_description')
 
@@ -92,8 +101,8 @@ class PlaceMinSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'meta', 'get_meta_description', 'description']
-
+        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'meta',
+                  'get_meta_description', 'description']
 
 
 class QueryPlaceSerializer(serializers.ModelSerializer):
@@ -102,11 +111,3 @@ class QueryPlaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = QueryPlace
         fields = ['place']
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email')
-
-
