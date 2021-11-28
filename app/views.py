@@ -194,7 +194,8 @@ def query_file_generate(request, pk):
 def queries(request):
     queries = Query.objects.all()
     queries = get_paginator(request, queries, 16)
-    return render(request, 'app/query/queries.html', {'queries': queries})
+    tags = Tag.objects.all()
+    return render(request, 'app/query/queries.html', {'queries': queries, 'tags': tags})
 
 
 def add_slug_for_tag(form, tag):

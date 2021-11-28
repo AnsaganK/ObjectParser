@@ -8,12 +8,16 @@
 
 {% block content %}
     <h2 class="block_title">Мои отзывы</h2>
-    {% for review in reviews %}
-        {% include 'app/include/review/card.html' with review=review %}
-        {% empty %}
-        <p class="text_centered" style="color:grey;">Вы пока не оставляли отзывов</p>
-    {% endfor %}
-    {% if reviews %}
-        {% include 'app/include/pagination.html' with page=reviews %}
-    {% endif %}
+    <div class="columns is-centered">
+        <div class="column is-9">
+            {% for review in reviews %}
+                {% include 'app/include/review/card.html' with review=review %}
+            {% empty %}
+                <p class="text_centered" style="color:grey;">Вы пока не оставляли отзывов</p>
+            {% endfor %}
+            {% if reviews %}
+                {% include 'app/include/pagination.html' with page=reviews %}
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

@@ -12,11 +12,7 @@
 {% endblock %}
 {% block content %}
     <h4 class="block_title"> {{ query.name }} </h4>
-    <div class="columns is-centered is-multiline">
-        {% for place in top_places %}
-            {% include 'app/include/place/preview_card.html' with place=place %}
-        {% endfor %}
-    </div>
+
     <hr>
     <div class="columns is-centered">
         <div class="column is-9">
@@ -35,6 +31,11 @@
                 {% endfor %}
             </div>
         </div>
+    </div>
+    <div class="columns is-centered is-multiline">
+        {% for place in top_places %}
+            {% include 'app/include/place/preview_card.html' with place=place %}
+        {% endfor %}
     </div>
     <hr>
 
