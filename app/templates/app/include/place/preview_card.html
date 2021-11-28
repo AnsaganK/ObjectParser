@@ -1,0 +1,35 @@
+{% load app_tags %}
+<div class="column is-9 " style="padding: 10px; box-sizing: border-box">
+    <div class="box place_little_card">
+        <span class="top_place_number">{{ forloop.counter }}</span>
+        <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
+        <div style="display: flex; ">
+            <a href="{{ place.get_absolute_url }}"><img src="{{ place.get_img }}" alt=""
+                                                        style="width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px"></a>
+            <div style="flex-grow: 1; width: min-content">
+                        <span style="color: black;
+    text-align: center;
+    display: block;
+    border-bottom: 1px solid grey;margin: 0px;
+;">
+                            <a href="{{ place.get_absolute_url }}">{{ place.name }}</a></span>
+                <span><b>Рейтинг</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
+                <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
+                <span><b>Телефон</b>: <a
+                        href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
+                <span><b>Описание</b>:
+                                {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
+                                    {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
+
+            </div>
+        </div>
+        <span>Отзывов: {{ place.reviews.count }}</span>
+        {% with place.get_more_text as review %}
+            {% if review %}
+                <div style="margin: 20px auto">
+                    {% include 'app/include/review/card.html' with review=review %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+</div>

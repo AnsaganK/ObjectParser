@@ -17,6 +17,8 @@ from django.shortcuts import reverse
 #         return self.name
 from django.utils.text import slugify
 
+from constants import SERVER_NAME
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=1000, null=True, blank=True, unique=True)
@@ -130,9 +132,10 @@ class Place(models.Model):
 
     @property
     def get_img(self):
+        url = '/static/img/not_found_place.png'
         if self.img:
-            return self.img.url
-        return '/static/img/not_found_place.png'
+            url = self.img.url
+        return SERVER_NAME+url
 
     @property
     def get_name(self):

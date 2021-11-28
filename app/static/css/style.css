@@ -25,3 +25,25 @@
     color: gold;
     font-weight: 600;
 }
+
+.place_little_card:hover .top_place_number {
+    opacity: 1;
+}
+
+.top_place_number {
+    position: absolute;
+    opacity: 0;
+    width: 50px;
+    transition: opacity .3s;
+    padding: 10px;
+    background-color: white;
+    color: cornflowerblue;
+    text-align: center;
+    z-index: 999 !important;
+}
+
+.number_right {
+    margin-left: 250px;
+    background: white;
+    font-weight: 600;
+}
