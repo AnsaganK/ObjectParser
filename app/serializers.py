@@ -11,20 +11,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class QuerySerializer(serializers.ModelSerializer):
-    places_count = serializers.SerializerMethodField('places_count')
-    base_img = serializers.SerializerMethodField('base_img')
+    places_count = serializers.ReadOnlyField()
+    base_img = serializers.ReadOnlyField()
     tags = TagSerializer(many=True)
-
-    def base_img(self, obj):
-        places = obj.places.all()
-        if len(places) > 0:
-            place = places[0]
-            if place and place.img:
-                return place.img.url
-        return 'http://170.130.40.103/static/img/not_found.png'
-
-    def places_count(self, obj):
-        return Place.objects.filter(queries__query_id=Query.id).count()
 
     class Meta:
         model = Query
@@ -54,10 +43,12 @@ class UserSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     parts = ReviewPartSerializer(many=True)
+    get_rating = serializers.ReadOnlyField()
 
     class Meta:
         model = Review
-        fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google', 'parts']
+        fields = ['author_name', 'author_link', 'author_img_link', 'rating', 'text', 'user', 'is_google', 'parts',
+                  'get_rating']
 
 
 class PlacePhotoSerializer(serializers.ModelSerializer):
@@ -67,37 +58,21 @@ class PlacePhotoSerializer(serializers.ModelSerializer):
 
 
 class PlaceSerializer(serializers.ModelSerializer):
-    get_meta_description = serializers.SerializerMethodField('get_meta_description')
+    get_meta_description = serializers.ReadOnlyField()
+    get_more_text = serializers.ReadOnlyField()
     reviews = ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
 
-    def get_meta_description(self, obj):
-        if obj.meta == None:
-            return None
-        pattern = r'(?<=content=")(.+?)(?=")'
-        meta = re.search(pattern, obj.meta)
-        if meta:
-            return meta.group()
-        return ' - '
 
     class Meta:
         model = Place
         fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site',
                   'description', 'meta', 'date_create', 'get_meta_description', 'reviews',
-                  'photos', 'rating_user_count', 'title']
+                  'photos', 'rating_user_count', 'title', 'get_more_text']
 
 
 class PlaceMinSerializer(serializers.ModelSerializer):
-    get_meta_description = serializers.SerializerMethodField('get_meta_description')
-
-    def get_meta_description(self, obj):
-        if obj.meta == None:
-            return None
-        pattern = r'(?<=content=")(.+?)(?=")'
-        meta = re.search(pattern, obj.meta)
-        if meta:
-            return meta.group()
-        return ' - '
+    get_meta_description = serializers.ReadOnlyField()
 
     class Meta:
         model = Place

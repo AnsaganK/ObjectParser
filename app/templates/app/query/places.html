@@ -59,27 +59,14 @@
 
                         </div>
                     </div>
-                    {% with place.reviews_google|getMoreText as review %}
+                    <span>Отзывов: {{ place.reviews.count }}</span>
+                    {% with place.get_more_text as review %}
                         {% if review %}
-                            <div style="margin: 10px auto">
-                                <b>Отзыв: </b>
-                                <span style="border-bottom: 1px dashed lightgray;border-top:1px dashed lightgray; padding: 10px;width: 100%;display:block;">
-
-                                        <div class="columns">
-                                            <div class="column ">
-                                            <span class="author"
-                                                  style="display: flex; justify-content: space-between; width:auto;"><b>{{ review.author_name }}</b><span>
-                                                {{ review.rating|getRating|safe }}
-                                            </span>
-                                            </span>
-                                                <span class="text">{{ review.text }}</span>
-                                            </div>
-                                        </div>
-                            </span>
+                            <div style="margin: 20px auto">
+                                {% include 'app/include/review/card.html' with review=review %}
                             </div>
                         {% endif %}
                     {% endwith %}
-                    <span>Отзывов: {{ place.reviews.count }}</span>
                 </div>
             </div>
         {% endfor %}

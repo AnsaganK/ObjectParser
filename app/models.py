@@ -3,7 +3,7 @@ import re
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Count, Sum
-from django.db.models.functions import Round
+from django.db.models.functions import Round, Length
 from django.urls import reverse
 
 from django.db.models.signals import post_save
@@ -135,6 +135,13 @@ class Place(models.Model):
     @property
     def locale_rating(self):
         return 1
+
+    @property
+    def get_more_text(self):
+        queries = self.reviews.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by('-text_len')
+        if queries:
+            return queries.first()
+        return None
 
     def __str__(self):
         return str(self.id)
