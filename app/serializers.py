@@ -59,7 +59,7 @@ class PlacePhotoSerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.ReadOnlyField()
-    get_more_text = serializers.ReadOnlyField()
+    get_more_text = ReviewSerializer(many=False)
     reviews = ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
 
