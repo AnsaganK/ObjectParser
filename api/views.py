@@ -13,7 +13,7 @@ from app.serializers import TagSerializer
 class QueryAPI(APIView):
     def get(self, request, user_id, format=None):
         queries = Query.objects.all(user__id=user_id)
-        tags = Tag.objects.filter(queries__in=queries).exclude()
+        tags = Tag.objects.filter(queries__in=queries).distinct()
         query_serializer_data = QuerySerializer(queries, many=True)
         tags_serializer_data = TagSerializer(tags, many=True)
         return Response({'queries': query_serializer_data, 'tags': tags_serializer_data})

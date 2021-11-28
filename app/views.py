@@ -27,6 +27,7 @@ def show_form_errors(request, errors):
     for error in errors:
         messages.error(request, errors[error])
 
+
 def get_paginator(request, queryset, count):
     paginator = Paginator(queryset, count)
     page = request.GET.get('page')
@@ -58,6 +59,7 @@ def index(request):
         return render(request, 'app/index.html', {'user': user, 'queries': queries, 'places': places})
     return render(request, 'app/index.html')
 
+
 @login_required()
 def query_add(request):
     if request.method == 'POST':
@@ -76,14 +78,13 @@ def query_add(request):
             else:
                 query_page = None
 
-
             print(query_name, not_all, query_page)
 
             query = Query(user=request.user, name=query_name, page=query_page, status='wait')
             query.save()
             query_id = query.id
 
-            slug = slugify(query_name+'-'+str(query_id))
+            slug = slugify(query_name + '-' + str(query_id))
             query.slug = slug
             query.save()
 
@@ -111,6 +112,7 @@ def query_add(request):
             return render(request, 'app/query/add.html')
     return render(request, 'app/query/add.html')
 
+
 @login_required()
 def query_edit(request, slug):
     query = get_object_or_404(Query, slug=slug)
@@ -125,6 +127,7 @@ def query_edit(request, slug):
     tags = Tag.objects.all()
     return render(request, 'app/query/edit.html', {'query': query, 'tags': tags})
 
+
 @login_required()
 def query_all(request):
     user = request.user
@@ -133,6 +136,7 @@ def query_all(request):
     queries = Query.objects.all()
     queries = get_paginator(request, queries, 20)
     return render(request, 'app/query/all.html', {'queries': queries})
+
 
 @login_required()
 def query_list(request):
@@ -143,6 +147,7 @@ def query_list(request):
     queries = Query.objects.filter(user=user)
     queries = get_paginator(request, queries, 20)
     return render(request, 'app/query/list.html', {'queries': queries})
+
 
 # def rating_sorted(query):
 #     return query.get_rating
@@ -162,6 +167,7 @@ def query_detail(request, slug):
             places = places.order_by('-rating')
     places = get_paginator(request, places, 20)
     return render(request, 'app/query/detail.html', {'query': query, 'places': places, 'sort_type': sort_type})
+
 
 @login_required()
 def query_delete(request, pk):
@@ -197,6 +203,7 @@ def add_slug_for_tag(form, tag):
     slug = slugify(name)
     tag.slug = slug
     tag.save()
+
 
 @login_required()
 def tags(request):
@@ -262,6 +269,7 @@ def review_type_edit(request, pk):
         return redirect(reverse('app:review_types'))
     return render(request, 'app/admin_dashboard/review_type/edit.html', {'review_type': review_type})
 
+
 def places(request, slug):
     places_letter = {
 
@@ -287,6 +295,7 @@ def places(request, slug):
                                                      'places': places,
                                                      'places_letter': places_letter,
                                                      'letters': letters})
+
 
 def create_or_update_review_types(post, review):
     for i in post:
@@ -339,21 +348,20 @@ def place_edit(request, cid):
     return render(request, 'app/place/edit.html', {'place': place})
 
 
-
-
-
 @login_required()
 def place_update(request, pk):
     place = Place.objects.filter(pk=pk).first()
-    #selenium_query_detail(place_id=place.place_id)
+    # selenium_query_detail(place_id=place.place_id)
     # updateDetail(place.pk)
     return redirect(place.get_absolute_url())
+
 
 def generate_slug():
     places = Place.objects.all()
     for place in places:
         place.slug = slugify(f'{place.name}-{str(place.id)}')
         place.save()
+
 
 @login_required()
 def profile(request):
@@ -368,10 +376,12 @@ def profile(request):
         return redirect(reverse('app:profile'))
     return render(request, 'app/user/profile.html', {'user': user})
 
+
 @login_required()
 def public_cabinet(request, username):
     user = get_object_or_404(User, username=username)
     return render(request, 'app/user/public_cabinet.html', {'user': user})
+
 
 @login_required()
 def all_reviews(request):
@@ -380,6 +390,7 @@ def all_reviews(request):
     reviews = Review.objects.all()
     reviews = get_paginator(request, reviews, 10)
     return render(request, 'app/reviews/all.html', {'reviews': reviews})
+
 
 @login_required()
 def my_reviews(request):
@@ -409,8 +420,8 @@ def my_review_edit(request, pk):
     review_types = ReviewType.objects.filter(reviews__review=review)
     review_parts = ReviewPart.objects.values('review_type', 'rating').filter(review=review)
     print(review_parts)
-    return render(request, 'app/reviews/review_edit.html', {'review': review, 'review_types': review_types, 'review_parts': review_parts})
-
+    return render(request, 'app/reviews/review_edit.html',
+                  {'review': review, 'review_types': review_types, 'review_parts': review_parts})
 
 
 def registration(request):
@@ -432,7 +443,8 @@ def registration(request):
 def group_list(request):
     groups = Group.objects.all()
     groups_not_count = User.objects.filter(groups=None).count()
-    return render(request, 'app/admin_dashboard/group/list.html', {'groups': groups, 'groups_not_count': groups_not_count})
+    return render(request, 'app/admin_dashboard/group/list.html',
+                  {'groups': groups, 'groups_not_count': groups_not_count})
 
 
 @login_required()
@@ -529,8 +541,10 @@ class QueryUser(APIView):
         if not user:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         queries = user.queries
-        serializer = QuerySerializer(queries, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        tags = Tag.objects.filter(queries__in=queries).distinct()
+        query_serializer_data = QuerySerializer(queries, many=True)
+        tags_serializer_data = TagSerializer(tags, many=True)
+        return Response({'queries': query_serializer_data, 'tags': tags_serializer_data}, status=status.HTTP_200_OK)
 
 
 class QueryPlaces(APIView):
@@ -595,7 +609,6 @@ class PlaceDetail(APIView):
         serializer_data = serializer.data
         serializer_data['query'] = query_serializer_data
         return Response(serializer_data, status=status.HTTP_200_OK)
-
 
     def post(self, request, slug, format=None):
         place = Place.objects.filter(slug=slug).first()
