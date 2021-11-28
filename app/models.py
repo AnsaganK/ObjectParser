@@ -129,6 +129,12 @@ class Place(models.Model):
         return ' - '
 
     @property
+    def get_img(self):
+        if self.img:
+            return self.img.url
+        return '/static/img/not_found_place.png'
+
+    @property
     def get_name(self):
         return self.data['name'] if self.data and 'name' in self.data else '-'
 
