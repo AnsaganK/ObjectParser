@@ -540,10 +540,10 @@ class QueryUser(APIView):
         user = User.objects.filter(username=username).first()
         if not user:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        queries = user.queries
+        queries = user.queries.all()
         tags = Tag.objects.filter(queries__in=queries).distinct()
-        query_serializer_data = QuerySerializer(queries, many=True)
-        tags_serializer_data = TagSerializer(tags, many=True)
+        query_serializer_data = QuerySerializer(queries, many=True).data
+        tags_serializer_data = TagSerializer(tags, many=True).data
         return Response({'queries': query_serializer_data, 'tags': tags_serializer_data}, status=status.HTTP_200_OK)
 
 
