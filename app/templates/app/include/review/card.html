@@ -2,7 +2,7 @@
 
 {% if review.is_google %}
     <div class="columns is-centered" style="margin-bottom: 30px">
-        <div class="column is-8 box">
+        <div class="column is-12 box review-card">
             <div style="display: flex; justify-content: space-between; width:auto; margin-bottom: 5px">
                 <div style="display: flex; justify-content: center; align-items: center">
                     <img src="{% if review.author_img_link %}
@@ -39,10 +39,11 @@
     </div>
 {% else %}
     <div class="columns is-centered" style="margin-bottom: 30px">
-        <div class="box column is-8">
+        <div class="box column is-12 review-card">
             <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
                     <span style="display: flex; justify-content: center; align-items: center">
                         <img src="
+
 
 
 

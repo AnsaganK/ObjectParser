@@ -1,6 +1,6 @@
 {% load app_tags %}
 <div class="box" id="detail_data" style="padding-bottom: 50px">
-    <h4 style="color: #64b5f6; text-align: center">{{ place.name }} <br><span
+    <h4 style="color: #64b5f6; text-align: center; font-size: 21px">{{ place.name }} <br><span
             style="color:grey; font-size: 11px; ">{{ place.date_update }}</span></h4>
     {% if request.user|hasGroup:'Администратор' %}
         <a href="{% url 'app:place_edit' place.cid %}" class="button_add button is-warning">
@@ -11,7 +11,7 @@
     <div style="display:flex;">
 
         <img src="{{ place.get_img }}" class="card" alt=""
-             style="height: 100% !important; max-width: 300px !important;margin-right: 10px">
+             style="height: 360px !important; max-width: 360px !important;margin-right: 30px">
         <div>
             <p><span>Название:</span> <span>{{ place.name }}</span></p>
             <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>

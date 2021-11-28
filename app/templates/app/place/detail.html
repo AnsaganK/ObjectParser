@@ -102,20 +102,30 @@
         </div>
     </div>
     <br>
-    {% for review in reviews %}
-        {% include 'app/include/review/card.html' with review=review %}
-    {% endfor %}
-    {% include 'app/include/pagination.html' with page=reviews %}
+    <div class="columns is-centered">
+        <div class="column is-9 ">
+            {% for review in reviews %}
+                {% include 'app/include/review/card.html' with review=review %}
+            {% endfor %}
+
+
+            {% include 'app/include/pagination.html' with page=reviews %}
+        </div>
+    </div>
 
 {% endblock %}
 
 {% block script %}
     <script>
-        function showModalImg(url) {
+        function showImg(){
             let modal = document.getElementById('modal');
+            modal.classList.toggle('is-active');
+        }
+
+        function showModalImg(url) {
             let img = document.getElementById('place_image');
             img.setAttribute('src', url);
-            modal.classList.toggle('is-active');
+            showImg();
         }
 
         function closeModal() {
