@@ -3,6 +3,8 @@ from rest_framework import serializers
 from app.models import Query, Place, QueryPlace, PlacePhoto, Tag, Review, ReviewPart, ReviewType
 import re
 
+from constants import SERVER_NAME
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,6 +54,11 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class PlacePhotoSerializer(serializers.ModelSerializer):
+    img = serializers.SerializerMethodField('get_img')
+
+    def get_img(self, obj):
+        return SERVER_NAME + obj.img.url
+
     class Meta:
         model = PlacePhoto
         fields = ['img']
@@ -63,7 +70,6 @@ class PlaceSerializer(serializers.ModelSerializer):
     get_more_text = ReviewSerializer(many=False)
     reviews = ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
-
 
     class Meta:
         model = Place
