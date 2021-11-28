@@ -16,7 +16,7 @@ class QuerySerializer(serializers.ModelSerializer):
     places_count = serializers.ReadOnlyField()
     base_img = serializers.ReadOnlyField()
     tags = TagSerializer(many=True)
-
+    
     class Meta:
         model = Query
         fields = ['name', 'slug', 'places_count', 'base_img', 'tags', 'content']
