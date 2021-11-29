@@ -130,12 +130,19 @@ def query_edit(request, slug):
 
 @login_required()
 def query_all(request):
-    user = request.user
-    if not has_group(user, 'Суперадминистратор'):
+    if not has_group(request.user, 'Суперадминистратор'):
         return redirect('app:index')
-    queries = Query.objects.all()
+    users = User.objects.exclude(queries=None)
+    selected_user = None
+    try:
+        username = request.GET.get('user')
+        user = get_object_or_404(User, username=username)
+        queries = Query.objects.filter(user=user)
+        selected_user = user
+    except:
+        queries = Query.objects.all()
     queries = get_paginator(request, queries, 20)
-    return render(request, 'app/query/all.html', {'queries': queries})
+    return render(request, 'app/query/all.html', {'queries': queries, 'users': users, 'selected_user': selected_user})
 
 
 @login_required()
