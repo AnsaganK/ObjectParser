@@ -25,7 +25,7 @@ class QuerySerializer(serializers.ModelSerializer):
 class ReviewTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReviewType
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class ReviewPartSerializer(serializers.ModelSerializer):

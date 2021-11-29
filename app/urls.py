@@ -45,10 +45,6 @@ urlpatterns = [
     path('admin_dashboard/users/<int:pk>', views.user_detail, name="user_detail"),
 ]
 
-
-
-
-
 urlpatterns += [
     path('api/v1/tags', views.TagList.as_view(), name='tag_list_api'),
     path('api/v1/query/add', views.QueryAdd.as_view(), name='query_add_api'),
@@ -57,5 +53,6 @@ urlpatterns += [
     path('api/v1/query/<slug:slug>/places', views.QueryPlaces.as_view(), name='query_places_api'),
     path('api/v1/query/<slug:slug>/detail', views.QueryDetail.as_view(), name='query_detail_api'),
     path('api/v1/place/<slug:slug>', views.PlaceDetail.as_view(), name='place_detail_api'),
+    path('api/v1/review/<int:pk>/types', views.ReviewTypeList.as_view(), name='review_type_list_api'),
     path('api/v1/review/<int:pk>', views.ReviewDetail.as_view(), name='review_detail_api'),
 ]

@@ -19,7 +19,7 @@ from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
 from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer, \
-    ReviewSerializer
+    ReviewSerializer, ReviewTypeSerializer
 from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
 
@@ -667,3 +667,14 @@ class ReviewDetail(RetrieveAPIView):
     model = Review
     serializer_class = ReviewSerializer
     queryset = model.objects.all()
+
+
+class ReviewTypeList(ListAPIView):
+    model = ReviewType
+    serializer_class = ReviewTypeSerializer
+    queryset = model.objects.all()
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            reviews__review_id=self.kwargs['pk']
+        ).distinct()
