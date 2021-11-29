@@ -210,7 +210,7 @@ def queries(request):
         tags_checked = request.GET.getlist('tags')
         if tags_checked:
             tags_checked = [int(i) for i in tags_checked]
-            queries = queries.filter(tags__id__in=tags_checked)
+            queries = queries.filter(tags__id__in=tags_checked).distinct()
     except:
         pass
     queries = get_paginator(request, queries, 16)
