@@ -648,8 +648,7 @@ class PlaceDetail(APIView):
 class QueryEdit(APIView):
     def post(self, request, slug, format=None):
         query = generics.get_object_or_404(Query, slug=slug)
-        data = request.POST
-        form = QueryContentForm(data, instance=query)
+        form = QueryContentForm(request.POST, instance=query)
         if form.is_valid():
             form.save()
             return Response({'status': 'success'}, status=status.HTTP_200_OK)
