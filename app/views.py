@@ -207,14 +207,15 @@ def queries(request):
     except:
         search = None
     try:
-        tags = list(request.GET.get('tags'))
-        print(tags)
-        queries = queries.filter(tags__id__in=tags)
+        tags_checked = request.GET.getlist('tags')
+        if tags_checked:
+            tags_checked = [int(i) for i in tags_checked]
+            queries = queries.filter(tags__id__in=tags_checked)
     except:
         pass
     queries = get_paginator(request, queries, 16)
     tags = Tag.objects.all()
-    return render(request, 'app/query/queries.html', {'queries': queries, 'tags': tags, 'search': search})
+    return render(request, 'app/query/queries.html', {'queries': queries, 'tags': tags, 'search': search, 'tags_checked': tags_checked})
 
 
 def add_slug_for_tag(form, tag):
