@@ -211,6 +211,7 @@ class Review(models.Model):
     author_link = models.TextField(null=True, blank=True)
     author_name = models.CharField(max_length=500, null=True, blank=True)
     author_img_link = models.TextField(null=True, blank=True)
+    author_img = models.ImageField(upload_to='google_avatars', null=True, blank=True)
     stars_choices = ((i, i) for i in range(1, 6))
     rating = models.IntegerField(default=1, choices=stars_choices, null=True, blank=True)
 

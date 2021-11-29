@@ -18,7 +18,8 @@ from app.models import Query, Place, Review, Tag, ReviewType, ReviewPart
 from django.contrib import messages
 
 from app.parser_selenium import selenium_query_detail
-from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer
+from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer, \
+    ReviewSerializer
 from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
 
@@ -659,4 +660,10 @@ class QueryEdit(APIView):
 class TagList(ListAPIView):
     model = Tag
     serializer_class = TagSerializer
+    queryset = model.objects.all()
+
+
+class ReviewDetail(RetrieveAPIView):
+    model = Review
+    serializer_class = ReviewSerializer
     queryset = model.objects.all()
