@@ -7,7 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from pytils.translit import slugify
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -216,7 +216,8 @@ def queries(request):
         pass
     queries = get_paginator(request, queries, 16)
     tags = Tag.objects.all()
-    return render(request, 'app/query/queries.html', {'queries': queries, 'tags': tags, 'search': search, 'tags_checked': tags_checked})
+    return render(request, 'app/query/queries.html',
+                  {'queries': queries, 'tags': tags, 'search': search, 'tags_checked': tags_checked})
 
 
 def add_slug_for_tag(form, tag):
@@ -668,6 +669,18 @@ class ReviewDetail(RetrieveAPIView):
     serializer_class = ReviewSerializer
     queryset = model.objects.all()
 
+
+class ReviewUpdateAPIView(APIView):
+    def post(self, request, pk, format=None):
+        review = generics.get_object_or_404(Review, pk=pk)
+        form = ReviewForm(request.data, instance=review)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.is_edit = True
+            review.save()
+            create_or_update_review_types(request.data, review)
+        else:
+            print(form.errors)
 
 class ReviewTypeList(ListAPIView):
     model = ReviewType
