@@ -207,9 +207,9 @@ def queries(request):
     except:
         search = None
     try:
-        tags = request.GET.get('search')
+        tags = list(request.GET.get('tags'))
         print(tags)
-        queries = queries.filter(tags__in=tags)
+        queries = queries.filter(tags__id__in=tags)
     except:
         pass
     queries = get_paginator(request, queries, 16)
