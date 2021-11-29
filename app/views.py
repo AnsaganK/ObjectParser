@@ -647,9 +647,7 @@ class PlaceDetail(APIView):
 
 class QueryEdit(APIView):
     def post(self, request, slug, format=None):
-        query = Query.objects.filter(slug=slug).first()
-        if not query:
-            return Response({}, status=status.HTTP_404_NOT_FOUND)
+        query = generics.get_object_or_404(Query, slug=slug)
         data = request.data
         form = QueryContentForm(data, instance=query)
         if form.is_valid():
