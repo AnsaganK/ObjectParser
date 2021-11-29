@@ -36,7 +36,7 @@
         </div>
         <i class="fa fa-star-o"></i>
         Оставить отзыв как:
-        {% if review %}{{ review.user.last_name }} {{ review.user.first_name }}{% else %}{{ request.user.last_name }}
+        {% if review %}{{ review.get_user_name }}{% else %}{{ request.user.last_name }}
             {{ request.user.first_name }}{% endif %}
     {% endif %}
     <textarea name="text" class="textarea" id="" cols="" rows="8">{% if review %}{{ review.text }}{% endif %}</textarea>
