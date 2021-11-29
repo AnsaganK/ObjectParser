@@ -47,6 +47,22 @@
     background: white;
     font-weight: 600;
 }
-.review-card{
+
+.review-card {
     background-color: inherit;
+}
+
+.tag_items {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.tag_item label:hover {
+    background-color: #48c78e !important;
+    color: white;
+}
+
+.tag_item input:checked + label {
+    background-color: #48c78e !important;
+    color: white !important;
 }

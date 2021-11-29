@@ -200,9 +200,21 @@ def query_file_generate(request, pk):
 
 def queries(request):
     queries = Query.objects.all()
+    try:
+        search = request.GET.get('search')
+        if search != '':
+            queries = queries.filter(name__icontains=search)
+    except:
+        search = None
+    try:
+        tags = request.GET.get('search')
+        print(tags)
+        queries = queries.filter(tags__in=tags)
+    except:
+        pass
     queries = get_paginator(request, queries, 16)
     tags = Tag.objects.all()
-    return render(request, 'app/query/queries.html', {'queries': queries, 'tags': tags})
+    return render(request, 'app/query/queries.html', {'queries': queries, 'tags': tags, 'search': search})
 
 
 def add_slug_for_tag(form, tag):
