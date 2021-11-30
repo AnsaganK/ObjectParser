@@ -662,6 +662,24 @@ class TagList(ListAPIView):
     queryset = model.objects.all()
 
 
+class ReviewCreate(APIView):
+    def post(self, request, format=None):
+        post = request.POST
+        form = ReviewForm(post)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.dependent_user_id = post['user_id']
+            review.place = Place.objects.filter(slug=post['place_slug']).first()
+            review.dependent_site = post['site']
+            review.is_dependent = True
+            review.author_name = post['author_name']
+            review.save()
+            create_or_update_review_types(request.POST, review)
+            return Response({'message': 'success'}, status=status.HTTP_200_OK)
+
+        return Response({'message': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ReviewDetail(RetrieveAPIView):
     model = Review
     serializer_class = ReviewSerializer
