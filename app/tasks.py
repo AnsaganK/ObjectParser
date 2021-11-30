@@ -276,6 +276,20 @@ def set_photo_url(img_url, place_id, base=True):
     except Exception as e:
         print(f'Ошиька при назначении фото: {img_url}', e.__class__.__name__)
 
+
+def set_photo_review(img_url, review_id):
+    try:
+        review = Review.objects.filter(id=review_id).first()
+        if review and img_url:
+            r = requests.get(img_url, timeout=10)
+            if r.status_code == 200:
+                content = r.content
+                review.author_img.save(os.path.basename(img_url), ContentFile(content))
+                review.save()
+
+    except Exception as e:
+        print(e.__class__.__name__)
+
 def set_photo_content(content, place_id, file_name='no_name'):
     place = Place.objects.filter(id=place_id).first()
     if not place:

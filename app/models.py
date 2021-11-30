@@ -221,6 +221,14 @@ class Review(models.Model):
 
     is_google = models.BooleanField(default=False)
 
+    is_dependent = models.BooleanField(default=False)
+    dependent_choices = (
+        ('VAeng', 'VAeng'),
+        ('clarion', 'clarion'),
+    )
+    dependent_site = models.CharField(max_length=100, choices=dependent_choices, null=True, blank=True, verbose_name='Зависимый сайт')
+    dependent_user_id = models.IntegerField(default=0, null=True, blank=True, verbose_name='ID пользователя на зависимом сайте')
+
     def __str__(self):
         return self.text[:30]
 

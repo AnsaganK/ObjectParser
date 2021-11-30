@@ -680,12 +680,15 @@ class ReviewUpdateAPIView(APIView):
         else:
             print(form.errors)
 
+
 class ReviewTypeList(ListAPIView):
     model = ReviewType
     serializer_class = ReviewTypeSerializer
     queryset = model.objects.all()
 
     def get_queryset(self):
-        return self.queryset.filter(
-            reviews__review_id=self.kwargs['pk']
-        ).distinct()
+        if 'pk' in self.kwargs:
+            return self.queryset.filter(
+                reviews__review_id=self.kwargs['pk']
+            ).distinct()
+        return self.queryset
