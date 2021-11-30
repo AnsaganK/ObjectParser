@@ -691,4 +691,4 @@ class ReviewTypeList(ListAPIView):
             return self.queryset.filter(
                 reviews__review_id=self.kwargs['pk']
             ).distinct()
-        return self.queryset
+        return self.queryset.all()
