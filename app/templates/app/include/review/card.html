@@ -42,19 +42,19 @@
         <div class="box column is-12 review-card">
             <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px">
                     <span style="display: flex; justify-content: center; align-items: center">
+                    {% if review.is_dependent %}
+                        <img src="{% static 'img/not_avatar.svg' %}"
+                             style="width: 30px; height: 30px; margin-right: 10px" alt="">
+                        <a class="link"
+                           href="">{{ review.get_user_name }}</a>
+                    {% else %}
                         <img src="
-
-
-
-
-
-
-
                                 {% if review.user.profile.img %}{{ review.user.profile.img.url }}{% else %}{% static 'img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px" alt="">
                         <a class="link"
                            href="{% url 'app:public_cabinet' review.user.username %}">{{ review.get_user_name }}</a>
-                <span style="color:grey;">({{ review.date_create }})</span>
+                    {% endif %}
+                        <span style="color:grey;">({{ review.date_create }})</span>
                     </span>
                 {% if review.user == request.user or request.user|hasGroup:'Редактор' %}
                     <a href="{% url 'app:my_review_edit' review.pk %}">
