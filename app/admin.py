@@ -34,4 +34,7 @@ class ReviewPartAdmin(admin.ModelAdmin):
 
 admin.site.register(Profile)
 admin.site.register(QueryPlace)
-admin.site.register(Review)
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ['id', 'date_create']
+    list_filter = ['dependent_site']
