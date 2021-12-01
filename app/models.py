@@ -207,6 +207,7 @@ class Review(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField()
+    position = models.IntegerField(default=0, null=True, blank=True, verbose_name='Позиция в рейтинге')
 
     author_link = models.TextField(null=True, blank=True)
     author_name = models.CharField(max_length=500, null=True, blank=True)

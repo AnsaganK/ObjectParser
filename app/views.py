@@ -128,6 +128,12 @@ def query_edit(request, slug):
     tags = Tag.objects.all()
     return render(request, 'app/query/edit.html', {'query': query, 'tags': tags})
 
+@login_required()
+def query_rating_edit(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    places = Place.objects.filter(queries__query=query)
+    return render(request, 'app/query/edit_rating.html', {'places': places})
+
 
 @login_required()
 def query_all(request):
@@ -213,7 +219,7 @@ def queries(request):
             tags_checked = [int(i) for i in tags_checked]
             queries = queries.filter(tags__id__in=tags_checked).distinct()
     except:
-        pass
+        tags_checked = []
     queries = get_paginator(request, queries, 16)
     tags = Tag.objects.all()
     return render(request, 'app/query/queries.html',

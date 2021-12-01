@@ -1,0 +1,48 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}
+    Составление рейтинга
+{% endblock %}
+
+{% block style %}
+    <style>
+
+    </style>
+    <script src="{% static 'Sortable-master/Sortable.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        <table>
+            <thead>
+            <tr>
+                <th>№</th>
+                <th>Название</th>
+                <th>Рейтинг</th>
+            </tr>
+            </thead>
+            <tbody id="places">
+            {% for place in places %}
+                <tr {% if forloop.counter <= 20 %} style="background-color: lightgrey" {% endif %}>
+                    <td class="place_position">{{ forloop.counter }}</td>
+                    <td class="place_name"><a href="{{ place.get_absolute_url }}">{{ place.name }}</a></td>
+                    <td class="place_name">{{ place.rating }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+        new Sortable(document.getElementById('places'), {
+            {#handle: '.handle',#}
+            animation: 150,
+            delayOnTouchOnly: true,
+            removeCloneOnHide: false,
+            ignore: '.place_position'
+        });
+    </script>
+{% endblock %}

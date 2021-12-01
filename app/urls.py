@@ -6,6 +6,7 @@ app_name = 'app'
 urlpatterns = [
     path('', views.index, name="index"),
 
+    path('queries/', views.queries, name='queries'),
     path('query/add', views.query_add, name="query_add"),
     path('query/my', views.query_list, name="query_list"),
     path('query/all', views.query_all, name="query_all"),
@@ -13,9 +14,9 @@ urlpatterns = [
     path('query/delete/<int:pk>', views.query_delete, name="query_delete"),
     path('query/<slug:slug>', views.query_detail, name="query_detail"),
 
-    path('queries/', views.queries, name='queries'),
-    path('query/<slug:slug>/places/', views.places, name='places'),
-    path('query/<slug:slug>/edit/', views.query_edit, name='query_edit'),
+    path('query/<slug:slug>/places', views.places, name='places'),
+    path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),
+    path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
 
     path('place/<str:cid>/edit', views.place_edit, name="place_edit"),
     path('place/<slug:slug>', views.place_detail, name="place_detail"),

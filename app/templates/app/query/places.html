@@ -32,6 +32,9 @@
             </div>
         </div>
     </div>
+    {% if request.user.is_authenticated %}
+        <a href="{% url 'app:query_rating_edit' query.slug %}" style="text-align: center;">Редактировать рейтинг</a>
+    {% endif %}
     <div class="columns is-centered is-multiline">
         {% for place in top_places %}
             {% include 'app/include/place/preview_card.html' with place=place %}
