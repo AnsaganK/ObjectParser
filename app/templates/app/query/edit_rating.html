@@ -27,7 +27,7 @@
                 <tr {% if forloop.counter <= 20 %} style="background-color: #ffe395" {% endif %}>
                     <td class="place_position">{{ forloop.counter }}</td>
                     <td class="place_name"><a href="{{ place.get_absolute_url }}">{{ place.name }}</a></td>
-                    <td class="place_name">{{ place.rating }}</td>
+                    <td class="place_name">{{ place.rating }}({{ place.rating_user_count }})</td>
                 </tr>
             {% endfor %}
             </tbody>
