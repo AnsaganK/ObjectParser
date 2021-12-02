@@ -103,3 +103,7 @@ def isSite(site):
     else:
         return 'http://'+site
 
+
+@register.filter(name="toRange")
+def toRange(number):
+    return range(1, number+1)

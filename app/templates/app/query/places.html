@@ -10,6 +10,18 @@
     <style>
     </style>
 {% endblock %}
+
+
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'app:index' %}">Главная</a></li>
+            <li><a href="{% url 'app:queries' %}">Места</a></li>
+            <li class="is-active"><a href="">{{ query.name }}</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
 {% block content %}
     <h4 class="block_title"> {{ query.name }} </h4>
 
@@ -33,7 +45,8 @@
         </div>
     </div>
     {% if request.user.is_authenticated %}
-        <a href="{% url 'app:query_rating_edit' query.slug %}" class="button is-outlined is-large" style="margin: 10px auto; display: block; width: fit-content ">Редактировать рейтинг</a>
+        <a href="{% url 'app:query_rating_edit' query.slug %}" class="button is-outlined is-large"
+           style="margin: 10px auto; display: block; width: fit-content ">Редактировать рейтинг</a>
     {% endif %}
     <div class="columns is-centered is-multiline">
         {% for place in top_places %}

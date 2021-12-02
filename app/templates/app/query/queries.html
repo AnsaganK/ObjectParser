@@ -59,6 +59,16 @@
     </style>
 {% endblock %}
 
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs" style="position:absolute;">
+        <ul>
+            <li><a href="{% url 'app:index' %}">Главная</a></li>
+            <li class="is-active"><a href="">Места</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
+
 {% block content %}
     <div class="icons"
          style="display: flex; justify-content: end; margin-bottom: 10px;margin-top: -10px; font-size: 19px">

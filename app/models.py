@@ -38,6 +38,7 @@ class Query(models.Model):
                              verbose_name='Пользователь')
     name = models.CharField(max_length=1000, verbose_name='Название')
     slug = models.SlugField(null=True, blank=True, unique=True)
+    sorted = models.BooleanField(default=False)
     page = models.IntegerField(null=True, blank=True)
     content = models.TextField(null=True, blank=True, verbose_name='Контент')
     tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='queries')
@@ -105,6 +106,8 @@ class Place(models.Model):
     attractions = models.ManyToManyField('Attraction', null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
+    position = models.IntegerField(default=None, null=True, blank=True, db_index=True, verbose_name='Позиция в рейтинге')
+
     rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
     rating_user_count = models.IntegerField(null=True, blank=True, default=0)
 
@@ -120,7 +123,6 @@ class Place(models.Model):
     def get_rating(self):
         return self.data['rating'] if self.data and 'rating' in self.data else 0
 
-    @property
     def get_meta_description(self):
         if self.meta == None:
             return ' - '
@@ -131,11 +133,18 @@ class Place(models.Model):
         return ' - '
 
     @property
+    def get_description(self):
+        if self.description:
+            return self.description
+        return self.get_meta_description()
+
+
+    @property
     def get_img(self):
         url = '/static/img/not_found_place.png'
         if self.img:
             url = self.img.url
-        return SERVER_NAME+url
+        return SERVER_NAME + url
 
     @property
     def get_name(self):
@@ -147,7 +156,8 @@ class Place(models.Model):
 
     @property
     def get_more_text(self):
-        queries = self.reviews.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by('-text_len')
+        queries = self.reviews.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by(
+            '-text_len')
         if queries:
             return queries.first()
         return None
@@ -207,7 +217,6 @@ class Review(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField()
-    position = models.IntegerField(default=0, null=True, blank=True, verbose_name='Позиция в рейтинге')
 
     author_link = models.TextField(null=True, blank=True)
     author_name = models.CharField(max_length=500, null=True, blank=True)
@@ -227,8 +236,10 @@ class Review(models.Model):
         ('VAeng', 'VAeng'),
         ('clarion', 'clarion'),
     )
-    dependent_site = models.CharField(max_length=100, choices=dependent_choices, null=True, blank=True, verbose_name='Зависимый сайт')
-    dependent_user_id = models.IntegerField(default=0, null=True, blank=True, verbose_name='ID пользователя на зависимом сайте')
+    dependent_site = models.CharField(max_length=100, choices=dependent_choices, null=True, blank=True,
+                                      verbose_name='Зависимый сайт')
+    dependent_user_id = models.IntegerField(default=0, null=True, blank=True,
+                                            verbose_name='ID пользователя на зависимом сайте')
 
     def __str__(self):
         return self.text[:30]
@@ -244,7 +255,7 @@ class Review(models.Model):
         if self.parts.exists():
             r = self.parts.all().aggregate(rating=Sum('rating'))
             c = self.parts.all().aggregate(count=Count('rating'))
-            return round(r['rating']/c['count'], 1)
+            return round(r['rating'] / c['count'], 1)
         return self.rating
 
     class Meta:
@@ -321,6 +332,7 @@ class Profile(models.Model):
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
         ordering = ['-pk']
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

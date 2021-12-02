@@ -1,3 +1,4 @@
+import json
 from email.headerregistry import Group
 
 from django.contrib.auth import login
@@ -5,10 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from pytils.translit import slugify
 from rest_framework import status, generics
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -128,11 +130,41 @@ def query_edit(request, slug):
     tags = Tag.objects.all()
     return render(request, 'app/query/edit.html', {'query': query, 'tags': tags})
 
+
+def get_sorted_places(query):
+    places = Place.objects.filter(queries__query=query)
+    if query.sorted:
+        places = places.order_by('position')
+    else:
+        places = places.order_by('-rating', '-rating_user_count')
+    return places
+
+
+def update_place_position(place_id, position):
+    place = get_object_or_404(Place, id=place_id)
+    place.position = position
+    place.save()
+
+
 @login_required()
 def query_rating_edit(request, slug):
     query = get_object_or_404(Query, slug=slug)
-    places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
-    return render(request, 'app/query/edit_rating.html', {'places': places})
+    # query.sorted = False
+    # query.save()
+    # places = get_sorted_places(query).update(position=None)
+    places = get_sorted_places(query)
+    if request.method == 'POST':
+        query.sorted = True
+        query.save()
+        places.update(position=None)
+        data = json.loads(request.body.decode('utf-8'))['data']
+        for i in data:
+            place_id = i['place_id']
+            position = i['index']
+            update_place_position(place_id, position)
+        messages.success(request, 'Success')
+        return JsonResponse({'message': 'succcess'})
+    return render(request, 'app/query/edit_rating.html', {'query': query, 'places': places})
 
 
 @login_required()
@@ -306,7 +338,7 @@ def places(request, slug):
     query = Query.objects.filter(slug=slug).first()
     if not query:
         return redirect('app:index')
-    places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
+    places = get_sorted_places(query)
     top_places = places[:20]
     # top_places = places.exclude(address=None)[:20]
     for i in places:
@@ -589,7 +621,7 @@ class QueryPlaces(APIView):
         query = Query.objects.filter(slug=slug).first()
         if not query:
             return redirect('app:index')
-        places = Place.objects.filter(queries__query=query).all().order_by('-rating', '-rating_user_count')
+        places = get_sorted_places(query)
         for i in places:
             first_letter = i.name[0]
             i = PlaceMinSerializer(i).data
