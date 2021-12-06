@@ -7,6 +7,8 @@ urlpatterns = [
     path('', views.index, name="index"),
 
     path('queries/', views.queries, name='queries'),
+    path('queries/tags/<slug:slug>', views.tag_queries, name="tag_queries"),
+
     path('query/add', views.query_add, name="query_add"),
     path('query/my', views.query_list, name="query_list"),
     path('query/all', views.query_all, name="query_all"),

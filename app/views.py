@@ -258,6 +258,14 @@ def queries(request):
                   {'queries': queries, 'tags': tags, 'search': search, 'tags_checked': tags_checked})
 
 
+@login_required()
+def tag_queries(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    queries = tag.queries.all().distinct()
+    queries = get_paginator(request, queries, 16)
+    return render(request, 'app/tag/queries.html', {'tag': tag, 'queries': queries})
+
+
 def add_slug_for_tag(form, tag):
     cd = form.cleaned_data
     name = cd['name']

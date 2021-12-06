@@ -66,3 +66,51 @@
     background-color: #48c78e !important;
     color: white !important;
 }
+
+.sidebar_filter {
+    z-index: 100;
+    height: 100%;
+    position: fixed;
+    width: 400px;
+    top: 0;
+    right: -401px;
+    transition: all .5s;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 10px;
+}
+
+.sidebar_filter .icon {
+    align-self: end;
+    font-size: 24px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    margin-top: -20px;
+}
+
+.sidebar_show {
+    right: 0px !important;
+}
+
+.shadow_wrapper {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: -10;
+    transition: background-color .1s;
+    height: 100vh;
+}
+
+.wrapper_show {
+    z-index: 10;
+    background-color: rgba(0, 0, 0, .30);
+}
+
+
+.tags {
+    display: flex;
+    justify-content: center;
+}

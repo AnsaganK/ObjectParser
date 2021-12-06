@@ -62,17 +62,17 @@ def getImg(img):
     return '/static/img/not_found_place.png'
 
 
-@register.filter(name="getBaseImg")
-def getBaseImg(query):
-    if query:
-        places = query.places
-        try:
-            first_place = places.first().place.first()
-            if first_place.img:
-                return first_place.img.url
-        except:
-            pass
-    return '/static/img/not_found_place.png'
+# @register.filter(name="getBaseImg")
+# def getBaseImg(query):
+#     if query:
+#         places = query.places
+#         try:
+#             first_place = places.first().place.first()
+#             if first_place.img:
+#                 return first_place.img.url
+#         except:
+#             pass
+#     return '/static/img/not_found_place.png'
 
 
 @register.filter(name="getMetaText")

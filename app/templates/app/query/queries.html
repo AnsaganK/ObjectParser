@@ -8,59 +8,11 @@
 
 
 {% block style %}
-    <style>
-        .sidebar_filter {
-            z-index: 100;
-            height: 100%;
-            position: fixed;
-            width: 400px;
-            top: 0;
-            right: -401px;
-            transition: all .5s;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            padding: 30px 10px;
-        }
 
-        .sidebar_filter .icon {
-            align-self: end;
-            font-size: 24px;
-            cursor: pointer;
-            margin-bottom: 30px;
-            margin-top: -20px;
-        }
-
-        .sidebar_show {
-            right: 0px !important;
-        }
-
-        .shadow_wrapper {
-            bottom: 0;
-            left: 0;
-            position: fixed;
-            right: 0;
-            top: 0;
-            z-index: -10;
-            transition: background-color .1s;
-            height: 100vh;
-        }
-
-        .wrapper_show {
-            z-index: 10;
-            background-color: rgba(0, 0, 0, .30);
-        }
-
-
-        .tags {
-            display: flex;
-            justify-content: center;
-        }
-    </style>
 {% endblock %}
 
 {% block breadcrumb %}
-    <nav class="breadcrumb" aria-label="breadcrumbs" style="position:absolute;">
+    <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="{% url 'app:index' %}">Главная</a></li>
             <li class="is-active"><a href="">Места</a></li>
@@ -71,7 +23,11 @@
 
 {% block content %}
     <div class="icons"
-         style="display: flex; justify-content: end; margin-bottom: 10px;margin-top: -10px; font-size: 19px">
+         style="display: flex;
+    justify-content: end;
+    margin-top: -23px;
+    position: absolute;
+    right: 10px;">
 
        <span class="icon is-small" id="filter_icon">
            <i style="color: grey" class="fas fa-filter" aria-hidden="true"></i>
@@ -112,25 +68,7 @@
     </div>
     <div class="columns is-multiline">
         {% for query in queries %}
-            <div class="column is-3" style="padding: 10px; box-sizing: border-box">
-                <a class="box" href="{% url 'app:places' query.slug %}" style="display: flex; min-height: 140px">
-                    <img src="{{ query|getBaseImg }}"
-                         style="height: 120px !important; width: 150px !important; margin-right: 10px" alt="">
-                    <div style="display: flex; justify-content: space-between; flex-direction: column; align-items: center">
-                        <div style="display: flex; justify-content: space-between; flex-direction: column">
-                            <span>{{ query }}</span>
-                            <p>Объектов: {{ query.places_count }}</p>
-                        </div>
-                        <div style="display: flex; justify-content: center; flex-wrap: wrap">
-                            {% for tag in query.tags.all %}
-                                <span class="tag is-outlined is-info" style="margin: 3px">{{ tag.name }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </a>
-
-
-            </div>
+            {% include 'app/include/query/preview_card.html' with query=query %}
         {% endfor %}
     </div>
 

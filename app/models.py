@@ -17,8 +17,6 @@ from django.shortcuts import reverse
 #         return self.name
 from django.utils.text import slugify
 
-from constants import SERVER_NAME
-
 
 class Tag(models.Model):
     name = models.CharField(max_length=1000, null=True, blank=True, unique=True)
@@ -68,13 +66,13 @@ class Query(models.Model):
 
     @property
     def base_img(self):
-        host = 'http://170.130.40.103'
+        # host = 'http://170.130.40.103'
         places = Place.objects.filter(queries__query_id=self.id)
         if len(places) > 0:
             place = places[0]
             if place and place.img:
-                return f'{host}{place.img.url}'
-        return f'{host}/static/img/not_found.png'
+                return f'{place.img.url}'
+        return '/static/img/not_found_place.png'
 
 
 class QueryPlace(models.Model):
@@ -106,7 +104,8 @@ class Place(models.Model):
     attractions = models.ManyToManyField('Attraction', null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
-    position = models.IntegerField(default=None, null=True, blank=True, db_index=True, verbose_name='Позиция в рейтинге')
+    position = models.IntegerField(default=None, null=True, blank=True, db_index=True,
+                                   verbose_name='Позиция в рейтинге')
 
     rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
     rating_user_count = models.IntegerField(null=True, blank=True, default=0)
@@ -138,13 +137,12 @@ class Place(models.Model):
             return self.description
         return self.get_meta_description()
 
-
     @property
     def get_img(self):
         url = '/static/img/not_found_place.png'
         if self.img:
             url = self.img.url
-        return SERVER_NAME + url
+        return url
 
     @property
     def get_name(self):

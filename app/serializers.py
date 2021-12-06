@@ -14,9 +14,12 @@ class TagSerializer(serializers.ModelSerializer):
 
 class QuerySerializer(serializers.ModelSerializer):
     places_count = serializers.ReadOnlyField()
-    base_img = serializers.ReadOnlyField()
+    base_img = serializers.SerializerMethodField('get_host_img')
     tags = TagSerializer(many=True)
-    
+
+    def get_host_img(self, obj):
+        return SERVER_NAME + obj.base_img
+
     class Meta:
         model = Query
         fields = ['name', 'slug', 'places_count', 'base_img', 'tags', 'content']
@@ -55,9 +58,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class PlacePhotoSerializer(serializers.ModelSerializer):
-    img = serializers.SerializerMethodField('get_img')
+    img = serializers.SerializerMethodField('get_host_img')
 
-    def get_img(self, obj):
+    def get_host_img(self, obj):
         return SERVER_NAME + obj.img.url
 
     class Meta:
@@ -67,14 +70,17 @@ class PlacePhotoSerializer(serializers.ModelSerializer):
 
 class PlaceSerializer(serializers.ModelSerializer):
     get_meta_description = serializers.ReadOnlyField()
-    get_img = serializers.ReadOnlyField()
+    get_img = serializers.SerializerMethodField('get_host_img')
     get_more_text = ReviewSerializer(many=False)
     reviews = ReviewSerializer(many=True)
     photos = PlacePhotoSerializer(many=True)
 
+    def get_host_img(self, obj):
+        return SERVER_NAME + obj.img.url
+
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site',
+        fields = ['name', 'slug', 'cid', 'rating', 'address', 'phone_number', 'site',
                   'description', 'meta', 'date_create', 'get_meta_description', 'reviews',
                   'photos', 'rating_user_count', 'title', 'get_more_text', 'get_img', 'coordinate_html']
 
@@ -84,7 +90,7 @@ class PlaceMinSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
-        fields = ['name', 'slug', 'cid', 'rating', 'img', 'address', 'phone_number', 'site', 'meta',
+        fields = ['name', 'slug', 'cid', 'rating', 'address', 'phone_number', 'site', 'meta',
                   'get_meta_description', 'description']
 
 

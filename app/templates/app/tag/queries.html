@@ -1,0 +1,26 @@
+{% extends 'app/base.html' %}
+
+{% block title %}
+    {{ tag.name }}
+{% endblock %}
+
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'app:index' %}">Главная</a></li>
+            <li><a href="{% url 'app:queries' %}">Места</a></li>
+            <li class="is-active"><a href="">Тэги</a></li>
+            <li class="is-active"><a href="">{{ tag.name }}</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div class="columns is-multiline">
+        {% for query in queries %}
+            {% include 'app/include/query/preview_card.html' with query=query %}
+        {% endfor %}
+    </div>
+
+    {% include 'app/include/pagination.html' with page=queries %}
+{% endblock %}

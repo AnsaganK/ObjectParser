@@ -8,11 +8,11 @@
         <a href="{% url 'app:place_update' place.pk %}" style="margin-top: 50px" class="button_add button is-info">
             Обновить данные</a>
     {% endif %}
-    <div style="display:flex;">
+    <div style="display:flex;" class="columns">
 
-        <img src="{{ place.get_img }}" class="card" alt=""
+        <img class="column is-4" src="{{ place.get_img }}" alt=""
              style="height: 360px !important; max-width: 360px !important;margin-right: 30px">
-        <div>
+        <div class="column is-8">
             <p><span>Название:</span> <span>{{ place.name }}</span></p>
             <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
             <p><span>Сайт:</span> <span><a
@@ -39,15 +39,16 @@
             </p>
             {% if place.photos.count > 3 %}
 
-                <section class="" style="max-width: 1000px">
+                <section class="" style="max-width: 100%">
                     <div class="is-clipped">
                         <div id="slider">
                             {% for photo in place.photos.all %}
-                                <div class="card">
-                                    <div class="card-image">
+                                <div class=""
+                                     style="height: 210px !important;width: 210px !important; margin: 10px 30px">
+                                    <div class="">
                                         <figure class="image is-16by9 is-covered">
-                                            <img src="{{ photo.img.url }}" alt=""
-                                                 style="width: 200px !important; height: 200px !important;"
+                                            <img src="{{ photo.img.url }}" class="card" alt=""
+                                                 style="min-width: 190px !important; min-height: 190px !important;"
                                                  onclick="showModalImg('{{ photo.img.url }}')">
                                         </figure>
                                     </div>
