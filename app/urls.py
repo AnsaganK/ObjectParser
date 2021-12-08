@@ -55,6 +55,7 @@ urlpatterns += [
     path('api/v1/user/<str:username>/queries', views.QueryUser.as_view(), name='query_user_api'),
     path('api/v1/query/<slug:slug>/places', views.QueryPlaces.as_view(), name='query_places_api'),
     path('api/v1/query/<slug:slug>/detail', views.QueryDetail.as_view(), name='query_detail_api'),
+    path('api/v1/place/<str:cid>/html', views.PlaceHTML.as_view(), name='place_html_api'),
     path('api/v1/place/<slug:slug>', views.PlaceDetail.as_view(), name='place_detail_api'),
     path('api/v1/review/types', views.ReviewTypeList.as_view(), name='review_type_list_api'),
     path('api/v1/review/create', views.ReviewCreate.as_view(), name='review_create_api'),

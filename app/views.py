@@ -8,6 +8,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.generic import DetailView
 from pytils.translit import slugify
 from rest_framework import status, generics
 from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
@@ -24,6 +27,7 @@ from app.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializ
     ReviewSerializer, ReviewTypeSerializer
 from app.tasks import startParsing, generate_file
 from app.templatetags.app_tags import GROUPS
+from constants import SERVER_NAME
 
 
 def show_form_errors(request, errors):
@@ -661,6 +665,21 @@ class QueryDetail(RetrieveAPIView):
     serializer_class = QuerySerializer
     queryset = model.objects.all()
     lookup_field = 'slug'
+
+@method_decorator(xframe_options_exempt, name='dispatch')
+class PlaceHTML(DetailView):
+    model = Place
+    queryset = model.objects.all()
+    slug_field = 'cid'
+    slug_url_kwarg = 'cid'
+    template_name = 'app/place/copy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['server_name'] = SERVER_NAME
+        return context
+
+
 
 
 class PlaceDetail(APIView):

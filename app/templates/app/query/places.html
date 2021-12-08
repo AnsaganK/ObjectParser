@@ -1,5 +1,5 @@
 {% extends 'app/base.html' %}
-{% load app_tags %}
+{% load app_tags static %}
 
 {% block title %}
     {{ query.name }}
@@ -7,8 +7,6 @@
 
 
 {% block style %}
-    <style>
-    </style>
 {% endblock %}
 
 
@@ -23,6 +21,14 @@
 {% endblock %}
 
 {% block content %}
+    <div class="modal" id="modal">
+        <div class="modal-background" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <iframe src="" frameborder="0" id="place_iframe"></iframe>
+        </div>
+        <button class="modal-close is-large" onclick="closeModal()" aria-label="close"></button>
+    </div>
+
     <h4 class="block_title"> {{ query.name }} </h4>
 
     <hr>
@@ -71,4 +77,9 @@
     <div style="color: grey">
         <p>Всего {{ places.count }} объектов</p>
     </div>
+{% endblock %}
+
+
+{% block script %}
+    <script src="{% static 'js/copy_place.js' %}"></script>
 {% endblock %}

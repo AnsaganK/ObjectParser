@@ -4,15 +4,31 @@
         <span class="top_place_number">{{ forloop.counter }}</span>
         <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
         <div style="display: flex; ">
-            <a href="{{ place.get_absolute_url }}"><img src="{{ place.get_img }}" alt=""
-                                                        style="width: 300px !important; min-width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px; border-radius: 5px"></a>
+            <a href="{{ place.get_absolute_url }}">
+                <img src="{{ place.get_img }}" alt=""
+                     style="width: 300px !important; min-width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px; border-radius: 5px">
+            </a>
             <div style="flex-grow: 1;">
-                        <span style="color: black;
+                <span style="color: black;
     text-align: center;
     display: block;
     border-bottom: 1px solid grey;margin: 0px;
 ;">
-                            <a href="{{ place.get_absolute_url }}">{{ place.name }}</a></span>
+                    <a href="{{ place.get_absolute_url }}">{{ place.name }}</a>
+                    {% if request.user.is_superuser %}
+                        <div class="place_preview_card_copy">
+                            <span style="margin-right: 10px">
+                                <a href="{% url 'app:place_html_api' place.cid %}"><i class="fa fa-link" data-place-cid="{{ place.cid }}"></i></a>
+                            </span>
+                            <span style="margin-right: 10px">
+                                <i class="fa fa-expand expand_icon" data-place-cid="{{ place.cid }}"></i>
+                            </span>
+                            <span>
+                                <i class="fa fa-clone clone_icon" data-place-cid="{{ place.cid }}"></i>
+                            </span>
+                        </div>
+                    {% endif %}
+                </span>
                 <span><b>Рейтинг</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
                 <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
                 <span><b>Телефон</b>: <a
@@ -20,7 +36,6 @@
                 <span><b>Описание</b>:
                                 {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
                                     {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
-
             </div>
         </div>
         <span>Отзывов: {{ place.reviews.count }}</span>

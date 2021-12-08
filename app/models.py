@@ -99,7 +99,7 @@ class Place(models.Model):
     address = models.CharField(max_length=500, null=True, blank=True)
     phone_number = models.CharField(max_length=500, null=True, blank=True)
     site = models.CharField(max_length=1000, null=True, blank=True)
-    description = models.CharField(max_length=500, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     meta = models.TextField(null=True, blank=True, default='<meta>')
     attractions = models.ManyToManyField('Attraction', null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
@@ -145,6 +145,15 @@ class Place(models.Model):
         return url
 
     @property
+    def isSite(self):
+        if not self.site or self.site == ' - ':
+            return ' - '
+        if self.site[:4] == 'http':
+            return self.site
+        else:
+            return 'http://' + self.site
+
+    @property
     def get_name(self):
         return self.data['name'] if self.data and 'name' in self.data else '-'
 
@@ -167,6 +176,9 @@ class Place(models.Model):
         verbose_name = 'Объект'
         verbose_name_plural = 'Объекты'
         ordering = ['-pk']
+
+    def get_preview_url(self):
+        return reverse('app:place_html_api', args=[self.cid])
 
     def get_absolute_url(self):
         return reverse('app:place_detail', args=[self.slug])
