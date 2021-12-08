@@ -60,7 +60,8 @@ function closeModal() {
 function open_preview(cid) {
     let modal = document.getElementById('modal');
     modal.classList.toggle('is-active');
-    modal.children[0].innerHTML = '<iframe src="" frameborder="0" id="place_iframe"></iframe>'
+    let modal_content = document.getElementById('modal_content')
+    modal_content.innerHTML = '<iframe src="" frameborder="0" id="place_iframe"></iframe>'
     let url = get_url(cid);
     let iframe = document.getElementById('place_iframe');
     iframe.innerHTML = ''
