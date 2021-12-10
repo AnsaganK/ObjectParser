@@ -505,7 +505,7 @@ def generate_user():
 
 def set_review_parts(rating, review):
     for review_type in ReviewType.objects.all():
-        review_part = ReviewPart.objects.update_or_create(review=review, review_type=review_type)
+        review_part = ReviewPart.objects.update_or_create(review=review, review_type=review_type)[0]
         review_part.rating = rating
         review_part.save()
 
@@ -517,11 +517,11 @@ def set_reviews(review_list, place):
         place.reviews.all().delete()
         for review in review_list:
             user_data = generate_user()
-            user = User.objects.get_or_create(username=user_data['username'])
-            user = user(email=user_data['email'],
-                        first_name=user_data['first_name'],
-                        last_name=user_data['last_name'],
-                        password=user_data['password'])
+            user = User.objects.get_or_create(username=user_data['username'])[0]
+            user.email = user_data['email']
+            user.first_name = user_data['first_name']
+            user.last_name = user_data['last_name']
+            user.password = user_data['password']
             user.save()
             user.profile.gender = user_data['gender']
             user.save()
@@ -531,10 +531,12 @@ def set_reviews(review_list, place):
                                            place=place,
                                            is_google=True)
             review.save()
-            set_review_parts(rating=review['rating'], review=review)
-
+            try:
+                set_review_parts(rating=review.rating, review=review)
+            except Exception as e:
+                print('Ошибка при назначении кусков отзыва', e)
     except Exception as e:
-        print('Ошибка при назначении отзывов: ', e.__class__.__name__)
+        print('Ошибка при назначении отзывов: ', e)
 
 
 def get_or_create_place(name, rating, rating_user_count, cid):
