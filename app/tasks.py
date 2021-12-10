@@ -5,18 +5,22 @@ from io import BytesIO
 import random
 import googlemaps
 from celery import shared_task
+from django.contrib.auth.models import User
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
+from mimesis import Person
+from mimesis.enums import Gender
 from pytils.translit import slugify
 
-from .models import Place, Query, QueryPlace, PlacePhoto, Review
+from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart
 
 
 @shared_task
 def add_task(x, y):
-    return x+y
+    return x + y
+
 
 from pip._vendor import requests
 from selenium import webdriver
@@ -51,6 +55,7 @@ CID_URL = 'https://maps.google.com/?cid={0}'
 
 display = None
 
+
 # gmaps = googlemaps.Client(key=KEY)
 
 def create_query_place(place, query):
@@ -62,6 +67,7 @@ def create_query_place(place, query):
         query_place.save()
         query_place.place.add(place)
 
+
 def strToInt(string):
     value = ''
     for i in string:
@@ -71,6 +77,7 @@ def strToInt(string):
         except:
             pass
     return int(value)
+
 
 def startFireFox(url=URL):
     driver = webdriver.Firefox()
@@ -157,7 +164,8 @@ class GetPhotos:
         try:
             wait = WebDriverWait(self.driver, 10)
             wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')))
-            self.driver.execute_script('let photo_button = document.getElementsByClassName("a4izxd-tUdTXb-xJzy8c-haAclf-UDotu");photo_button[0].click()')
+            self.driver.execute_script(
+                'let photo_button = document.getElementsByClassName("a4izxd-tUdTXb-xJzy8c-haAclf-UDotu");photo_button[0].click()')
         except Exception as e:
             print('Ошибка при нажатии на кнопку ВСЕ ФОТО: ', e.__class__.__name__)
 
@@ -186,7 +194,7 @@ class GetPhotos:
             url.pop()
             url = ''.join(url)
             if not url.startswith('http'):
-                url = 'http://'+url
+                url = 'http://' + url
             print(url)
             self.photo_list.append(url)
         except Exception as e:
@@ -215,6 +223,7 @@ def set_photos(photos_list, place_id):
     for photo_url in photos_list:
         set_photo_url(photo_url, place_id, base=False)
 
+
 def get_place_information(driver):
     try:
         place_information = is_find_object(driver, 'uxOu9-sTGRBb-UmHwN')
@@ -223,6 +232,7 @@ def get_place_information(driver):
     except Exception as e:
         print('Ошибка при получении описания места: ', e.__class__.__name__)
         return None
+
 
 def get_location_information(driver):
     try:
@@ -254,6 +264,7 @@ def get_photo(driver):
     except Exception as e:
         print('Ошибка при получении главного фото: ', e.__class__.__name__)
         return None
+
 
 def set_photo_url(img_url, place_id, base=True):
     try:
@@ -290,6 +301,7 @@ def set_photo_review(img_url, review_id):
     except Exception as e:
         print(e.__class__.__name__)
 
+
 def set_photo_content(content, place_id, file_name='no_name'):
     place = Place.objects.filter(id=place_id).first()
     if not place:
@@ -299,16 +311,23 @@ def set_photo_content(content, place_id, file_name='no_name'):
     place_photo.place = place
     place_photo.save()
 
+
 def get_review_rating(review):
     try:
         rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
-        rating = int(rating[0])
-    except (NoSuchElementException, StaleElementReferenceException):
+        rating = rating.split('/')
+        available_rating = int(rating[-1])
+        checked_rating = int(rating[0])
+        if available_rating > 5:
+            rating_coefficent = available_rating / 5
+            checked_rating /= rating_coefficent
+        rating = int(checked_rating)
+    except:
         try:
             rating = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
         except Exception as e:
             print('Ошибка при получении звезд: ', e.__class__.__name__)
-            rating = None
+            rating = 1
     return rating
 
 
@@ -320,10 +339,10 @@ def review_more_button_click(driver, review):
                             ''')
     print('Review More Button Clicked')
 
+
 def get_review_text(driver, review):
     try:
         try:
-
             review_more_button_click(driver, review)
             # wait = WebDriverWait(review, 10)
             # wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'ODSEW-KoToPc-ShBeI')))
@@ -368,7 +387,7 @@ class GetReviews:
         except Exception as e:
             print('-- Ошибка при получении первых отзывов', e.__class__.__name__)
 
-    def scrolled_driver(self,):
+    def scrolled_driver(self, ):
         try:
             self.driver.execute_script(
                 'let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
@@ -389,32 +408,15 @@ class GetReviews:
 
     def check_review(self, review):
         try:
-            try:
-                author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute(
-                    'innerText')
-            except (NoSuchElementException, StaleElementReferenceException):
-                author_name = ''
-            try:
-                author_link = review.find_element_by_class_name('ODSEW-ShBeI-tXxcle-SfQLQb-menu').find_element_by_tag_name('a').get_attribute(
-                    'href'
-                )
-            except:
-                author_link = ''
-            try:
-                author_img_link = review.find_element_by_class_name('ODSEW-ShBeI-t1uDwd-HiaYvf').get_attribute('src')
-            except:
-                author_img_link = ''
             rating = get_review_rating(review)
             text = get_review_text(self.driver, review)
-            print(author_name, text[:40])
-            self.review_list.append({
-                'author_name': author_name,
-                'author_link': author_link,
-                'author_img_link': author_img_link,
-                'rating': rating,
-                'text': text
-            })
-            return True
+            if text:
+                self.review_list.append({
+                    'rating': rating,
+                    'text': text
+                })
+                return True
+            return False
         except Exception as e:
             print('-- Ошибка при назначении атрибутов отзыву', e.__class__.__name__)
             time.sleep(1)
@@ -434,15 +436,15 @@ class GetReviews:
 
     def close_review_pages(self):
         try:
-            self.driver.execute_script('let close_b = document.getElementsByClassName("VfPpkd-icon-Jh9lGc"); close_b[0].click()')
+            self.driver.execute_script(
+                'let close_b = document.getElementsByClassName("VfPpkd-icon-Jh9lGc"); close_b[0].click()')
         except Exception as e:
             print('Ошибка при закрытии отзывов', e.__class__.__name__)
-
 
     def get_reviews(self):
         try:
             self.get_page_review_button()
-            reviews = self.get_reviews_objects()
+            self.get_reviews_objects()
             reviews = self.scrolled_driver()
             for review in reviews:
                 self.review_detail(review)
@@ -450,6 +452,7 @@ class GetReviews:
             print('Ошибка при получении отзывов: ', e.__class__.__name__)
         self.close_review_pages()
         return self.review_list
+
 
 #
 # def get_this_page_reviews(driver):
@@ -473,22 +476,63 @@ class GetReviews:
 #     return review_list
 
 
+def generate_user():
+    person = Person('en')
+    gender_choices = [Gender.FEMALE, Gender.MALE]
+    random_gender = random.choice(gender_choices)
+    email = person.email()
+
+    full_name = person.full_name(gender=random_gender)
+    username = full_name.replace(' ', '_')
+    full_name = full_name.split(' ')
+    first_name = full_name[0]
+    last_name = full_name[-1]
+
+    password = User.objects.make_random_password()
+
+    print(full_name, random_gender.name)
+    user_data = {
+        'username': username,
+        'first_name': first_name,
+        'last_name': last_name,
+        'email': email,
+        'gender': random_gender.name,
+        'password': password
+    }
+    print(user_data)
+    return user_data
+
+
+def set_review_parts(rating, review):
+    for review_type in ReviewType.objects.all():
+        review_part = ReviewPart.objects.update_or_create(review=review, review_type=review_type)
+        review_part.rating = rating
+        review_part.save()
+
+
 def set_reviews(review_list, place):
     if len(review_list) == 0:
         return None
     try:
         place.reviews.all().delete()
         for review in review_list:
-            if review['author_name']:
-                review_google = Review.objects.create(author_name=review['author_name'],
-                                                      author_link=review['author_link'],
-                                                      author_img_link=review['author_img_link'],
-                                                            rating=review['rating'],
-                                                            text=review['text'],
-                                                            place=place,
-                                                            is_google=True
-                                                      )
-                review_google.save()
+            user_data = generate_user()
+            user = User.objects.get_or_create(username=user_data['username'])
+            user = user(email=user_data['email'],
+                        first_name=user_data['first_name'],
+                        last_name=user_data['last_name'],
+                        password=user_data['password'])
+            user.save()
+            user.profile.gender = user_data['gender']
+            user.save()
+            review = Review.objects.create(user=user,
+                                           rating=review['rating'],
+                                           text=review['text'],
+                                           place=place,
+                                           is_google=True)
+            review.save()
+            set_review_parts(rating=review['rating'], review=review)
+
     except Exception as e:
         print('Ошибка при назначении отзывов: ', e.__class__.__name__)
 
@@ -507,13 +551,12 @@ def get_or_create_place(name, rating, rating_user_count, cid):
                                      rating_user_count=rating_user_count,
                                      cid=cid)
         place.save()
-        place.slug=slugify(f'{place.name}-{str(place.id)}')
+        place.slug = slugify(f'{place.name}-{str(place.id)}')
         place.save()
         return place
     except Exception as e:
         print('Ошибка при создании или взятии palce')
         print(e.__class__.__name__)
-
 
 
 def get_info(driver):
@@ -555,11 +598,12 @@ def get_info(driver):
         print('Ошибка при получении общих данных: ', e.__class__.__name__)
         return None
 
+
 @shared_task()
 def get_site_description(url, place_id):
     if not url or url == ' - ':
         return None
-    url = 'http://'+url
+    url = 'http://' + url
     meta_data = ''
     try:
         html = get_site(url, timeout=15)
@@ -579,6 +623,7 @@ def get_site_description(url, place_id):
         place.save()
     return url
 
+
 def set_info(data, place):
     if not data:
         return None
@@ -589,6 +634,7 @@ def set_info(data, place):
     place.phone_number = data['phone_number'] if 'phone_number' in data else None
     place.site = data['site'] if 'site' in data else None
     place.save()
+
 
 def cid_to_place_id(cid):
     url = f'https://maps.googleapis.com/maps/api/place/details/json?cid={cid}&key={KEY}'
@@ -636,13 +682,16 @@ def get_coordinate(driver):
         print('Ошибка при взятии', e.__class__.__name__)
         return None
 
+
 def set_coordinate(data, place):
     if data:
         place.coordinate_html = data
         place.save()
 
+
 def place_update_driver(cid):
     pass
+
 
 def place_create_driver(cid, query_id):
     url = CID_URL.format(cid)
@@ -698,7 +747,6 @@ def place_create_driver(cid, query_id):
         print('Отзывы готовы', reviews)
         set_reviews(reviews, place)
 
-
         print(' --------- Фотографии')
         photos = GetPhotos(driver).get_photos()  # class PlacePhoto
         set_photos(photos, place.id)
@@ -736,6 +784,8 @@ def set_api_photos(photos, place_id):
         # print(image_file)
         # set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
     time.sleep(1)
+
+
 def get_value_or_none(data, key, default_value=' - '):
     if key in data:
         return data[key]
@@ -778,9 +828,9 @@ def place_create_api(cid, query_id, api_data):
     reviews = api_data['reviews'] if 'reviews' in api_data else []
     set_reviews(reviews, place)
 
+
 def place_detail(cid, query_id):
     place_create_driver(cid, query_id)
-
 
 
 # def place_api_detail(cid):
@@ -807,10 +857,12 @@ def parse_places(driver, query_id):
     if len(places) == 0:
         return False
     for place in places:
-        cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name('C8TUKc') else None
-        print('https://www.google.com/maps?cid='+cid)
+        cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name(
+            'C8TUKc') else None
+        print('https://www.google.com/maps?cid=' + cid)
         place_detail(cid, query_id) if cid else None
     return True
+
 
 # Функция для смены страниц
 
@@ -841,6 +893,7 @@ def get_pagination(driver, page):
         print('Ошибка в пагинации2: ', e.__class__.__name__)
         return False
 
+
 @shared_task
 def startParsing(query_name, query_id, pages=None):
     display = None
@@ -862,7 +915,7 @@ def startParsing(query_name, query_id, pages=None):
     # print(2)
     try:
         if pages:
-            for page in range(1, pages+1):
+            for page in range(1, pages + 1):
                 # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
                 if page == 1:
                     print(f'СТРАНИЦА {page} начата')
@@ -916,6 +969,7 @@ def startParsing(query_name, query_id, pages=None):
 
         driver.close()
         print('Критическая ошибка')
+
 
 # Запуск скрипта
 # def main():
@@ -976,8 +1030,6 @@ def startParsing(query_name, query_id, pages=None):
 #     main()
 
 
-
-
 # Все что ниже нужно для генерации CSV файла
 
 def get_headers():
@@ -1002,12 +1054,14 @@ class Echo(object):
     def write(self, value):
         return value
 
+
 def iter_items(items, pseudo_buffer):
     writer = csv.DictWriter(pseudo_buffer, fieldnames=get_headers())
     yield writer.writerow(get_headers())
 
     for item in items:
         yield writer.writerow(get_data(item))
+
 
 def get_response(queryset):
     response = StreamingHttpResponse(
@@ -1016,6 +1070,7 @@ def get_response(queryset):
     )
     response['Content-Disposition'] = 'attachment;filename=items.csv'
     return response
+
 
 def generate_file(file_name, places):
     response = StreamingHttpResponse(

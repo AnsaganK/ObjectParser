@@ -257,7 +257,7 @@ class Review(models.Model):
     @property
     def get_user_name(self):
         if self.user:
-            return f'{self.user.last_name} {self.user.first_name}'
+            return f'{self.user.profile.full_name}'
         return self.author_name
 
     @property
@@ -334,6 +334,16 @@ class Location(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     img = models.ImageField(upload_to='user_avatars', null=True, blank=True)
+    birth_date = models.DateTimeField(null=True, blank=True)
+    gender_choices = (
+        ('FEMALE', 'FEMALE'),
+        ('MALE', 'MALE'),
+    )
+    gender = models.CharField(max_length=100, null=True, blank=True, choices=gender_choices, verbose_name='Гендер')
+
+    @property
+    def full_name(self):
+        return f'{self.user.first_name} {self.user.last_name}'
 
     def __str__(self):
         return self.user.username
