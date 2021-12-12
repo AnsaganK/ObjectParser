@@ -15,7 +15,7 @@
                                 {% if review.user.profile.img %}{{ review.user.profile.img.url }}{% else %}{% static 'img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px" alt="">
                         <a class="link"
-                           href="{% url 'app:public_cabinet' review.user.username %}">{{ review.get_user_name }}</a>
+                           href="{% if review.user %}{% url 'app:public_cabinet' review.user.username %}{% endif %}">{{ review.get_user_name }}</a>
                     {% endif %}
                         <span style="color:grey;">({{ review.date_create }})</span>
                     </span>
