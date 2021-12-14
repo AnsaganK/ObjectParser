@@ -5,7 +5,7 @@ from io import BytesIO
 import random
 import googlemaps
 from celery import shared_task
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
@@ -523,6 +523,9 @@ def set_reviews(review_list, place):
             user.last_name = user_data['last_name']
             user.password = user_data['password']
             user.save()
+            group = Group.objects.filter(name='Пользователь').first()
+            if group:
+                user.groups.add(group)
             user.profile.gender = user_data['gender']
             user.save()
             review = Review.objects.create(user=user,
