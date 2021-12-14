@@ -270,12 +270,18 @@ def tag_queries(request, path):
     return render(request, 'app/tag/queries.html', {'tag': tag, 'queries': queries})
 
 
-def add_path_for_tag(form, tag):
+def add_path_for_tag(request, form, tag):
     cd = form.cleaned_data
     name = cd['name']
     path = slugify(name)
-    tag.path = path
-    tag.save()
+    if not Tag.objects.filter(path=path).exists():
+        tag.path = path
+        tag.save()
+        return True
+    messages.error(request, 'A tag with this path already exists')
+    return False
+
+
 
 
 @login_required()
@@ -285,8 +291,8 @@ def tags(request):
         form = TagForm(request.POST)
         if form.is_valid():
             tag = form.save(commit=False)
-            add_path_for_tag(form, tag)
-            messages.success(request, 'Тэг создан')
+            if add_path_for_tag(request, form, tag):
+                messages.success(request, 'Тэг создан')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('app:tags'))
