@@ -21,6 +21,7 @@ from django.utils.text import slugify
 class Tag(models.Model):
     name = models.CharField(max_length=1000, null=True, blank=True, unique=True)
     slug = models.SlugField(max_length=1000, null=True, blank=True)
+    path = models.TextField(null=True, blank=True, verbose_name='Путь')
 
     def __str__(self):
         return self.name

@@ -50,7 +50,7 @@ class PlaceForm(forms.ModelForm):
 class TagForm(forms.ModelForm):
     class Meta:
         model = Tag
-        fields = ['name']
+        fields = ['name', 'path']
 
 
 class QueryContentForm(forms.ModelForm):

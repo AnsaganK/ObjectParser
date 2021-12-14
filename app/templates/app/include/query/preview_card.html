@@ -12,7 +12,7 @@
             </div>
             <div style="display: flex; justify-content: center; flex-wrap: wrap">
                 {% for tag in query.tags.all %}
-                    <a href="{% url 'app:tag_queries' tag.slug %}" class="tag is-outlined is-info"
+                    <a href="{% url 'app:tag_queries' tag.path %}" class="tag is-outlined is-info"
                        style="margin: 3px">{{ tag.name }}</a>
                 {% endfor %}
             </div>

@@ -7,7 +7,7 @@ urlpatterns = [
     path('', views.index, name="index"),
 
     path('queries/', views.queries, name='queries'),
-    path('queries/tags/<slug:slug>', views.tag_queries, name="tag_queries"),
+    path('queries/tags/<path:path>', views.tag_queries, name="tag_queries"),
 
     path('query/add', views.query_add, name="query_add"),
     path('query/my', views.query_list, name="query_list"),
@@ -34,8 +34,8 @@ urlpatterns = [
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
 
     path('admin_dashboard/tags', views.tags, name='tags'),
-    path('admin_dashboard/tags/<slug:slug>/edit', views.tag_edit, name='tag_edit'),
-    path('admin_dashboard/tags/<slug:slug>/delete', views.tag_delete, name='tag_delete'),
+    path('admin_dashboard/tags/<int:pk>/edit', views.tag_edit, name='tag_edit'),
+    path('admin_dashboard/tags/<path:path>/delete', views.tag_delete, name='tag_delete'),
 
     path('admin_dashboard/groups/', views.group_list, name="group_list"),
     path('admin_dashboard/groups/not', views.group_not, name="group_not"),

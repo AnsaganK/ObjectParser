@@ -9,7 +9,7 @@ from constants import SERVER_NAME
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['name', 'id', 'slug']
+        fields = ['name', 'id', 'path']
 
 
 class QuerySerializer(serializers.ModelSerializer):

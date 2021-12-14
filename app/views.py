@@ -263,18 +263,18 @@ def queries(request):
 
 
 @login_required()
-def tag_queries(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
+def tag_queries(request, path):
+    tag = get_object_or_404(Tag, path=path)
     queries = tag.queries.all().distinct()
     queries = get_paginator(request, queries, 16)
     return render(request, 'app/tag/queries.html', {'tag': tag, 'queries': queries})
 
 
-def add_slug_for_tag(form, tag):
+def add_path_for_tag(form, tag):
     cd = form.cleaned_data
     name = cd['name']
-    slug = slugify(name)
-    tag.slug = slug
+    path = slugify(name)
+    tag.path = path
     tag.save()
 
 
@@ -285,7 +285,7 @@ def tags(request):
         form = TagForm(request.POST)
         if form.is_valid():
             tag = form.save(commit=False)
-            add_slug_for_tag(form, tag)
+            add_path_for_tag(form, tag)
             messages.success(request, 'Тэг создан')
         else:
             show_form_errors(request, form.errors)
@@ -294,13 +294,12 @@ def tags(request):
 
 
 @login_required()
-def tag_edit(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
+def tag_edit(request, pk):
+    tag = get_object_or_404(Tag, pk=pk)
     if request.method == 'POST':
         form = TagForm(request.POST, instance=tag)
         if form.is_valid():
             tag = form.save(commit=False)
-            add_slug_for_tag(form, tag)
             tag.save()
             messages.success(request, 'Тэг изменен')
         else:
@@ -310,8 +309,8 @@ def tag_edit(request, slug):
 
 
 @login_required()
-def tag_delete(request, slug):
-    tag = get_object_or_404(Tag, slug=slug)
+def tag_delete(request, path):
+    tag = get_object_or_404(Tag, path=path)
     tag.delete()
     messages.success(request, 'Тэг удален')
     return redirect(reverse('app:tags'))

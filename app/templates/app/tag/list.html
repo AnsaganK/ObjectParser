@@ -22,8 +22,8 @@
             {% for tag in tags %}
                 <div class="control">
                     <div class="tags has-addons">
-                        <a href="{% url 'app:tag_edit' tag.slug %}" class="tag is-medium is-link">{{ tag.name }}</a>
-                        <a href="{% url 'app:tag_delete' tag.slug %}" class="tag is-medium is-delete"></a>
+                        <a href="{% url 'app:tag_edit' tag.id %}" title="{{ tag.path }}" class="tag is-medium is-link">{{ tag.name }}</a>
+                        <a href="{% url 'app:tag_delete' tag.path %}" class="tag is-medium is-delete"></a>
                     </div>
                 </div>
 
