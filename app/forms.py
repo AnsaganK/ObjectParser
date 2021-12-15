@@ -56,4 +56,4 @@ class TagForm(forms.ModelForm):
 class QueryContentForm(forms.ModelForm):
     class Meta:
         model = Query
-        fields = ['content', 'tags']
+        fields = ['content', 'tags', 'access']

@@ -6,9 +6,17 @@
 
 {% block style %}
     <style>
+        #access_status {
+            display: block;
+            font-size: 17px;
+            margin-bottom: 10px;
+        }
 
+        #access_input {
+            display: none;
+        }
     </style>
-{#    <script src="https://cdn.ckeditor.com/ckeditor5/30.0.0/classic/ckeditor.js"></script>#}
+    {#    <script src="https://cdn.ckeditor.com/ckeditor5/30.0.0/classic/ckeditor.js"></script>#}
     <script src="{% static 'ckeditor/build/ckeditor.js' %}"></script>
 {% endblock %}
 
@@ -17,6 +25,10 @@
     <h4 class="centered_link">{{ query.name }}</h4>
     <form action="" method="post" class="custom_form" style="max-width: 900px">
         {% csrf_token %}
+        <div style="display: flex; justify-content: center; align-items: center; flex-direction: row">
+            <input type="checkbox" {% if query.access %} checked {% endif %} name="access" id="access_input">
+            <label for="access_input" class="button" id="access_status"></label>
+        </div>
         <div class="field">
             <label for="page_content" class="label">
                 Content
@@ -34,7 +46,8 @@
         <div class="tag_items">
             {% for tag in tags %}
                 <div class="tag_item">
-                    <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tags" value="{{ tag.id }}" {% if tag in query.tags.all %}checked{% endif %}>
+                    <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tags" value="{{ tag.id }}"
+                           {% if tag in query.tags.all %}checked{% endif %}>
                     <label for="tag_{{ tag.id }}" class="button is-success is-outlined"
                            style="margin: 3px">{{ tag.name }}</label>
                 </div>
@@ -52,5 +65,22 @@
             .catch(error => {
                 console.error(error);
             });
+    </script>
+    <script>
+        let input = document.getElementById('access_input');
+        input.addEventListener('change', accessChanged)
+
+        function accessChanged() {
+            let access_status = document.getElementById('access_status')
+            if (input.checked) {
+                access_status.innerText = 'Opened access'
+                access_status.classList.add('is-success')
+            } else {
+                access_status.innerText = 'Closed access'
+                access_status.classList.remove('is-success')
+            }
+        }
+
+        accessChanged()
     </script>
 {% endblock %}

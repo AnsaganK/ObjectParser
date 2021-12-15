@@ -242,7 +242,10 @@ def query_file_generate(request, pk):
 
 
 def queries(request):
-    queries = Query.objects.all()
+    if has_group(request.user, 'Редактор'):
+        queries = Query.objects.all()
+    else:
+        queries = Query.objects.filter(access=True)
     try:
         search = request.GET.get('search')
         if search != '':

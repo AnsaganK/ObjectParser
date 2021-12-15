@@ -41,6 +41,8 @@ class Query(models.Model):
     page = models.IntegerField(null=True, blank=True)
     content = models.TextField(null=True, blank=True, verbose_name='Контент')
     tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='queries')
+
+    access = models.BooleanField(default=False)
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     status_choices = (
         ('wait', 'wait'),
