@@ -120,21 +120,6 @@ def query_add(request):
     return render(request, 'app/query/add.html')
 
 
-@login_required()
-def query_edit(request, slug):
-    query = get_object_or_404(Query, slug=slug)
-    if request.method == 'POST':
-        form = QueryContentForm(request.POST, instance=query)
-        if form.is_valid():
-            query = form.save()
-            messages.success(request, 'Описание изменено')
-        else:
-            show_form_errors(request, form.errors)
-        return redirect(reverse('app:places', args=[query.slug]))
-    tags = Tag.objects.all()
-    return render(request, 'app/query/edit.html', {'query': query, 'tags': tags})
-
-
 def get_sorted_places(query):
     places = Place.objects.filter(queries__query=query)
     if query.sorted:
@@ -220,6 +205,29 @@ def query_detail(request, slug):
 
 
 @login_required()
+def query_edit(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    if request.method == 'POST':
+        form = QueryContentForm(request.POST, instance=query)
+        if form.is_valid():
+            query = form.save()
+            messages.success(request, 'Описание изменено')
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('app:places', args=[query.slug]))
+    tags = Tag.objects.all()
+    return render(request, 'app/query/edit.html', {'query': query, 'tags': tags})
+
+
+@login_required()
+def query_edit_access(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    query.access = not (query.access)
+    query.save()
+    return redirect(reverse('app:queries'))
+
+
+@login_required()
 def query_delete(request, pk):
     query = Query.objects.filter(pk=pk).first()
     if query and query.user == request.user or has_group(request.user, 'Суперадминистратор'):
@@ -283,8 +291,6 @@ def add_path_for_tag(request, form, tag):
         return True
     messages.error(request, 'A tag with this path already exists')
     return False
-
-
 
 
 @login_required()
@@ -674,6 +680,7 @@ class QueryDetail(RetrieveAPIView):
     queryset = model.objects.all()
     lookup_field = 'slug'
 
+
 @method_decorator(xframe_options_exempt, name='dispatch')
 class PlaceHTML(DetailView):
     model = Place
@@ -686,8 +693,6 @@ class PlaceHTML(DetailView):
         context = super().get_context_data(**kwargs)
         context['server_name'] = SERVER_NAME
         return context
-
-
 
 
 class PlaceDetail(APIView):

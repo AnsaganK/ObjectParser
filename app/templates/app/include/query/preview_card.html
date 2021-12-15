@@ -18,11 +18,13 @@
             </div>
         </div>
         <div style="flex-grow: 1;display: flex;justify-content: end;">
-            {% if query.access %}
-                <i class="fa fa-lock-open" style="color: #00d1b2"></i>
-            {% else %}
-                <i class="fa fa-lock" style="color: #ff784e;"></i>
-            {% endif %}
+            <a href="{% url 'app:query_edit_access' query.slug %}">
+                {% if query.access %}
+                    <i class="fa fa-lock-open" style="color: #00d1b2"></i>
+                {% else %}
+                    <i class="fa fa-lock" style="color: #ff784e;"></i>
+                {% endif %}
+            </a>
         </div>
     </div>
 </div>
