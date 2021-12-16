@@ -414,6 +414,10 @@
             margin: auto;
             display: block;
         }
+
+        .more_text {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -529,6 +533,24 @@
         slidesToShow: 3,
         infinite: true,
     });
+</script>
+
+<script>
+    function showMore(elem) {
+        let text_block = elem.parentNode;
+        console.log(elem)
+        let dots = text_block.querySelector('span.dots')
+        let more_text = text_block.querySelector('span.more_text')
+        if (more_text.style.display === 'inline') {
+            elem.innerHTML = 'More text'
+            dots.innerHTML = '...';
+            more_text.style.display = 'none';
+        } else {
+            elem.innerHTML = 'Less text'
+            dots.innerHTML = ''
+            more_text.style.display = 'inline'
+        }
+    }
 </script>
 
 {% block script %}

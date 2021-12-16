@@ -12,10 +12,14 @@
                     {% else %}
                         <img src="
 
+
+
                                 {% if review.user.profile.img %}{{ review.user.profile.img.url }}{% else %}{% static 'img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px" alt="">
                         <a class="link"
-                           href="{% if review.user %}{% url 'app:public_cabinet' review.user.username %}{% endif %}">{{ review.get_user_name }}</a>
+                           href="
+
+                                   {% if review.user %}{% url 'app:public_cabinet' review.user.username %}{% endif %}">{{ review.get_user_name }}</a>
                     {% endif %}
                         <span style="color:grey;">({{ review.date_create }})</span>
                     </span>
@@ -49,6 +53,13 @@
         {% else %}
             {{ review.rating|getRating|safe }}
         {% endif %}
-        <p>{{ review.text }}</p>
+        {% if review.text|length > 320 %}
+            <p>
+                {{ review.text|slice:":320" }}<span class="dots">...</span><span class="more_text">{{ review.text|slice:"320:" }}</span>
+                <span class="link" onclick="showMore(this)">More text</span>
+            </p>
+        {% else %}
+            <p>{{ review.text }}</p>
+        {% endif %}
     </div>
 </div>
