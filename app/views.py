@@ -222,7 +222,7 @@ def query_edit(request, slug):
 @login_required()
 def query_edit_access(request, slug):
     query = get_object_or_404(Query, slug=slug)
-    query.access = not (query.access)
+    query.access = not(query.access)
     query.save()
     return redirect(reverse('app:queries'))
 

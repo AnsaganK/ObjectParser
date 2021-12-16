@@ -1,6 +1,6 @@
 <form action="" method="post">
     {% csrf_token %}
-    {% if not review_parts %}
+    {% if not review_types %}
         <div class="rating-area" style="margin: 10px auto">
             {% for number in '54321'|make_list %}
                 <input type="radio" id="rating_{{ number }}"
