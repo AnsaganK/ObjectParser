@@ -1,5 +1,5 @@
-let host = '127.0.0.1:8000'
-// let host = '170.130.40.103'
+// let host = '127.0.0.1:8000'
+let host = '170.130.40.103'
 function select_copy(text) {
     let textarea = document.getElementById('message_block_textarea');
     textarea.innerText = text;
