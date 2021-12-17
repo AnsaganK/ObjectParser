@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.shortcuts import reverse
+from django.shortcuts import reverse, redirect
 
 # class Role(models.Model):
 #     name = models.CharField(max_length=128, verbose_name='Название')
@@ -120,6 +120,9 @@ class Place(models.Model):
     date_update = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     isApiData = models.BooleanField(default=False)
+
+    is_redirect = models.BooleanField(default=False)
+    redirect = models.TextField(null=True, blank=True, default='00')
 
     @property
     def get_rating(self):

@@ -29,7 +29,12 @@
         <button class="modal-close is-large" onclick="closeModal()" aria-label="close"></button>
     </div>
 
-    <h4 class="block_title"> {{ query.name }} </h4>
+    <h4 class="block_title"> {{ query.name }}
+        <div style="right: 15px;position: absolute;color: #878787;margin-top: -20px;">
+            <a href="{% url 'app:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
+            <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
+        </div>
+    </h4>
 
     <hr>
     <div class="columns is-centered">

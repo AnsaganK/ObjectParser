@@ -222,7 +222,7 @@ def query_edit(request, slug):
 @login_required()
 def query_edit_access(request, slug):
     query = get_object_or_404(Query, slug=slug)
-    query.access = not(query.access)
+    query.access = not (query.access)
     query.save()
     return redirect(reverse('app:queries'))
 
@@ -356,17 +356,10 @@ def review_type_edit(request, pk):
         return redirect(reverse('app:review_types'))
     return render(request, 'app/admin_dashboard/review_type/edit.html', {'review_type': review_type})
 
-
-def places(request, slug):
+def places_to_sorted_letters(places):
     places_letter = {
 
     }
-    query = Query.objects.filter(slug=slug).first()
-    if not query:
-        return redirect('app:index')
-    places = get_sorted_places(query)
-    top_places = places[:20]
-    # top_places = places.exclude(address=None)[:20]
     for i in places:
         first_letter = i.name[0]
         if first_letter in places_letter:
@@ -378,11 +371,38 @@ def places(request, slug):
             }
     letters = list(places_letter.keys())
     letters = sorted(letters)
+    return {
+        'places_letter': places_letter,
+        'letters': letters
+    }
+
+def places(request, slug):
+    query = Query.objects.filter(slug=slug).first()
+    if not query:
+        return redirect('app:index')
+    places = get_sorted_places(query)
+    top_places = places[:20]
+    places_and_letters = places_to_sorted_letters(places)
     return render(request, 'app/query/places.html', {'query': query,
                                                      'top_places': top_places,
                                                      'places': places,
-                                                     'places_letter': places_letter,
-                                                     'letters': letters})
+                                                     'places_letter': places_and_letters['places_letter'],
+                                                     'letters': places_and_letters['letters']})
+
+
+@login_required()
+def places_copy(request, slug):
+    query = Query.objects.filter(slug=slug).first()
+    if not query:
+        return redirect('app:index')
+    places = get_sorted_places(query)
+    top_places = places[:20]
+    places_and_letters = places_to_sorted_letters(places)
+    return render(request, 'app/query/places_copy.html', {'query': query,
+                                                     'top_places': top_places,
+                                                     'places': places,
+                                                     'places_letter': places_and_letters['places_letter'],
+                                                     'letters': places_and_letters['letters']})
 
 
 def create_or_update_review_types(post, review):

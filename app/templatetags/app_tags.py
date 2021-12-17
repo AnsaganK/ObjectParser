@@ -5,6 +5,7 @@ from django import template
 import json
 
 from django.db.models.functions import Length
+from django.template.defaultfilters import safe
 
 register = template.Library()
 
@@ -22,7 +23,7 @@ def getRating(rating):
         stars += '<span style="color:gold;"><i class="fa fa-star"></i></span>'
     for i in range(5 - rating):
         stars += '<span style="color:lightgrey;"><i class="fa fa-star"></i></span>'
-    return stars
+    return safe(stars)
 
 
 @register.filter(name="hasGroup")
