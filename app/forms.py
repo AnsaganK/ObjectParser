@@ -44,7 +44,7 @@ class UserDetailForm(forms.ModelForm):
 class PlaceForm(forms.ModelForm):
     class Meta:
         model = Place
-        fields = ['name', 'description', 'meta', 'title']
+        fields = ['name', 'description', 'meta', 'title', 'is_redirect', 'redirect']
 
 
 class TagForm(forms.ModelForm):
