@@ -122,7 +122,7 @@ class Place(models.Model):
     isApiData = models.BooleanField(default=False)
 
     is_redirect = models.BooleanField(default=False)
-    redirect = models.TextField(null=True, blank=True, default='00')
+    redirect = models.TextField(null=True, blank=True, default='')
 
     @property
     def get_rating(self):
