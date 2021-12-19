@@ -1,0 +1,23 @@
+{% extends 'parsing/base.html' %}
+{% load app_tags %}
+
+
+{% block title %}
+    Мои отзывы
+{% endblock %}
+
+{% block content %}
+    <h2 class="block_title">Мои отзывы</h2>
+    <div class="columns is-centered">
+        <div class="column is-9">
+            {% for review in reviews %}
+                {% include 'parsing/include/review/card.html' with review=review %}
+            {% empty %}
+                <p class="text_centered" style="color:grey;">Вы пока не оставляли отзывов</p>
+            {% endfor %}
+            {% if reviews %}
+                {% include 'parsing/include/pagination.html' with page=reviews %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    Регистрация
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" class="custom_form">
+          <span class="form_title">Регистрация</span>
+          {% csrf_token %}
+        <div class="field">
+            <label for="" class="label">
+                Логин
+            </label>
+            <div class="control">
+                <input type="text" class="input" required name="username">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Фамилия
+            </label>
+            <div class="control">
+                <input type="text" class="input" name="last_name">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Имя
+            </label>
+            <div class="control">
+                <input type="text" class="input" name="first_name">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Почта
+            </label>
+            <div class="control">
+                <input type="email" class="input" required name="email">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Пароль
+            </label>
+            <div class="control">
+                <input type="password" class="input" required name="password1">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Повторите пароль
+            </label>
+            <div class="control">
+                <input type="password" class="input" required name="password2">
+            </div>
+        </div>
+        <button type="submit" class="button is-info">Зарегистрироваться</button>
+        <a href="{% url 'login' %}" class="centered_link">Вход</a>
+    </form>
+{% endblock %}

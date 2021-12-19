@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from app.models import Query, Place, QueryPlace
+from parsing.models import Query, Place, QueryPlace
 
 
 class QuerySerializer(serializers.ModelSerializer):

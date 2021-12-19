@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from app.models import Query, Place, Tag
+from parsing.models import Query, Place, Tag
 from api.serializers import QuerySerializer, PlaceSerializer, UserSerializer
-from app.serializers import TagSerializer
+from parsing.serializers import TagSerializer
 
 
 class QueryAPI(APIView):

@@ -1,0 +1,51 @@
+{% extends 'parsing/base.html' %}
+{% load app_tags %}
+{% block title %}
+    {{ query.name }}
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'parsing:query_file' query.pk %}" class="button is-info button_add">
+        <span class="icon is-small">
+            <i class="fas fa-file-excel"></i>
+        </span>
+        <span>Сгенерировать файл</span>
+    </a>
+    <div class="select">
+        <select class=""
+                onchange="window.location.href = '{{ request.get_path }}?sorted='+this.value">
+            <option value="">По умолчанию</option>
+            <option value="rating_gt" {% if sort_type == 'rating_gt' %}selected{% endif %}>По возрастанию рейтинга
+            </option>
+            <option value="rating_lt" {% if sort_type == 'rating_lt' %}selected{% endif %}>По убыванию рейтинга</option>
+        </select>
+    </div>
+
+    <table class="table caption-top">
+        <caption>{{ query.name }}</caption>
+        <thead>
+        <tr>
+            <td>Идентификатор</td>
+            <td>Название</td>
+            <td>Адрес</td>
+            <td>Рейтинг</td>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for place in places %}
+            <tr>
+                <td><a href="{{ place.get_absolute_url }}">{{ place.cid }}</a></td>
+                <td>{{ place.name }}</td>
+                <td>{{ place.address|isValue }}</td>
+                <td>{{ place.rating }}</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    {% include 'parsing/include/pagination.html' with page=places %}
+    {% if request.user|hasGroup:'SuperAdmin' %}
+        <a href="{% url 'parsing:query_delete' query.pk %}" class="button is-danger aligned right">Удалить данный запрос</a>
+    {% endif %}
+{% endblock %}

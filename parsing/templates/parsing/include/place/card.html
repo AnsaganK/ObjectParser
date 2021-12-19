@@ -1,0 +1,72 @@
+{% load app_tags %}
+<div class="box" id="detail_data" style="padding-bottom: 50px">
+    <h4 style="color: #64b5f6; text-align: center; font-size: 21px">{{ place.name }} <br><span
+            style="color:grey; font-size: 11px; ">{{ place.date_update }}</span></h4>
+    {% if request.user|hasGroup:'Admin' %}
+        <a href="{% url 'parsing:place_edit' place.cid %}" class="button_add button is-warning">
+            Редактировать данные</a>
+        <a href="{% url 'parsing:place_update' place.pk %}" style="margin-top: 50px" class="button_add button is-info">
+            Обновить данные</a>
+    {% endif %}
+    <div style="display:flex;" class="columns">
+
+        <img class="column is-4" src="{{ place.get_img }}" alt=""
+             style="height: 360px !important; max-width: 360px !important;margin-right: 30px">
+        <div class="column is-8">
+            <p><span>Название:</span> <span>{{ place.name }}</span></p>
+            <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
+            <p><span>Сайт:</span> <span><a
+                    href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
+            <p><span>Телефон:</span> <span><a
+                    href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
+            <p><span>Рейтинг:</span> <span>{{ place.rating }} (<span
+                    style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
+            </p>
+            <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
+                                                        target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
+            </p>
+
+            <p class="iframe_wrap">{% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% else %}Карты
+                нет{% endif %}</p>
+            <p><span>Описание:</span>
+                <span>
+                        {% if place.description %}
+                            {{ place.description }}
+                        {% else %}
+                            {{ place.get_meta_description }}
+                        {% endif %}
+                </span>
+            </p>
+            {% if place.photos.count > 3 %}
+
+                <section class="" style="max-width: 100%">
+                    <div class="is-clipped">
+                        <div id="slider">
+                            {% for photo in place.photos.all %}
+                                <div class=""
+                                     style="height: 210px !important;width: 210px !important; margin: 10px 30px">
+                                    <div class="">
+                                        <figure class="image is-16by9 is-covered">
+                                            <img src="{{ photo.img.url }}" class="card" alt=""
+                                                 style="min-width: 190px !important; min-height: 190px !important;"
+                                                 onclick="showModalImg('{{ photo.img.url }}')">
+                                        </figure>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </section>
+            {% else %}
+                <div style="display: flex; justify-content: center;flex-wrap: wrap; ">
+                    {% for photo in place.photos.all %}
+                        <img src="{{ photo.img.url }}" alt=""
+                             style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;"
+                             onclick="showModalImg('{{ photo.img.url }}')">
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

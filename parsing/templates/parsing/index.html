@@ -1,0 +1,24 @@
+{% extends 'parsing/base.html' %}
+{% load app_tags %}
+
+{% block title %}
+    Главная
+{% endblock %}
+
+{% block content %}
+    {% if request.user.is_authenticated %}
+        <div class="statistic_text">
+            <h3>Статистика по аккаунту</h3>
+            <p>Пользователь: {{ user.last_name }} {{ user.first_name }}</p>
+            <p>На сайте с: {{ user.date_joined }}</p>
+            {% if request.user|hasGroup:'Admin' %}
+                <p>Всего запросов: {{ queries.count }}</p>
+                <p>Всего данных: {{ places.distinct.count }}</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="welcome_text">Сайт предназначенный для парсинга, <a href="{% url 'login' %}">войдите</a> либо <a
+                href="{% url 'parsing:registration' %}">зарегистрируйтесь</a> чтобы продолжить</p>
+    {% endif %}
+
+{% endblock %}

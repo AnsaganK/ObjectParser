@@ -1,0 +1,31 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    Авторизация
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" class="custom_form">
+        <span class="form_title">Вход</span>
+        {% csrf_token %}
+
+        <div class="field">
+            <label for="" class="label">
+                Логин
+            </label>
+            <div class="control">
+                <input type="text" class="input" name="username">
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Пароль
+            </label>
+            <div class="control">
+                <input type="text" class="input" name="password">
+            </div>
+        </div>
+        <button type="submit" class="button is-info">Вход</button>
+        <a href="{% url 'parsing:registration' %}" class="centered_link">Регистрация</a>
+    </form>
+{% endblock %}

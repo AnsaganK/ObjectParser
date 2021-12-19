@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'app',
+    'parsing',
     'api'
 ]
 
@@ -117,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LOGIN_REDIRECT_URL = "app:index"
+LOGIN_REDIRECT_URL = "parsing:index"
 LOGOUT_REDIRECT_URL = "login"
 
 LANGUAGE_CODE = 'ru'
