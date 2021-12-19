@@ -239,7 +239,7 @@ class Review(models.Model):
     author_img_link = models.TextField(null=True, blank=True)
     author_img = models.ImageField(upload_to='google_avatars', null=True, blank=True)
     stars_choices = ((i, i) for i in range(1, 6))
-    rating = models.IntegerField(default=1, choices=stars_choices)
+    rating = models.IntegerField(default=1, choices=stars_choices, null=True, blank=True)
 
     is_edit = models.BooleanField(default=False)
     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)

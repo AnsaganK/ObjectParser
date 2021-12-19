@@ -22,7 +22,6 @@ from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, R
 from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart
 from django.contrib import messages
 
-from parsing.parser_selenium import selenium_query_detail
 from parsing.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file
@@ -32,7 +31,7 @@ from constants import SERVER_NAME
 
 def show_form_errors(request, errors):
     for error in errors:
-        messages.error(request, errors[error])
+        messages.error(request, f'{error} {errors[error]}')
 
 
 def get_paginator(request, queryset, count):

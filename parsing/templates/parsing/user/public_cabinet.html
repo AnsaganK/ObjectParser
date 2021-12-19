@@ -17,7 +17,7 @@
         <div style="align-self: center">
             <img src="
                 {% if user.profile.img %}
-                    {{ user.profile.img }}
+                    {{ user.profile.img.url }}
                     {% else %}
                     {% static 'parsing/img/not_avatar.svg' %}
                 {% endif %}

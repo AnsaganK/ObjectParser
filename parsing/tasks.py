@@ -1,6 +1,7 @@
 import base64
 import csv
 import os
+import io
 from io import BytesIO
 import random
 import googlemaps
@@ -489,23 +490,21 @@ class GenerateUser():
 
     def random_color(self):
         import random
-        color = "#%06x" % random.randint(0, 0xFFFFFF)
+        color = "#%06x" % random.randint(0, 0xFFF666)
         return color
 
     def generate_avatar(self, name_letters):
         from PIL import Image, ImageFont, ImageDraw
-        im = Image.new('RGB', (320, 320), color=(self.random_color()))
-        draw_text = ImageDraw.Draw(im)
-        font = ImageFont.truetype(os.path.abspath('fonts/Raleway-Regular.ttf'), size=120)
-        if len(name_letters) == 1:
-            width = 120
-            height = 75
-        else:
-            width = 75
-            height = 75
-        draw_text.text((width, height), name_letters, font=font, fill=(self.random_color()))
-
-        return im
+        width = 320
+        height = 320
+        img = Image.new('RGB', (width, height), color=(self.random_color()))
+        draw_text = ImageDraw.Draw(img)
+        font = ImageFont.truetype('parsing/static/parsing/fonts/Raleway-Regular.ttf', size=120)
+        draw_text.text((width / 2, height / 2), name_letters, anchor='mm', font=font, fill=('#ffffff'))
+        img_byte_arr = io.BytesIO()
+        img.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+        return img_byte_arr
 
     def generate_data(self):
         person = Person('en')
@@ -536,12 +535,14 @@ class GenerateUser():
         name_letters = f'{user_data["first_name"][0]}.{user_data["last_name"][0]}'
         user_img = self.generate_avatar(name_letters)
         user_data['img'] = user_img
-        print(user_data)
         return user_data
 
     def get_or_create_user(self):
         user_data = self.get_user()
-        user = User.objects.get_or_create(username=user_data['username'])[0]
+        user = User.objects.get_or_create(username=user_data['username'])
+        if not user[1]:
+            return user[0]
+        user = user[0]
         user.email = user_data['email']
         user.first_name = user_data['first_name']
         user.last_name = user_data['last_name']
@@ -551,7 +552,7 @@ class GenerateUser():
         if group:
             user.groups.add(group)
         user.profile.gender = user_data['gender']
-        user.profile.img.save(os.path.basename(user.username), ContentFile(user_data['img']))
+        user.profile.img.save(os.path.basename(user.username) + '.png', ContentFile(user_data['img']))
         user.save()
         return user
 
@@ -563,9 +564,15 @@ def set_reviews(review_list, place):
         place.reviews.all().delete()
         for review in review_list:
             user = GenerateUser().get_or_create_user()
+            translate_word_1 = '(Translated by Google)'
+            translate_word_2 = '(Original)'
+            if translate_word_1 in review['text'] and translate_word_2 in review['text']:
+                text = review['text'][len(translate_word_1)+1:review['text'].find(translate_word_2)-1]
+            else:
+                text = review['text']
             review = Review.objects.create(user=user,
                                            rating=review['rating'],
-                                           text=review['text'],
+                                           text=text,
                                            place=place,
                                            is_google=True)
             review.save()
@@ -574,7 +581,7 @@ def set_reviews(review_list, place):
             except Exception as e:
                 print('Ошибка при назначении кусков отзыва', e)
     except Exception as e:
-        print('Ошибка при назначении отзывов: ', e)
+        print('Ошибка при назначении отзывов: ', e.__class__.__name__, e)
 
 
 def get_or_create_place(name, rating, rating_user_count, cid):
