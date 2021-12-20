@@ -271,7 +271,7 @@ class Review(models.Model):
         if self.parts.exists():
             r = self.parts.all().aggregate(rating=Sum('rating'))
             c = self.parts.all().aggregate(count=Count('rating'))
-            return round(r['rating'] / c['count'], 1)
+            return str(round(r['rating'] / c['count'], 1)).replace(',', '.')
         return self.rating
 
     class Meta:
