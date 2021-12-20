@@ -490,7 +490,7 @@ class GenerateUser():
 
     def random_color(self):
         import random
-        color = "#%06x" % random.randint(0, 0xFFF666)
+        color = "#%06x" % random.randint(0, 0xFFFFFE)
         return color
 
     def generate_avatar(self, name_letters):

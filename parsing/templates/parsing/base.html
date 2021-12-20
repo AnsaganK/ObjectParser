@@ -418,8 +418,13 @@
         .more_text {
             display: none;
         }
-        .query_clone_icon{
+
+        .query_clone_icon {
             cursor: pointer;
+        }
+        .maps iframe{
+            width: 100%;
+            height: 250px;
         }
     </style>
 </head>
@@ -427,79 +432,83 @@
 
 
 <nav class="navbar nav menu_nav" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand">
-        <a class="navbar-item" href="{% url 'parsing:index' %}">
-            <img src="{% static 'parsing/img/GoogleParser.png' %}" width="120px">
-        </a>
+    <div class="container">
 
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
-           data-target="navbarBasicExample">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-        </a>
-    </div>
+        <div class="navbar-brand">
+            <a class="navbar-item" href="{% url 'parsing:index' %}">
+                <img src="{% static 'parsing/img/GoogleParser.png' %}" width="120px">
+            </a>
 
-    <div id="navbarBasicExample" class="navbar-menu">
-        <div class="navbar-start">
-            {% if request.user.is_authenticated %}
-                <a class="navbar-item" href="{% url 'parsing:index' %}">Home</a>
-                <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>
-                {% if request.user|hasGroup:'Admin' %}
-                    <a class="navbar-item" href="{% url 'parsing:query_list' %}">My queries</a>
-                {% endif %}
-                {% if request.user|hasGroup:'SuperAdmin' %}
-                    <a class="navbar-item" href="{% url 'parsing:query_all' %}">All queries</a>
-                {% endif %}
-                <a class="navbar-item" href="{% url 'parsing:my_reviews' %}">My reviews</a>
-                {% if request.user|hasGroup:'Redactor' %}
-                    <a class="navbar-item" href="{% url 'parsing:all_reviews' %}">All reviews</a>
-                {% endif %}
-            {% else %}
-                <a class="navbar-item" href="{% url 'parsing:index' %}">Home</a>
-            {% endif %}
-            {% if request.user and request.user|hasGroup:'Admin' %}
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
-                        More
-                    </a>
-                    <div class="navbar-dropdown">
-                        {#                        <a class="navbar-item" href="{% url 'parsing:admin_dashboard' %}">Панель управления</a>#}
-                        <a class="navbar-item" href="{% url 'parsing:group_list' %}">Roles</a>
-                        <a class="navbar-item" href="{% url 'parsing:user_list' %}">Users</a>
-                        <a class="navbar-item" href="{% url 'parsing:tags' %}">Tags</a>
-                        <a class="navbar-item" href="{% url 'parsing:review_types' %}">Review types</a>
-                        <hr class="navbar-divider">
-                        <a class="navbar-item" href="#">Settings</a>
-                    </div>
-                </div>
-            {% endif %}
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+               data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
         </div>
 
-        <div class="navbar-end">
-            <div class="navbar-item">
-                <div class="buttons">
-                    {% if request.user.is_authenticated %}
-                        <a class="button is-primary" href="{% url 'parsing:profile' %}">
-                            <strong>{{ request.user.last_name|slice:":1" }}. {{ request.user.first_name }} </strong>
-                        </a>
-                        <a class="button is-light" href="{% url 'logout' %}">
-                            Logout
-                        </a>
-                    {% else %}
-                        <a class="button is-primary" href="{% url 'parsing:registration' %}">
-                            <strong>Регистрация</strong>
-                        </a>
-                        <a class="button is-light" href="{% url 'login' %}">
-                            Login
-                        </a>
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                {% if request.user.is_authenticated %}
+                    <a class="navbar-item" href="{% url 'parsing:index' %}">Home</a>
+                    <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>
+                    {% if request.user|hasGroup:'Admin' %}
+                        <a class="navbar-item" href="{% url 'parsing:query_list' %}">My queries</a>
                     {% endif %}
+                    {% if request.user|hasGroup:'SuperAdmin' %}
+                        <a class="navbar-item" href="{% url 'parsing:query_all' %}">All queries</a>
+                    {% endif %}
+                    <a class="navbar-item" href="{% url 'parsing:my_reviews' %}">My reviews</a>
+                    {% if request.user|hasGroup:'Redactor' %}
+                        <a class="navbar-item" href="{% url 'parsing:all_reviews' %}">All reviews</a>
+                    {% endif %}
+                {% else %}
+                    <a class="navbar-item" href="{% url 'parsing:index' %}">Home</a>
+                {% endif %}
+                {% if request.user and request.user|hasGroup:'Admin' %}
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">
+                            More
+                        </a>
+                        <div class="navbar-dropdown">
+                            {#                        <a class="navbar-item" href="{% url 'parsing:admin_dashboard' %}">Панель управления</a>#}
+                            <a class="navbar-item" href="{% url 'parsing:group_list' %}">Roles</a>
+                            <a class="navbar-item" href="{% url 'parsing:user_list' %}">Users</a>
+                            <a class="navbar-item" href="{% url 'parsing:tags' %}">Tags</a>
+                            <a class="navbar-item" href="{% url 'parsing:review_types' %}">Review types</a>
+                            <hr class="navbar-divider">
+                            <a class="navbar-item" href="#">Settings</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        {% if request.user.is_authenticated %}
+                            <a class="button is-primary" href="{% url 'parsing:profile' %}">
+                                <strong>{{ request.user.last_name|slice:":1" }}. {{ request.user.first_name }} </strong>
+                            </a>
+                            <a class="button is-light" href="{% url 'logout' %}">
+                                Logout
+                            </a>
+                        {% else %}
+                            <a class="button is-primary" href="{% url 'parsing:registration' %}">
+                                <strong>Регистрация</strong>
+                            </a>
+                            <a class="button is-light" href="{% url 'login' %}">
+                                Login
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </nav>
-<div style="padding: 10px">
+<div class="container" style="width:100%; padding:13px; flex-grow: 0">
     {% block breadcrumb %}
 
     {% endblock %}
@@ -520,7 +529,7 @@
         </span>
         <textarea class="message_block_textarea" id="message_block_textarea" cols="0" rows="0"></textarea>
     </div>
-    <div class="content">
+    <div class="content container">
         {% block content %}
 
         {% endblock %}

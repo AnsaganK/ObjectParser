@@ -1,72 +1,79 @@
 {% load app_tags %}
-<div class="box" id="detail_data" style="padding-bottom: 50px">
-    <h4 style="color: #64b5f6; text-align: center; font-size: 21px">{{ place.name }} <br><span
-            style="color:grey; font-size: 11px; ">{{ place.date_update }}</span></h4>
+<div class="" id="detail_data" style="padding-bottom: 50px">
     {% if request.user|hasGroup:'Admin' %}
-        <a href="{% url 'parsing:place_edit' place.cid %}" class="button_add button is-warning">
-            Редактировать данные</a>
-        <a href="{% url 'parsing:place_update' place.pk %}" style="margin-top: 50px" class="button_add button is-info">
-            Обновить данные</a>
+        <div style="display: flex; justify-content: end; flex-direction: row; position:absolute; right: 0px">
+
+            <a href="{% url 'parsing:place_edit' place.cid %}" class="button is-warning mr-3">
+                Edit</a>
+            <a href="{% url 'parsing:place_update' place.pk %}"
+               class="button is-info">
+                Update</a>
+        </div>
     {% endif %}
     <div style="display:flex;" class="columns">
 
-        <img class="column is-4" src="{{ place.get_img }}" alt=""
-             style="height: 360px !important; max-width: 360px !important;margin-right: 30px">
-        <div class="column is-8">
-            <p><span>Название:</span> <span>{{ place.name }}</span></p>
-            <p><span>Адрес:</span> <span>{{ place.address|isValue }}</span></p>
-            <p><span>Сайт:</span> <span><a
+        <div class="box column is-4"
+             style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">
+            <img src="{{ place.get_img }}" alt=""
+                 style="height: 360px !important; width:100%; margin-right: 30px; border-radius: 3px;">
+            <div class="place-info" style="padding: 10px">
+                <p><h5>Name:</h5> <span>{{ place.name }}</span></p>
+                <hr>
+                <p><h5>Address:</h5> <span>{{ place.address|isValue }}</span></p>
+                <hr>
+                <p><h5>Site:</h5> <span><a
                     href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
-            <p><span>Телефон:</span> <span><a
+                <hr>
+                <p><h5>Phone number:</h5> <span><a
                     href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
-            <p><span>Рейтинг:</span> <span>{{ place.rating }} (<span
+                <hr>
+                <p><h5>Rating:</h5> <span>{{ place.rating }} (<span
                     style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
-            </p>
-            <p><span>Ссылка GoogleMaps:</span> <span><a href="https://maps.google.com/?cid={{ place.cid }}"
-                                                        target="_blank">https://maps.google.com/?cid={{ place.cid }}</a></span>
-            </p>
-
-            <p class="iframe_wrap">{% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% else %}Карты
-                нет{% endif %}</p>
-            <p><span>Описание:</span>
-                <span>
+            </div>
+            <div class="maps">
+                {% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% endif %}
+            </div>
+        </div>
+        <div class="column is-8">
+            <h5>Description:</h5>
+            <span>
                         {% if place.description %}
                             {{ place.description }}
                         {% else %}
                             {{ place.get_meta_description }}
                         {% endif %}
                 </span>
-            </p>
-            {% if place.photos.count > 3 %}
 
-                <section class="" style="max-width: 100%">
-                    <div class="is-clipped">
-                        <div id="slider">
-                            {% for photo in place.photos.all %}
-                                <div class=""
-                                     style="height: 210px !important;width: 210px !important; margin: 10px 30px">
-                                    <div class="">
-                                        <figure class="image is-16by9 is-covered">
-                                            <img src="{{ photo.img.url }}" class="card" alt=""
-                                                 style="min-width: 190px !important; min-height: 190px !important;"
-                                                 onclick="showModalImg('{{ photo.img.url }}')">
-                                        </figure>
-                                    </div>
-                                </div>
-                            {% endfor %}
+            <div style="display: flex; justify-content: space-between;flex-wrap: wrap; ">
+                {% for photo in place.photos.all %}
+                    <img src="{{ photo.img.url }}" alt=""
+                         style="min-width: 200px !important; width: 30%; height: 200px !important; margin: 10px; border-radius: 10px;"
+                         onclick="showModalImg('{{ photo.img.url }}')">
+                {% endfor %}
+            </div>
 
-                        </div>
-                    </div>
-                </section>
-            {% else %}
-                <div style="display: flex; justify-content: center;flex-wrap: wrap; ">
-                    {% for photo in place.photos.all %}
-                        <img src="{{ photo.img.url }}" alt=""
-                             style="width: 200px !important; height: 200px !important; margin: 20px; border-radius: 10px;"
-                             onclick="showModalImg('{{ photo.img.url }}')">
+            <h3 class="block_title">Reviews</h3>
+            <a href="" class="button is-success"
+               style="position: absolute;margin-top: -45px;right: 0px;background: #ff764d;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"
+                     style="width: 60%;height: 66%;margin-right: 10px;">
+                    <path fill="#fff"
+                          d="M54.67285,0.91553L51.5,4.08838l-1.38281-1.38281c-1.13281-1.13281-3.10156-1.13281-4.23438,0	L3.29297,45.29346l0,0l0,0l-0.14014,0.14014c-0.13428,0.13428-0.22803,0.3042-0.26904,0.48975L0.02393,58.78271	c-0.07422,0.33398,0.02734,0.68262,0.26904,0.92432C0.48242,59.89648,0.73779,60,1,60c0.07227,0,0.14502-0.00781,0.21729-0.02393	l12.85986-2.85986c0.18555-0.04102,0.35547-0.13428,0.48975-0.26904l38.43298-38.43121l0.87854,0.87848	c0.39014,0.39014,0.39014,1.02441,0.00049,1.41455L41.29297,33.29395c-0.39063,0.39063-0.39063,1.02344,0,1.41406	c0.19531,0.19531,0.45117,0.29297,0.70703,0.29297s0.51172-0.09766,0.70703-0.29297l12.58643-12.58496	c1.16895-1.16992,1.16895-3.07275-0.00049-4.24268l-0.87878-0.87866l2.88269-2.88257	c0.56641-0.56641,0.87793-1.31787,0.87793-2.11719s-0.31152-1.55078-0.87793-2.1167L55.914,8.50238l3.17242-3.17279	C59.67578,4.74121,60,3.95752,60,3.12256c0-0.83447-0.32422-1.61816-0.91309-2.20703	C57.87012-0.30127,55.88965-0.30127,54.67285,0.91553z M4.49176,47.90625l7.60236,7.60199l-9.77673,2.17438L4.49176,47.90625z M13.99976,54.58575l-8.58545-8.58502L42.99994,8.41644l8.58582,8.58545L13.99976,54.58575z M55.88281,12.70508l-2.88275,2.88257	l-8.586-8.58527l2.88281-2.88275c0.37695-0.37695,1.0293-0.37695,1.40625,0l7.17969,7.18018	c0.18848,0.18799,0.29199,0.4375,0.29199,0.70215C56.1748,12.26709,56.07129,12.5166,55.88281,12.70508z M57.67285,3.91504	l-3.17291,3.17328l-1.58588-1.58588l3.17285-3.17285c0.4375-0.4375,1.14844-0.4375,1.58594,0C57.94336,2.6001,58,2.91016,58,3.12256	S57.94336,3.64453,57.67285,3.91504z"></path>
+                </svg>
+                <span>Write review</span>
+            </a>
+            <br>
+            <div class="columns is-centered">
+                <div class="column is-12">
+
+                    {% for review in reviews %}
+                        {% include 'parsing/include/review/card.html' with review=review %}
                     {% endfor %}
+
+
+                    {% include 'parsing/include/pagination.html' with page=reviews %}
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>

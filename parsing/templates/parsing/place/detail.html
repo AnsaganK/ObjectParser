@@ -42,7 +42,7 @@
         <ul>
             <li><a href="{% url 'parsing:query_list' %}">Мои запросы</a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
-            <li class="is-active"><a href="#" aria-current="page">{{ place.cid }}</a></li>
+            <li class="is-active"><a href="#" aria-current="page">{{ place.name }}</a></li>
         </ul>
     </nav>
 
@@ -71,47 +71,8 @@
     {#        </div>#}
     {#    </div>#}
     {% include 'parsing/include/place/card.html' with place=place %}
-    <div class="dropdown" onclick="this.classList.toggle('is-active')">
-        <div class="dropdown-trigger">
-            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu3">
-                <span>Относящийся запросы</span>
-                <span class="icon is-small">
-                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                  </span>
-            </button>
-        </div>
-        <div class="dropdown-menu" id="dropdown-menu3" role="menu">
-            <div class="dropdown-content">
-                {% for query in place.queries.all %}
-                    <a href="{% url 'parsing:places' query.query.slug %}" class="dropdown-item">
-                        {{ query }}
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
     <hr>
-    <h3 class="block_title">Отзывы</h3>
-    <div class="columns is-centered">
-        <div class="review_form box column is-8">
-            {% if not my_review %}
-                {% include 'parsing/include/review/form.html' %}
-            {% else %}
-                <p class="text_centered" style="color:lightgreen;">Ваш отзыв сохранен</p>
-            {% endif %}
-        </div>
-    </div>
-    <br>
-    <div class="columns is-centered">
-        <div class="column is-9 ">
-            {% for review in reviews %}
-                {% include 'parsing/include/review/card.html' with review=review %}
-            {% endfor %}
 
-
-            {% include 'parsing/include/pagination.html' with page=reviews %}
-        </div>
-    </div>
 
 {% endblock %}
 
