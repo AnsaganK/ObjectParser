@@ -23674,9 +23674,9 @@ console.warn: SearchSettings: "get: No settings file exists, new profile?" (new 
 1639942873280	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 console.log: WebExtensions: reset-default-search: starting.
 console.log: WebExtensions: reset-default-search: No addons in our list are installed.
-\\firefox.exe" "--marionette" "-no-remote" "-profile" "C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileEeo1Ng"
-1639942888863	Marionette	INFO	Marionette enabled
-console.warn: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileEeo1Ng\\search.json.mozlz4", (void 0)))
+1639960881964	Marionette	INFO	Stopped listening on port 50196
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.
+: SearchSettings: "get: No settings file exists, new profile?" (new NotFoundError("Could not open the file at C:\\Users\\Ansagan\\AppData\\Local\\Temp\\rust_mozprofileEeo1Ng\\search.json.mozlz4", (void 0)))
 1639942891338	Marionette	INFO	Listening on port 50297
 1639942891604	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
 JavaScript warning: https://www.google.com/maps/_/js/k=maps.m.ru.pOYgBBZrf_0.2019.O/m=sc2,per,mo,lp,ep,ti,ds,stx,pwd,ppl,log,std,b/am=t7hA/rt=j/d=1/rs=ACT90oH6_JgIhwYWraj0LJJPLosRX_K-uw, line 4483: WEBGL_debug_renderer_info is deprecated in Firefox and will be removed. Please use RENDERER.
@@ -23998,3 +23998,5 @@ JavaScript warning: , line 0: WebGL warning: texSubImage: Texture has not been i
 JavaScript warning: , line 0: WebGL warning: texSubImage: Tex image TEXTURE_2D level 0 is incurring lazy initialization.
 console.log: WebExtensions: reset-default-search: starting.
 console.log: WebExtensions: reset-default-search: No addons in our list are installed.
+1639960880889	Marionette	INFO	Stopped listening on port 52601
+console.warn: TopSitesFeed: Failed to fetch data from Contile server: NetworkError when attempting to fetch resource.

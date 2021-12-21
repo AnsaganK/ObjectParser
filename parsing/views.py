@@ -25,7 +25,7 @@ from django.contrib import messages
 from parsing.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file
-from parsing.templatetags.app_tags import GROUPS
+from parsing.templatetags.parsing_tags import GROUPS
 from constants import SERVER_NAME
 
 

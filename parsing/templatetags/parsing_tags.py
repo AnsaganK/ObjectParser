@@ -60,7 +60,7 @@ def isValue(value, returned=' - '):
 def getImg(img):
     if img:
         return img.url
-    return '/static/img/not_found_place.png'
+    return '/static/parsing/img/not_found_place.png'
 
 
 # @register.filter(name="getBaseImg")

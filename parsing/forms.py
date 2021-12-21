@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from parsing.models import Review, Place, Tag, Query, ReviewType
+from parsing.models import Review, Place, Tag, Query, ReviewType, Profile
 
 
 class QueryForm(forms.Form):
@@ -22,6 +22,7 @@ class ReviewTypeForm(forms.ModelForm):
     class Meta:
         model = ReviewType
         fields = ['name']
+
 
 class UserCreateForm(UserCreationForm):
     class Meta:
@@ -57,3 +58,9 @@ class QueryContentForm(forms.ModelForm):
     class Meta:
         model = Query
         fields = ['content', 'tags', 'access']
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['user']

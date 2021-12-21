@@ -13,3 +13,4 @@ redis==3.5.3
 requests==2.26.0
 selenium==3.141.0
 sqlparse==0.4.2
+mimesis==5.1.0

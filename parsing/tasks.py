@@ -4,7 +4,6 @@ import os
 import io
 from io import BytesIO
 import random
-import googlemaps
 from celery import shared_task
 from django.contrib.auth.models import User, Group
 from django.core.files import File

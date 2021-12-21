@@ -75,7 +75,7 @@ class Query(models.Model):
             place = places[0]
             if place and place.img:
                 return f'{place.img.url}'
-        return '/static/img/not_found_place.png'
+        return '/static/parsing/img/not_found_place.png'
 
 
 class QueryPlace(models.Model):
@@ -145,7 +145,7 @@ class Place(models.Model):
 
     @property
     def get_img(self):
-        url = '/static/img/not_found_place.png'
+        url = '/static/parsing/img/not_found_place.png'
         if self.img:
             url = self.img.url
         return url
