@@ -125,6 +125,7 @@ class QueryPlace(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True, related_name='places')
     place = models.ManyToManyField('Place', related_name='queries')
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    date_update = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __str__(self):
         return f'{self.query.name}'
