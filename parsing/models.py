@@ -112,7 +112,7 @@ class Query(models.Model):
     @property
     def duration(self):
         date_format = '%d-%m-%Y %H:%M'
-        end_time = self.places.last().date_create
+        end_time = self.places.order_by('pk').last().date_create
         start_time = self.date_create
         if end_time.day == start_time.day:
             end_time = end_time.strftime('%H:%M')
