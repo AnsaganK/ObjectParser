@@ -1,7 +1,7 @@
 {% extends 'parsing/base.html' %}
 {% load static %}
 {% block title %}
-    Список всех запросов
+    List of all query
 {% endblock %}
 
 {% block content %}
@@ -15,16 +15,16 @@
             {% endfor %}
         </select>
         </div>
-        <h4 class="block_title">Список запросов</h4>
+        <h4 class="block_title">Query group</h4>
         <table class="table caption-top">
             <thead class="table-light">
             <tr>
-                <td>Название</td>
-                <td>Ссылка</td>
-                <td>Создал</td>
-                <td>Страниц</td>
-                <td>Время</td>
-                <td>Количество</td>
+                <td>Name</td>
+                <td>Link</td>
+                <td>Created</td>
+                <td>Pages</td>
+                <td>Time</td>
+                <td>Count</td>
             </tr>
             </thead>
             <tbody>
@@ -55,6 +55,6 @@
         </table>
         {% include 'parsing/include/pagination.html' with page=queries %}
     {% else %}
-        <p class="centered_link">Запросы пока не созданы</p>
+        <p class="centered_link">Queries have not been created yet</p>
     {% endif %}
 {% endblock %}

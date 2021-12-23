@@ -16,16 +16,16 @@
 ;">
                     <a href="{{ place.get_absolute_url }}">{{ place.name }}</a>
                 </span>
-                <span><b>Рейтинг</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
-                <span><b>Адрес</b>: {{ place.address|isValue }}</span><br>
-                <span><b>Телефон</b>: <a
+                <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
+                <span><b>Address</b>: {{ place.address|isValue }}</span><br>
+                <span><b>Phone</b>: <a
                         href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
-                <span><b>Описание</b>:
+                <span><b>Description</b>:
                                 {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
                                     {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
             </div>
         </div>
-        <span>Отзывов: {{ place.reviews.count }}</span>
+        <span>Reviews: {{ place.reviews.count }}</span>
         {% with place.get_more_text as review %}
             {% if review %}
                 <div style="margin: 20px auto">

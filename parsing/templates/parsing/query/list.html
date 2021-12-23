@@ -1,22 +1,22 @@
 {% extends 'parsing/base.html' %}
 {% load static %}
 {% block title %}
-    Список моих запросов
+    List of my query
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'parsing:query_add' %}" class="button is-success button_add">Добавить</a>
+    <a href="{% url 'parsing:query_add' %}" class="button is-success button_add"><i class="fa fa-plus"></i></a>
     {% if queries %}
 
-        <h4 class="block_title">Список запросов</h4>
+        <h4 class="block_title">List of query</h4>
     <table class="table caption-top">
         <thead class="table-light">
             <tr>
-                <td>Название</td>
-                <td>Ссылка</td>
-                <td>Страниц</td>
-                <td>Время</td>
-                <td>Количество</td>
+                <td>Name</td>
+                <td>Link</td>
+                <td>Pages</td>
+                <td>Time</td>
+                <td>Count</td>
             </tr>
         </thead>
         <tbody>

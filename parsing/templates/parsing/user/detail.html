@@ -7,8 +7,8 @@
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:admin_dashboard' %}">Админ панель</a></li>
-            <li><a href="{% url 'parsing:user_list' %}">Пользователи</a></li>
+            <li><a href="{% url 'parsing:admin_dashboard' %}">Admin</a></li>
+            <li><a href="{% url 'parsing:user_list' %}">Users</a></li>
             <li class="is-active"><a href="#" aria-current="page">{{ user.last_name }} {{ user.first_name }}</a></li>
         </ul>
     </nav>
@@ -19,7 +19,7 @@
         {% csrf_token %}
         <div class="field">
             <label for="" class="label">
-                Логин
+                Username
             </label>
             <div class="control">
                 <input type="text" required class="input" name="username" value="{{ user.username }}">
@@ -27,7 +27,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Фамилия
+                Last name
             </label>
             <div class="control">
                 <input type="text" class="input" name="last_name" value="{{ user.last_name }}">
@@ -35,7 +35,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Имя
+                First name
             </label>
             <div class="control">
                 <input type="text" class="input" name="first_name" value="{{ user.first_name }}">
@@ -43,7 +43,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Почта
+                Email
             </label>
             <div class="control">
                 <input type="email" class="input" name="email" value="{{ user.email }}">
@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <button type="submit" class="button is-info">Изменить</button>
+        <button type="submit" class="button is-info">Edit</button>
     </form>
 
 {% endblock %}

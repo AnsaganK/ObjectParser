@@ -7,8 +7,8 @@
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:admin_dashboard' %}">Админ панель</a></li>
-            <li><a href="{% url 'parsing:group_list' %}">Роли</a></li>
+            <li><a href="{% url 'parsing:admin_dashboard' %}">Admin</a></li>
+            <li><a href="{% url 'parsing:group_list' %}">Roles</a></li>
             <li class="is-active"><a href="#" aria-current="page">{{ group.name }}</a></li>
         </ul>
     </nav>
@@ -19,9 +19,9 @@
     <table class="table is-bordered">
         <thead>
         <tr style="text-align: center;">
-            <th>ФИО</th>
-            <th>Роль</th>
-            <th>Регистрация</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Registration</th>
             {% if request.user|hasGroup:'Admin' %}
                 <th></th>
             {% endif %}
@@ -31,7 +31,6 @@
         {% for user in group.user_set.all %}
             <tr>
                 <td>{{ user.last_name }} {{ user.first_name }}</td>
-
                 <td>{% if user.groups.count %}{{ user.groups.first }}{% else %}-{% endif %}</td>
                 <td>{{ user.date_joined }}</td>
                 {% if request.user|hasGroup:'Admin' %}

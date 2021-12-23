@@ -5,13 +5,13 @@
 {% endblock %}
 
 {% block content %}
-    <h2 class="block_title">Все отзывы</h2>
+    <h2 class="block_title">All reviews</h2>
     <div class="columns is-centered">
         <div class="column is-9">
             {% for review in reviews %}
                 {% include 'parsing/include/review/card.html' %}
             {% empty %}
-                <p class="text_centered" style="color:grey;">Отзывов пока нет</p>
+                <p class="text_centered" style="color:grey;">No reviews yet</p>
             {% endfor %}
             {% if reviews %}
                 {% include 'parsing/include/pagination.html' with page=reviews %}

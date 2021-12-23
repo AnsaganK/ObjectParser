@@ -1,16 +1,16 @@
 {% extends 'parsing/base.html' %}
 
 {% block title %}
-    Регистрация
+    Registration
 {% endblock %}
 
 {% block content %}
     <form action="" method="post" class="custom_form">
-          <span class="form_title">Регистрация</span>
+          <span class="form_title">Registration</span>
           {% csrf_token %}
         <div class="field">
             <label for="" class="label">
-                Логин
+                Username
             </label>
             <div class="control">
                 <input type="text" class="input" required name="username">
@@ -18,7 +18,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Фамилия
+                Last name
             </label>
             <div class="control">
                 <input type="text" class="input" name="last_name">
@@ -26,7 +26,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Имя
+                First name
             </label>
             <div class="control">
                 <input type="text" class="input" name="first_name">
@@ -34,7 +34,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Почта
+                Email
             </label>
             <div class="control">
                 <input type="email" class="input" required name="email">
@@ -42,7 +42,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Пароль
+                Password
             </label>
             <div class="control">
                 <input type="password" class="input" required name="password1">
@@ -50,13 +50,13 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Повторите пароль
+                Repeat password
             </label>
             <div class="control">
                 <input type="password" class="input" required name="password2">
             </div>
         </div>
-        <button type="submit" class="button is-info">Зарегистрироваться</button>
-        <a href="{% url 'login' %}" class="centered_link">Вход</a>
+        <button type="submit" class="button is-info">Register now</button>
+        <a href="{% url 'login' %}" class="centered_link">Login</a>
     </form>
 {% endblock %}

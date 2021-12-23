@@ -4,9 +4,7 @@
     <div class="card column is-12 review-card" style="background-color: #FAFAFA; border-radius: 10px">
         <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px; padding-bottom: 10px">
                     <span style="display: flex; justify-content: center; align-items: center">
-                        <img src="
-
-                                {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
+                        <img src="{% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                     <span>
                         <a class="link"
@@ -21,7 +19,7 @@
             {% if review.user == request.user or request.user|hasGroup:'Redactor' %}
                 <a href="{% url 'parsing:my_review_edit' review.pk %}">
                     {% if review.is_edit %}
-                        <span style="color: grey">Было ред.:{{ review.date_update }}</span>
+                        <span style="color: grey">edited:{{ review.date_update }}</span>
                     {% endif %}
                     <span class="icon" style="color: orange">
                             <i class="fas fa-edit"></i>

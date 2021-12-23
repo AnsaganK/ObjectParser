@@ -15,7 +15,7 @@
         {% csrf_token %}
         <div class="field">
             <label for="" class="label">
-                Title объекта
+                Place title
             </label>
             <div class="control">
                 <input type="text" required class="input" name="title" placeholder="Title"
@@ -24,7 +24,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Meta объекта
+                Place meta tag
             </label>
             <div class="control">
                 <textarea type="text" required class="textarea" name="meta"
@@ -34,7 +34,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Название объекта
+                Place name
             </label>
             <div class="control">
                 <input type="text" required class="input" name="name" placeholder="Name" value="{{ place.name }}">
@@ -42,7 +42,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Описание объекта
+                Place description
             </label>
             <div class="control">
                 <textarea type="text" required class="textarea" name="description"
@@ -66,7 +66,7 @@
         {#            <input class="checkbox" type="checkbox" name="detail">#}
         {#            Детальный поиск#}
         {#        </label>#}
-        <button type="submit" class="button is-info centered">Редактировать</button>
+        <button type="submit" class="button is-info centered">Edit</button>
     </form>
 {% endblock %}
 

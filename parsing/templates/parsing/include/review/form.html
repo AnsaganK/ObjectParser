@@ -5,7 +5,7 @@
             {% for number in '54321'|make_list %}
                 <input type="radio" id="rating_{{ number }}"
                        name="rating" value="{{ number }}" {% if review.rating == number|add:'0' %}checked{% endif %}>
-                <label for="rating_{{ number }}" title="Оценка «{{ number }}»"></label>
+                <label for="rating_{{ number }}" title="Rating «{{ number }}»"></label>
             {% endfor %}
         </div>
     {% else %}
@@ -35,7 +35,7 @@
             {% endfor %}
         </div>
     {% endif %}
-    Оставить отзыв как:
+    Leave feedback as:
     {% if review %}<a href="{% if review.user %}{% url 'parsing:public_cabinet' review.user.id %}{% endif %}"
                       class="link">{{ review.get_user_name }}</a>{% else %}{{ request.user.last_name }}
         {{ request.user.first_name }}{% endif %}

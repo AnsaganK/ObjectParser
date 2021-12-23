@@ -3,7 +3,7 @@
 {% load parsing_tags %}
 
 {% block title %}
-    Места
+    Places
 {% endblock %}
 
 
@@ -14,8 +14,8 @@
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:index' %}">Главная</a></li>
-            <li class="is-active"><a href="">Места</a></li>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li class="is-active"><a href="">Places</a></li>
         </ul>
     </nav>
 {% endblock %}
@@ -40,7 +40,7 @@
         </span>
         <form action="">
             <div class="field">
-                <label for="" style="display:block;">Поиск по названию</label>
+                <label for="" style="display:block;">Search by name</label>
                 <div class="control" style="display: flex">
                     <input type="text" class="input" name="search" id="name" placeholder="search"
                            {% if search %}value="{{ search }}"{% else %}{% endif %}>
@@ -50,7 +50,7 @@
         </form>
         <hr>
         <form action="">
-            <label for="">Поиск по тэгам</label>
+            <label for="">Search by tags</label>
             <div class="tag_items">
                 {% for tag in tags %}
                     <div class="tag_item">

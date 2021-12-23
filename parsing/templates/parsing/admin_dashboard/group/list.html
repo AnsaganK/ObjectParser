@@ -7,8 +7,8 @@
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:admin_dashboard' %}">Админ панель</a></li>
-            <li class="is-active"><a href="#" aria-current="page">Роли</a></li>
+            <li><a href="{% url 'parsing:admin_dashboard' %}">Admin</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Roles</a></li>
         </ul>
     </nav>
 {% endblock %}
@@ -17,8 +17,8 @@
     <table class="table is-bordered">
         <thead>
         <tr style="text-align: center;">
-            <th>Роль</th>
-            <th>Кол-во людей</th>
+            <th>Role</th>
+            <th>User count</th>
         </tr>
         </thead>
         <tbody>
@@ -30,8 +30,7 @@
             </tr>
         {% endfor %}
         <tr>
-            <td><a href="{% url 'parsing:group_not' %}">Пользователи
-                без роли</a></td>
+            <td><a href="{% url 'parsing:group_not' %}">Users without a role</a></td>
             <td>{{ groups_not_count }}</td>
         </tr>
         </tbody>

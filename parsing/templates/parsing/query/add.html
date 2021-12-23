@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    Добавление запроса
+    Query create
 {% endblock %}
 
 {% block style %}
@@ -15,7 +15,7 @@
         {% csrf_token %}
         <div class="field">
             <label for="" class="label">
-                Название запроса
+                Query name
             </label>
             <div class="control">
                 <input type="text" required class="input" name="name" placeholder="Отели в москве">
@@ -25,11 +25,11 @@
             <input type="checkbox" id="page_checkbox" name="not_all">
             <span class="slider"></span>
         </label>
-        <div style="color: grey; text-align: center; margin-bottom: 10px;" id="all_pages_text">Все страницы</div>
+        <div style="color: grey; text-align: center; margin-bottom: 10px;" id="all_pages_text">All pages</div>
 
         <div class="field hidden_block" id="page">
             <label for="" class="label">
-                Количевство страниц
+                Pages count
             </label>
             <div class="control">
                 <input type="number" class="input" value="1">

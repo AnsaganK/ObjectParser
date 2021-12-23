@@ -1,14 +1,14 @@
 {% extends 'parsing/base.html' %}
 
 {% block title %}
-    Пользователи без групп
+    Users without a role
 {% endblock %}
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:admin_dashboard' %}">Админ панель</a></li>
-            <li><a href="{% url 'parsing:group_list' %}">Роли</a></li>
-            <li class="is-active"><a href="#" aria-current="page">Без роли</a></li>
+            <li><a href="{% url 'parsing:admin_dashboard' %}">Admin</a></li>
+            <li><a href="{% url 'parsing:group_list' %}">Roles</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Without a role</a></li>
         </ul>
     </nav>
 {% endblock %}

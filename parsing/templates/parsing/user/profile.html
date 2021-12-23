@@ -1,7 +1,7 @@
 {% extends 'parsing/base.html' %}
 
 {% block title %}
-    Профиль
+    Profile
 {% endblock %}
 
 
@@ -13,7 +13,7 @@
         {% csrf_token %}
         <div class="field">
             <label for="" class="label">
-                Логин
+                Username
             </label>
             <div class="control">
                 <input type="text" class="input" required name="username" value="{{ user.username }}">
@@ -21,7 +21,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Фамилия
+                Last name
             </label>
             <div class="control">
                 <input type="text" class="input" name="last_name" value="{{ user.last_name }}">
@@ -29,7 +29,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Имя
+                First name
             </label>
             <div class="control">
                 <input type="text" class="input" name="first_name" value="{{ user.first_name }}">
@@ -37,7 +37,7 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Почта
+                Email
             </label>
             <div class="control">
                 <input type="email" class="input" name="email" value="{{ user.email }}">
@@ -45,8 +45,8 @@
         </div>
 
         <div class="centered centered_flex">
-            <button type="submit" class="button is-info">Изменить</button>
-            <a href="{% url 'logout' %}" class="button is-danger">Выход</a>
+            <button type="submit" class="button is-info">Edit</button>
+            <a href="{% url 'logout' %}" class="button is-danger">Logout</a>
         </div>
     </form>
 {% endblock %}

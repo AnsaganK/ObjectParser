@@ -1,7 +1,7 @@
 {% extends 'parsing/base.html' %}
 {% load static %}
 {% block title %}
-    Редактирование типа отзыва
+    Edit review type
 {% endblock %}
 
 
@@ -10,12 +10,12 @@
         {% csrf_token %}
         <div class="field">
             <label for="" class="label">
-                Тип запроса
+                Query type
             </label>
             <div class="control">
                 <input type="text" required class="input" name="name" placeholder="" value="{{ review_type.name }}">
             </div>
         </div>
-        <button type="submit" class="button is-info centered">Редактировать</button>
+        <button type="submit" class="button is-info centered">Edit</button>
     </form>
 {% endblock %}

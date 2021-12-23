@@ -8,17 +8,17 @@
 {% block content %}
     {% if request.user.is_authenticated %}
         <div class="statistic_text">
-            <h3>Статистика по аккаунту</h3>
-            <p>Пользователь: {{ user.last_name }} {{ user.first_name }}</p>
-            <p>На сайте с: {{ user.date_joined }}</p>
+            <h3>Account statistics</h3>
+            <p>User: {{ user.last_name }} {{ user.first_name }}</p>
+            <p>On site with: {{ user.date_joined }}</p>
             {% if request.user|hasGroup:'Admin' %}
-                <p>Всего запросов: {{ queries.count }}</p>
-                <p>Всего данных: {{ places.distinct.count }}</p>
+                <p>All query count: {{ queries.count }}</p>
+                <p>All place count: {{ places.distinct.count }}</p>
             {% endif %}
         </div>
     {% else %}
-        <p class="welcome_text">Сайт предназначенный для парсинга, <a href="{% url 'login' %}">войдите</a> либо <a
-                href="{% url 'parsing:registration' %}">зарегистрируйтесь</a> чтобы продолжить</p>
+        <p class="welcome_text">Site dedicated to finding places, <a href="{% url 'login' %}">Login</a> or <a
+                href="{% url 'parsing:registration' %}">Registration</a></p>
     {% endif %}
 
 {% endblock %}

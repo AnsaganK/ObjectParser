@@ -13,8 +13,8 @@
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:index' %}">Главная</a></li>
-            <li><a href="{% url 'parsing:queries' %}">Места</a></li>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li><a href="{% url 'parsing:queries' %}">Places</a></li>
             <li class="is-active"><a href="">{{ query.name }}</a></li>
         </ul>
     </nav>
@@ -39,7 +39,7 @@
     <hr>
     <div class="columns is-centered">
         <div class="column is-9">
-            <h4 style="text-align: center">Описание</h4>
+            <h4 style="text-align: center">Description</h4>
             {% if request.user|hasGroup:'Admin' %}
                 <a href="{% url 'parsing:query_edit' query.slug %}" class="button is-success is-light is-outlined centered"
                    style="width: fit-content"><i class="fa fa-edit"></i></a>
@@ -57,7 +57,7 @@
     </div>
     {% if request.user.is_authenticated %}
         <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined is-large"
-           style="margin: 10px auto; display: block; width: fit-content ">Редактировать рейтинг</a>
+           style="margin: 10px auto; display: block; width: fit-content ">Edit rating</a>
     {% endif %}
     <div class="columns is-centered is-multiline">
         {% for place in top_places %}
@@ -66,7 +66,7 @@
     </div>
     <hr>
 
-    <h4 class="block_title">Весь список</h4>
+    <h4 class="block_title">All places</h4>
     <div class="columns is-multiline">
         {% for letter in letters %}
             <div class="column is-3">
@@ -80,7 +80,7 @@
     </div>
     <hr>
     <div style="color: grey">
-        <p>Всего {{ places.count }} объектов</p>
+        <p>Total {{ places.count }} places</p>
     </div>
 {% endblock %}
 
