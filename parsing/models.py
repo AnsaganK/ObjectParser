@@ -104,17 +104,27 @@ class Query(models.Model):
     @property
     def base_img(self):
         # host = 'http://170.130.40.103'
-        places = Place.objects.filter(queries__query_id=self.id)
-        if len(places) > 0:
-            place = places[0]
-            if place and place.cloud_img:
-                return f'{place.cloud_img.get_default_img}'
+        place = Place.objects.filter(queries__query_id=self.id).order_by('pk').first()
+        if place and place.cloud_img:
+            return f'{place.cloud_img.get_default_img}'
         return '/static/parsing/img/not_found_place.png'
+
+    @property
+    def duration(self):
+        date_format = '%d-%m-%Y %H:%M'
+        end_time = self.places.last().date_create
+        start_time = self.date_create
+        if end_time.day == start_time.day:
+            end_time = end_time.strftime('%H:%M')
+        else:
+            end_time = end_time.strftime(date_format)
+        return f'{start_time.strftime(date_format)} - {end_time}'
 
 
 class QueryPlace(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True, related_name='places')
     place = models.ManyToManyField('Place', related_name='queries')
+    date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f'{self.query.name}'
