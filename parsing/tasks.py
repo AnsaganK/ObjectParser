@@ -190,7 +190,7 @@ class GetPhotos:
             photos = self.finds_photo_elements()
             print(len(photos))
             if photos:
-                photos = photos[:5]
+                photos = photos[:6]
             for photo in photos:
                 self.check_photo(photo)
             print(self.photo_list)
