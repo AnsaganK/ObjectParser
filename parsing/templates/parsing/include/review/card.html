@@ -6,7 +6,7 @@
                     <span style="display: flex; justify-content: center; align-items: center">
                         <img src="
 
-                                {% if review.user.profile.img %}{{ review.user.profile.img.url }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
+                                {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                     <span>
                         <a class="link"

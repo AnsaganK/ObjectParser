@@ -15,6 +15,7 @@ from mimesis.enums import Gender
 from pytils.translit import slugify
 
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart
+from .utils import save_image
 
 
 @shared_task
@@ -137,24 +138,6 @@ def get_soup(html):
     return html
 
 
-def get_attractions(driver):
-    attractions_list = []
-    try:
-        attractions = is_find_object(driver, 'xtu1r-K9a4Re-ibnC6b-haAclf')
-        attractions = attractions.find_elements_by_class_name('NovK6')
-        for attraction in attractions:
-            pattern = r'(?<=image:url\(//)(.+?)(?=\))'
-            attraction_img = attraction.get_attribute('innerHTML')
-            attraction_img_url = re.search(pattern, attraction_img)
-            attraction_text = attraction.get_attribute('innerText')
-            attractions_list.append({'url': attraction_img_url.group(), 'text': attraction_text})
-    except Exception as e:
-        print('Ошибка при  получении достопримечательностей: ', e.__class__.__name__)
-        return None
-    print(attractions_list)
-    return attractions_list
-
-
 class GetPhotos:
     def __init__(self, driver):
         self.photo_list = []
@@ -274,32 +257,19 @@ def set_photo_url(img_url, place_id, base=True):
             r = requests.get(img_url, timeout=10)
             if r.status_code == 200:
                 content = r.content
+                cloud_image = save_image(content)
                 if base:
-                    place.img_url = img_url
-                    place.img.save(os.path.basename(img_url), ContentFile(content))
+                    place.cloud_img = cloud_image
                     place.save()
                 else:
                     photo = PlacePhoto(place=place)
-                    photo.img.save(os.path.basename(img_url), ContentFile(content))
+                    photo.cloud_img = cloud_image
                     photo.save()
                 return 'Фото назначено для {}'.format(place_id)
         return 'Фото не назначено {}'.format(place_id)
     except Exception as e:
         print(f'Ошиька при назначении фото: {img_url}', e.__class__.__name__)
 
-
-def set_photo_review(img_url, review_id):
-    try:
-        review = Review.objects.filter(id=review_id).first()
-        if review and img_url:
-            r = requests.get(img_url, timeout=10)
-            if r.status_code == 200:
-                content = r.content
-                review.author_img.save(os.path.basename(img_url), ContentFile(content))
-                review.save()
-
-    except Exception as e:
-        print(e.__class__.__name__)
 
 
 def set_photo_content(content, place_id, file_name='no_name'):
@@ -310,56 +280,6 @@ def set_photo_content(content, place_id, file_name='no_name'):
     place_photo.img.save(os.path.basename(file_name), ContentFile(content))
     place_photo.place = place
     place_photo.save()
-
-
-def get_review_rating(review):
-    try:
-        rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
-        rating = rating.split('/')
-        available_rating = int(rating[-1])
-        checked_rating = int(rating[0])
-        if available_rating > 5:
-            rating_coefficent = available_rating / 5
-            checked_rating /= rating_coefficent
-        rating = int(checked_rating)
-    except:
-        try:
-            rating = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
-        except Exception as e:
-            print('Ошибка при получении звезд: ', e.__class__.__name__)
-            rating = 1
-    return rating
-
-
-def review_more_button_click(driver, review):
-    review_id = review.get_attribute('data-review-id')
-    driver.execute_script(f'''
-                            let review = document.querySelector("div[data-review-id={review_id}]");
-                            let more = review.getElementsByClassName('ODSEW-KoToPc-ShBeI')[0].click();
-                            ''')
-    print('Review More Button Clicked')
-
-
-def get_review_text(driver, review):
-    try:
-        try:
-            review_more_button_click(driver, review)
-            # wait = WebDriverWait(review, 10)
-            # wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'ODSEW-KoToPc-ShBeI')))
-            # more_text_button = review.find_element_by_class_name('ODSEW-KoToPc-ShBeI')
-            # print(more_text_button.text)
-            # clicked_object(more_text_button, 10)
-            time.sleep(1)
-            print('Нашел кнопку ЕЩЕ')
-        except Exception as e:
-            print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
-            pass
-
-        text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
-    except Exception as e:
-        text = ''
-        print('Ошибка в отзыве: ', e.__class__.__name__)
-    return text
 
 
 class GetReviews:
@@ -406,10 +326,52 @@ class GetReviews:
         except Exception as e:
             print('--- Ошибка при скролле по отзывам')
 
+    def review_more_button_click(self, review):
+        review_id = review.get_attribute('data-review-id')
+        self.driver.execute_script(f'''
+                                let review = document.querySelector("div[data-review-id={review_id}]");
+                                let more = review.getElementsByClassName('ODSEW-KoToPc-ShBeI')[0].click();
+                                ''')
+        print('Review More Button Clicked')
+
+    def get_review_text(self, review):
+        try:
+            try:
+                self.review_more_button_click(review)
+                time.sleep(1)
+                print('Нашел кнопку ЕЩЕ')
+            except Exception as e:
+                print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
+                pass
+
+            text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
+        except Exception as e:
+            text = ''
+            print('Ошибка в отзыве: ', e.__class__.__name__)
+        return text
+
+    def get_review_rating(self, review):
+        try:
+            rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
+            rating = rating.split('/')
+            available_rating = int(rating[-1])
+            checked_rating = int(rating[0])
+            if available_rating > 5:
+                rating_coefficent = available_rating / 5
+                checked_rating /= rating_coefficent
+            rating = int(checked_rating)
+        except:
+            try:
+                rating = len(review.find_elements_by_class_name('ODSEW-ShBeI-fI6EEc-active'))
+            except Exception as e:
+                print('Ошибка при получении звезд: ', e.__class__.__name__)
+                rating = 1
+        return rating
+
     def check_review(self, review):
         try:
-            rating = get_review_rating(review)
-            text = get_review_text(self.driver, review)
+            rating = self.get_review_rating(review)
+            text = self.get_review_text(review)
             if text:
                 self.review_list.append({
                     'rating': rating,
@@ -452,28 +414,6 @@ class GetReviews:
             print('Ошибка при получении отзывов: ', e.__class__.__name__)
         self.close_review_pages()
         return self.review_list
-
-
-#
-# def get_this_page_reviews(driver):
-#     review_list = []
-#     try:
-#         reviews = driver.find_elements_by_class_name('ODSEW-ShBeI')
-#         for review in reviews:
-#             try:
-#                 author_name = review.find_element_by_class_name('ODSEW-ShBeI-title').get_attribute('innerText')
-#             except:
-#                 author_name = 'no_name'
-#             rating = get_review_rating(review)
-#             text = get_review_text(driver, review)
-#             review_list.append({
-#                 'author_name': author_name,
-#                 'rating': rating,
-#                 'text': text
-#             })
-#     except Exception as e:
-#         print('Ошибка при получении отзывов', e.__class__.__name__)
-#     return review_list
 
 
 def set_review_parts(rating, review):
@@ -551,7 +491,8 @@ class GenerateUser():
         if group:
             user.groups.add(group)
         user.profile.gender = user_data['gender']
-        user.profile.img.save(os.path.basename(user.username) + '.png', ContentFile(user_data['img']))
+        cloud_image = save_image(user_data['img'])
+        user.profile.cloud_img = cloud_image
         user.save()
         return user
 
@@ -566,14 +507,13 @@ def set_reviews(review_list, place):
             translate_word_1 = '(Translated by Google)'
             translate_word_2 = '(Original)'
             if translate_word_1 in review['text'] and translate_word_2 in review['text']:
-                text = review['text'][len(translate_word_1)+1:review['text'].find(translate_word_2)-1]
+                text = review['text'][len(translate_word_1) + 1:review['text'].find(translate_word_2) - 1]
             else:
                 text = review['text']
             review = Review.objects.create(user=user,
                                            rating=review['rating'],
                                            text=text,
-                                           place=place,
-                                           is_google=True)
+                                           place=place)
             review.save()
             try:
                 set_review_parts(rating=review.rating, review=review)
@@ -682,18 +622,6 @@ def set_info(data, place):
     place.save()
 
 
-def cid_to_place_id(cid):
-    url = f'https://maps.googleapis.com/maps/api/place/details/json?cid={cid}&key={KEY}'
-    print(url)
-    r = requests.get(url)
-    print(r)
-    if r.status_code == 200 and r.json()['status'] == 'OK':
-        print(r.json())
-        return r.json()
-    print('Ошибка ', url)
-    return None
-
-
 def get_coordinate(driver):
     try:
         time.sleep(1)
@@ -733,10 +661,6 @@ def set_coordinate(data, place):
     if data:
         place.coordinate_html = data
         place.save()
-
-
-def place_update_driver(cid):
-    pass
 
 
 def place_create_driver(cid, query_id):
@@ -809,90 +733,13 @@ def place_create_driver(cid, query_id):
         driver.close()
 
 
-def set_api_photos(photos, place_id):
-    place = Place.objects.filter(id=place_id).first()
-    if not place:
-        return None
-    place.photos.all().delete()
-    photos = photos[:6]
-    base = True
-    for photo in photos:
-        print(photo)
-        photo_reference = photo['photo_reference']
-        url = f'https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference={photo_reference}&key={KEY}'
-        set_photo_url(img_url=url, place_id=place.id, base=base)
-        base = False
-        # image = gmaps.places_photo(photo_reference=photo_reference, max_width=width, max_height=height)
-        # image_file = ''
-        # for chunk in image:
-        #     image_file += str(chunk)
-        # image_file = base64.b64decode(image_file)
-        # print(image_file)
-        # set_photo_content(image_file, place_id=place.id, file_name=photo_reference)
-    time.sleep(1)
-
-
 def get_value_or_none(data, key, default_value=' - '):
     if key in data:
         return data[key]
     return default_value
 
 
-def place_create_api(cid, query_id, api_data):
-    name = get_value_or_none(api_data, 'name')
-    address = get_value_or_none(api_data, 'formatted_address')
-    phone_number = get_value_or_none(api_data, 'formatted_phone_number')
-    rating = float(api_data['rating'] if 'rating' in api_data else 0)
-    rating_user_count = float(api_data['user_ratings_total'] if 'user_ratings_total' in api_data else 0)
-    site = get_value_or_none(api_data, 'website')
-    place = Place.objects.filter(cid=cid).first()
-    if not place:
-        print('Такого объекта нет Создаю')
-        place = Place.objects.create(cid=cid)
-    place.name = name
-    place.address = address
-    place.phone_number = phone_number
-    place.rating = rating
-    place.rating_user_count = rating_user_count
-    place.site = site
-    place.isApiData = True
-    place.save()
-    place.slug = slugify(f'{name}-{str(place.id)}')
-    place.save()
-
-    query = Query.objects.filter(id=query_id).first()
-    create_query_place(place, query)
-
-    get_site_description.delay(site, place.id)
-
-    print('Беру фотографии')
-    photos = api_data['photos'] if 'photos' in api_data else []
-    print(len(photos))
-    set_api_photos(photos, place.id)
-
-    print('Беру отзывы')
-    reviews = api_data['reviews'] if 'reviews' in api_data else []
-    set_reviews(reviews, place)
-
-
-def place_detail(cid, query_id):
-    place_create_driver(cid, query_id)
-
-
-# def place_api_detail(cid):
-#     url = CID_API_URL.format(cid)
-#     r = requests.get(url)
-#     if r.status_code == 200:
-#         print(r.json())
-#         if r.json()['status'] == 'OK':
-#             result = r.json()['result']
-#             print(result['place_id'], result['formatted_address'])
-#         else:
-#             print(r.json()['status'])
-#     return None
-
-
-# Функция которая парсит отели на странице
+# Функция которая парсит объекты на странице
 def parse_places(driver, query_id):
     time.sleep(3)
     try:
@@ -906,12 +753,11 @@ def parse_places(driver, query_id):
         cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name(
             'C8TUKc') else None
         print('https://www.google.com/maps?cid=' + cid)
-        place_detail(cid, query_id) if cid else None
+        place_create_driver(cid, query_id) if cid else None
     return True
 
 
 # Функция для смены страниц
-
 def get_pagination(driver, page):
     try:
         pagination = is_find_object(driver, 'AaVjTc')
@@ -945,20 +791,12 @@ def startParsing(query_name, query_id, pages=None):
     display = None
     print(CUSTOM_URL.format(query_name))
     if IS_LINUX:
-        # from xvfbwrapper import Xvfb
-        # with Xvfb() as xvfb:
-        #     display = xvfb.start()
-
         from pyvirtualdisplay import Display
         display = Display(visible=False, size=(800, 600))
         display.start()
         driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
     else:
         driver = startFireFox(url=CUSTOM_URL.format(query_name))
-    # print(1)
-    # driver = startFireFox(url=CUSTOM_URL.format(query_name))
-
-    # print(2)
     try:
         if pages:
             for page in range(1, pages + 1):
@@ -1011,69 +849,9 @@ def startParsing(query_name, query_id, pages=None):
         print(e.__class__.__name__)
         if display:
             display.stop()
-            # display.popen.terminate()
 
         driver.close()
         print('Критическая ошибка')
-
-
-# Запуск скрипта
-# def main():
-#     query_name = 'name'
-#     query_id = 1
-#     pages = 4
-#     print(1)
-#     driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
-#     print(2)
-#     try:
-#         if pages:
-#             for page in range(1, pages+1):
-#                 # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
-#                 if page == 1:
-#                     print(f'СТРАНИЦА {page} начата')
-#                     parse_places(driver, query_id)
-#                     print(f'{page} страница готова')
-#                     print('-----------------------------------')
-#                 elif get_pagination(driver, page):
-#                     print(f'СТРАНИЦА {page} начата')
-#                     parse_places(driver, query_id)
-#                     print(f'{page} страница готова')
-#                     print('-----------------------------------')
-#             print('Парсинг завершен')
-#             driver.close()
-#         else:
-#             page = 1
-#             while True:
-#                 if pages== 1:
-#                     print(f'СТРАНИЦА {page} начата')
-#                     if not parse_places(driver, query_id):
-#                         break
-#                     print(f'{page} страница готова')
-#                     print('-----------------------------------')
-#                 elif get_pagination(driver, page):
-#                     print(f'СТРАНИЦА {page} начата')
-#                     if not parse_places(driver, query_id):
-#                         break
-#                     print(f'{page} страница готова')
-#                     print('-----------------------------------')
-#                 page += 1
-#             query = Query.objects.filter(id=query_id).first()
-#             query.status = 'success'
-#             query.save()
-#             print('Парсинг завершен')
-#             driver.close()
-#     except Exception as e:
-#         print(e.__class__.__name__)
-#         if display:
-#             display.stop()
-#
-#         driver.close()
-#         print('Критическая ошибка')
-
-
-# if __name__ == '__main__':
-#     # startTime = datetime.now()
-#     main()
 
 
 # Все что ниже нужно для генерации CSV файла
@@ -1125,17 +903,3 @@ def generate_file(file_name, places):
     )
     response['Content-Disposition'] = f'attachment;filename={file_name}.csv'
     return response
-    # response = StreamingHttpResponse(content_type='text/csv')
-    # response['Content-Disposition'] = 'attachment; filename="data.csv"'
-    #
-    # writer = csv.writer(response, delimiter=',', lineterminator="\r")
-    # query_list = [['place_id', 'name', 'formatted_address', 'rating']]
-    # for query in queries:
-    #     query_object = []
-    #     query_object.append(query.place_id)
-    #     query_object.append(query.data['name'] if 'name' in query.data else '-')
-    #     query_object.append(query.data['formatted_address'] if 'formatted_address' in query.data else '-')
-    #     query_object.append(query.data['rating'] if 'rating' in query.data else '-')
-    #     query_list.append(query_object)
-    # writer.writerows(query_list)
-    # return response

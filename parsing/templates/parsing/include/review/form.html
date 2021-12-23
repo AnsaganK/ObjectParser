@@ -36,7 +36,7 @@
         </div>
     {% endif %}
     Оставить отзыв как:
-    {% if review %}<a href="{% if review.is_google %}{{ review.author_link }}{% endif %}"
+    {% if review %}<a href="{% if review.user %}{% url 'parsing:public_cabinet' review.user.id %}{% endif %}"
                       class="link">{{ review.get_user_name }}</a>{% else %}{{ request.user.last_name }}
         {{ request.user.first_name }}{% endif %}
     <textarea name="text" class="textarea" id="" cols="" rows="8">{% if review %}{{ review.text }}{% endif %}</textarea>

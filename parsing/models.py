@@ -17,6 +17,8 @@ from django.shortcuts import reverse, redirect
 #         return self.name
 from django.utils.text import slugify
 
+from constants import CLOUDFLARE_IMAGE_DELIVERY_URL
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=1000, null=True, blank=True, unique=True)
@@ -29,6 +31,38 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
+        ordering = ['-pk']
+
+
+class CloudImage(models.Model):
+    image_id = models.TextField()
+    image_response = models.JSONField()
+
+    def __str__(self):
+        return self.image_id
+
+    def get_img(self, variant):
+        url = CLOUDFLARE_IMAGE_DELIVERY_URL.format(image_id=self.image_id, variant=variant)
+        return url
+
+    @property
+    def get_default_img(self):
+        variant = 'public'
+        return self.get_img(variant)
+
+    @property
+    def get_thumbnail_img(self):
+        variant = 'thumbnail'
+        return self.get_img(variant)
+
+    @property
+    def get_min_img(self):
+        variant = 'min'
+        return self.get_img(variant)
+
+    class Meta:
+        verbose_name = 'CloudFlare image'
+        verbose_name_plural = 'CloudFlare images'
         ordering = ['-pk']
 
 
@@ -73,8 +107,8 @@ class Query(models.Model):
         places = Place.objects.filter(queries__query_id=self.id)
         if len(places) > 0:
             place = places[0]
-            if place and place.img:
-                return f'{place.img.url}'
+            if place and place.cloud_img:
+                return f'{place.cloud_img.get_default_img}'
         return '/static/parsing/img/not_found_place.png'
 
 
@@ -97,14 +131,12 @@ class Place(models.Model):
     name = models.CharField(max_length=1000, null=True, blank=True)
     slug = models.SlugField(max_length=1000, null=True, blank=True)
     cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True, unique=True)
-    img = models.ImageField(upload_to='place_images', null=True, blank=True, verbose_name='Картинка')
-    img_url = models.TextField(null=True, blank=True)
+    cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
     address = models.CharField(max_length=500, null=True, blank=True)
     phone_number = models.CharField(max_length=500, null=True, blank=True)
     site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     meta = models.TextField(null=True, blank=True, default='<meta>')
-    attractions = models.ManyToManyField('Attraction', null=True, blank=True, related_name='places')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
     position = models.IntegerField(default=None, null=True, blank=True, db_index=True,
@@ -143,12 +175,12 @@ class Place(models.Model):
             return self.description
         return self.get_meta_description()
 
-    @property
-    def get_img(self):
-        url = '/static/parsing/img/not_found_place.png'
-        if self.img:
-            url = self.img.url
-        return url
+    # @property
+    # def get_img(self):
+    #     url = '/static/parsing/img/not_found_place.png'
+    #     if self.img:
+    #         url = self.img.url
+    #     return url
 
     @property
     def isSite(self):
@@ -191,7 +223,7 @@ class Place(models.Model):
 
 
 class PlacePhoto(models.Model):
-    img = models.ImageField(upload_to='place_photos', null=True, blank=True)
+    cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, null=True, blank=True, related_name='photos')
 
     def __str__(self):
@@ -233,11 +265,6 @@ class Review(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField()
-
-    author_link = models.TextField(null=True, blank=True)
-    author_name = models.CharField(max_length=500, null=True, blank=True)
-    author_img_link = models.TextField(null=True, blank=True)
-    author_img = models.ImageField(upload_to='google_avatars', null=True, blank=True)
     stars_choices = ((i, i) for i in range(1, 6))
     rating = models.IntegerField(default=1, choices=stars_choices, null=True, blank=True)
 
@@ -245,26 +272,12 @@ class Review(models.Model):
     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
 
-    is_google = models.BooleanField(default=False)
-
-    is_dependent = models.BooleanField(default=False)
-    dependent_choices = (
-        ('VAeng', 'VAeng'),
-        ('clarion', 'clarion'),
-    )
-    dependent_site = models.CharField(max_length=100, choices=dependent_choices, null=True, blank=True,
-                                      verbose_name='Зависимый сайт')
-    dependent_user_id = models.IntegerField(default=0, null=True, blank=True,
-                                            verbose_name='ID пользователя на зависимом сайте')
-
     def __str__(self):
         return self.text[:30]
 
     @property
     def get_user_name(self):
-        if self.user:
-            return f'{self.user.profile.full_name}'
-        return self.author_name
+        return f'{self.user.profile.full_name}'
 
     @property
     def get_rating(self):
@@ -278,48 +291,6 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = ['-pk']
-
-
-# class ReviewGoogle(models.Model):
-#     author_name = models.CharField(max_length=500, null=True, blank=True)
-#     rating = models.IntegerField(null=True, blank=True)
-#     text = models.TextField(null=True, blank=True)
-#
-#     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews_google')
-#     date_create = models.DateTimeField(null=True, blank=True, auto_now_add=True)
-#     date_update = models.DateTimeField(null=True, blank=True, auto_now=True)
-#
-#     def __str__(self):
-#         return self.author_name
-#
-#     class Meta:
-#         verbose_name = 'Отзыв с Google'
-#         verbose_name_plural = 'Отзывы с Google'
-#         ordering = ['-text']
-
-
-class AttractionImage(models.Model):
-    url = models.URLField()
-    img = models.ImageField(upload_to='attractions')
-
-    def __str__(self):
-        return self.url
-
-    class Meta:
-        verbose_name = 'Картинка достопримечательности'
-        verbose_name_plural = 'Картинки'
-
-
-class Attraction(models.Model):
-    name = models.CharField(max_length=250)
-    img = models.ForeignKey(AttractionImage, on_delete=models.DO_NOTHING, related_name='attractions')
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = 'Достопричательность'
-        verbose_name_plural = 'Достопричательности'
 
 
 class Location(models.Model):
@@ -339,7 +310,7 @@ class Location(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    img = models.ImageField(upload_to='user_avatars', null=True, blank=True)
+    cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
     birth_date = models.DateTimeField(null=True, blank=True)
     gender_choices = (
         ('FEMALE', 'FEMALE'),

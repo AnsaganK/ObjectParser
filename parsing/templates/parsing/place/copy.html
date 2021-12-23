@@ -178,7 +178,7 @@
 <div class="box box_inner">
     <h2 class="place_name">{{ place.name }}</h2>
     <span class="line"></span>
-    <img src="{{ server_name }}{{ place.get_img }}" class="place_image box" alt="">
+    <img src="{{ place.cloud_img.get_default_img }}" class="place_image box" alt="">
     <table class="table">
         <tr>
             <td>Название</td>

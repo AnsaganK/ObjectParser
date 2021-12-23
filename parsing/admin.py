@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart
+from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart, CloudImage
 
 
 @admin.register(Query)
@@ -11,7 +11,7 @@ class QueryAdmin(admin.ModelAdmin):
 
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'cid', 'name', 'img_url']
+    list_display = ['id', 'cid', 'name']
     list_display_links = ['id']
     # list_filter = ['query']
 
@@ -34,7 +34,7 @@ class ReviewPartAdmin(admin.ModelAdmin):
 
 admin.site.register(Profile)
 admin.site.register(QueryPlace)
+admin.site.register(CloudImage)
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['id', 'date_create']
-    list_filter = ['dependent_site']

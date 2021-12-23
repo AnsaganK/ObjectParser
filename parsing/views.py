@@ -1,11 +1,10 @@
 import json
 from email.headerregistry import Group
 
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -17,44 +16,15 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
     QueryContentForm, ReviewTypeForm
 from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart
-from django.contrib import messages
-
-from parsing.serializers import QuerySerializer, QueryPlaceSerializer, PlaceSerializer, PlaceMinSerializer, TagSerializer, \
+from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
+    TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file
-from parsing.templatetags.parsing_tags import GROUPS
-from constants import SERVER_NAME
-
-
-def show_form_errors(request, errors):
-    for error in errors:
-        messages.error(request, f'{error} {errors[error]}')
-
-
-def get_paginator(request, queryset, count):
-    paginator = Paginator(queryset, count)
-    page = request.GET.get('page')
-    try:
-        queryset = paginator.page(page)
-    except PageNotAnInteger:
-        queryset = paginator.page(1)
-    except EmptyPage:
-        queryset = paginator.page(paginator.num_pages)
-    return queryset
-
-
-def has_group(user, group_name):
-    group = user.groups.first()
-    if not group:
-        return False
-    current_index = GROUPS[group.name]
-    recommended_index = GROUPS[group_name]
-    if current_index < recommended_index:
-        return False
-    return True
+from parsing.utils import show_form_errors, has_group, get_paginator
 
 
 def index(request):
@@ -169,7 +139,8 @@ def query_all(request):
     except:
         queries = Query.objects.all()
     queries = get_paginator(request, queries, 20)
-    return render(request, 'parsing/query/all.html', {'queries': queries, 'users': users, 'selected_user': selected_user})
+    return render(request, 'parsing/query/all.html',
+                  {'queries': queries, 'users': users, 'selected_user': selected_user})
 
 
 @login_required()
@@ -355,6 +326,7 @@ def review_type_edit(request, pk):
         return redirect(reverse('parsing:review_types'))
     return render(request, 'parsing/admin_dashboard/review_type/edit.html', {'review_type': review_type})
 
+
 def places_to_sorted_letters(places):
     places_letter = {
 
@@ -375,6 +347,7 @@ def places_to_sorted_letters(places):
         'letters': letters
     }
 
+
 def places(request, slug):
     query = Query.objects.filter(slug=slug).first()
     if not query:
@@ -383,10 +356,10 @@ def places(request, slug):
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
     return render(request, 'parsing/query/places.html', {'query': query,
-                                                     'top_places': top_places,
-                                                     'places': places,
-                                                     'places_letter': places_and_letters['places_letter'],
-                                                     'letters': places_and_letters['letters']})
+                                                         'top_places': top_places,
+                                                         'places': places,
+                                                         'places_letter': places_and_letters['places_letter'],
+                                                         'letters': places_and_letters['letters']})
 
 
 @login_required()
@@ -398,10 +371,10 @@ def places_copy(request, slug):
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
     return render(request, 'parsing/query/places_copy.html', {'query': query,
-                                                     'top_places': top_places,
-                                                     'places': places,
-                                                     'places_letter': places_and_letters['places_letter'],
-                                                     'letters': places_and_letters['letters']})
+                                                              'top_places': top_places,
+                                                              'places': places,
+                                                              'places_letter': places_and_letters['places_letter'],
+                                                              'letters': places_and_letters['letters']})
 
 
 def create_or_update_review_types(post, review):
@@ -438,7 +411,7 @@ def place_detail(request, slug):
     review_types = ReviewType.objects.all()
     my_review = Review.objects.filter(place=place).filter(user=request.user).first()
     return render(request, 'parsing/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review,
-                                                     'review_types': review_types})
+                                                         'review_types': review_types})
 
 
 @login_required()

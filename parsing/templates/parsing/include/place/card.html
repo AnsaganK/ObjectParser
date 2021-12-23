@@ -14,7 +14,7 @@
 
         <div class="box column is-4"
              style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">
-            <img src="{{ place.get_img }}" alt=""
+            <img src="{{ place.cloud_img.get_default_img }}" alt=""
                  style="height: 360px !important; width:100%; margin-right: 30px; border-radius: 3px;">
             <div class="place-info" style="padding: 10px">
                 <p><h5>Name:</h5> <span>{{ place.name }}</span></p>
@@ -46,9 +46,9 @@
 
             <div style="display: flex; justify-content: space-between;flex-wrap: wrap; ">
                 {% for photo in place.photos.all %}
-                    <img src="{{ photo.img.url }}" alt=""
+                    <img src="{{ photo.cloud_img.get_thumbnail_img }}" alt=""
                          style="min-width: 200px !important; width: 30%; height: 200px !important; margin: 10px; border-radius: 10px;"
-                         onclick="showModalImg('{{ photo.img.url }}')">
+                         onclick="showModalImg('{{ photo.cloud_img.get_thumbnail_img }}')">
                 {% endfor %}
             </div>
 
