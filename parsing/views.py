@@ -181,7 +181,7 @@ def query_edit(request, slug):
         form = QueryContentForm(request.POST, instance=query)
         if form.is_valid():
             query = form.save()
-            messages.success(request, 'Описание изменено')
+            messages.success(request, 'Description changed')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:places', args=[query.slug]))
@@ -202,7 +202,7 @@ def query_delete(request, pk):
     query = Query.objects.filter(pk=pk).first()
     if query and query.user == request.user or has_group(request.user, 'SuperAdmin'):
         query.delete()
-        messages.success(request, f'Запрос "{query.name}" успешно удален')
+        messages.success(request, f'Query "{query.name}" deleted')
     return redirect('parsing:query_list')
 
 
@@ -271,7 +271,7 @@ def tags(request):
         if form.is_valid():
             tag = form.save(commit=False)
             if add_path_for_tag(request, form, tag):
-                messages.success(request, 'Тэг создан')
+                messages.success(request, 'Tag created')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:tags'))
@@ -286,7 +286,7 @@ def tag_edit(request, pk):
         if form.is_valid():
             tag = form.save(commit=False)
             tag.save()
-            messages.success(request, 'Тэг изменен')
+            messages.success(request, 'Tag changed')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:tags'))
@@ -297,7 +297,7 @@ def tag_edit(request, pk):
 def tag_delete(request, path):
     tag = get_object_or_404(Tag, path=path)
     tag.delete()
-    messages.success(request, 'Тэг удален')
+    messages.success(request, 'Tag deleted')
     return redirect(reverse('parsing:tags'))
 
 
@@ -307,7 +307,7 @@ def review_types(request):
         form = ReviewTypeForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Тип отзыва создан')
+            messages.success(request, 'Review type created')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:review_types'))
@@ -320,7 +320,7 @@ def review_type_edit(request, pk):
         form = ReviewTypeForm(request.POST, instance=review_type)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Тип отзыва изменен')
+            messages.success(request, 'Review type changed')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:review_types'))
@@ -392,7 +392,7 @@ def place_detail(request, slug):
     place = get_object_or_404(Place, slug=slug)
     if request.method == 'POST':
         if Review.objects.filter(user=request.user).filter(place=place).first():
-            messages.error(request, 'Вы не можете оставить более одного отзыва')
+            messages.error(request, 'You cannot leave more than one review.')
             return redirect(place.get_absolute_url())
         form = ReviewForm(request.POST)
         if form.is_valid():
@@ -401,7 +401,7 @@ def place_detail(request, slug):
             review.place = place
             review.save()
             create_or_update_review_types(request.POST, review)
-            messages.success(request, 'Ваш отзыв сохранен')
+            messages.success(request, 'Your review has been saved')
         else:
             show_form_errors(request, form.errors)
         return redirect(place.get_absolute_url())
@@ -421,7 +421,7 @@ def place_edit(request, cid):
         form = PlaceForm(request.POST, instance=place)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Объект изменен')
+            messages.success(request, 'Place changed')
         else:
             show_form_errors(request, form.errors)
         return redirect(place.get_absolute_url())
@@ -449,7 +449,7 @@ def profile(request):
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
         if form.is_valid():
-            messages.success(request, 'Данные успешно изменены')
+            messages.success(request, 'Data changed')
             form.save()
         else:
             show_form_errors(request, form.errors)
@@ -492,7 +492,7 @@ def my_review_edit(request, pk):
             review.is_edit = True
             review.save()
             create_or_update_review_types(request.POST, review)
-            messages.success(request, 'Отзыв успешно отредактирован')
+            messages.success(request, 'Review changed')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:my_review_edit', args=[review.id]))
@@ -572,7 +572,7 @@ def user_detail(request, pk):
                 user.groups.clear()
                 user.groups.add(group)
             user.save()
-            messages.success(request, 'Данные успешно изменены')
+            messages.success(request, 'Data changed')
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:user_detail', args=[user.id]))
