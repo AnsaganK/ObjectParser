@@ -9,6 +9,36 @@
 {% endblock %}
 
 {% block style %}
+    <link rel="stylesheet" href="{% static 'parsing/chief-slider/chief-slider.min.css' %}">
+    <script src="{% static 'parsing/chief-slider/chief-slider.min.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const slider = new ChiefSlider('.slider', {
+                loop: false
+            });
+        });
+    </script>
+    <style>
+        .slider__wrapper {
+            overflow: hidden;
+        }
+
+        .slider__item {
+            flex: 0 0 33.3333333333%;
+            max-width: 33.3333333333%;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 7rem;
+            padding: 5px;
+        }
+        .slider__item img{
+            height: 100%;
+            margin: 0px 10px;
+        }
+    </style>
     <style>
         .iframe_wrap iframe {
             box-shadow: 0 1px 2px 0 rgb(60 64 67 / 30%), 0 1px 3px 1px rgb(60 64 67 / 15%);
@@ -58,27 +88,13 @@
         </div>
         <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
     </div>
-    {#    <div class="box block_data show" id="basic_data">#}
-    {#        <span>{{ place.date_create }}</span>#}
-    {#        <div class="">#}
-    {#            <p><span>Название:</span> <span>{{ place.data.name }}</span></p>#}
-    {#            <p><span>Адрес:</span> <span>{{ place.data.formatted_address }}</span></p>#}
-    {#            <p><span>Рейтинг:</span> <span>{{ place.data.rating }}</span></p>#}
-    {#            <p><span>Пользователей оценило:</span> <span>{{ place.data.user_ratings_total }}</span></p>#}
-    {#            <p><span>Тип:</span> <span>{% for type in place.data.types %}{{ type }}{% if not forloop.last %},#}
-    {#            {% endif %}{% endfor %}</span></p>#}
-    {##}
-    {#        </div>#}
-    {#    </div>#}
     {% include 'parsing/include/place/card.html' with place=place %}
     <hr>
-
-
 {% endblock %}
 
 {% block script %}
     <script>
-        function showImg(){
+        function showImg() {
             let modal = document.getElementById('modal');
             modal.classList.toggle('is-active');
         }

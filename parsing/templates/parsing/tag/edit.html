@@ -13,7 +13,10 @@
         </div>
         <div class="field">
             <label for="path" class="label">Path</label>
-            <input type="text" required class="input" name="path" id="path" value="{{ tag.path|default:'' }}">
+            <div style="display: flex; ">
+                <input type="text" required class="input" name="path" id="path" value="{{ tag.path|default:'' }}">
+                <a href="{{ tag.path }}" class="button is-success">Open tag path</a>
+            </div>
         </div>
 
         <button type="submit" class="button is-warning">Edit</button>

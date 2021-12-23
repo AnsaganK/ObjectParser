@@ -244,8 +244,8 @@ def queries(request):
 
 
 @login_required()
-def tag_queries(request, path):
-    tag = get_object_or_404(Tag, path=path)
+def tag_queries(request, pk):
+    tag = get_object_or_404(Tag, id=pk)
     queries = tag.queries.all().distinct()
     queries = get_paginator(request, queries, 16)
     return render(request, 'parsing/tag/queries.html', {'tag': tag, 'queries': queries})
