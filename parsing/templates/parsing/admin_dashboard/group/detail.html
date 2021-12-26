@@ -28,7 +28,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for user in group.user_set.all %}
+        {% for user in users %}
             <tr>
                 <td>{{ user.last_name }} {{ user.first_name }}</td>
                 <td>{% if user.groups.count %}{{ user.groups.first }}{% else %}-{% endif %}</td>
@@ -46,5 +46,8 @@
         {% endfor %}
         </tbody>
     </table>
+
+
+    {% include 'parsing/include/pagination.html' with page=users %}
 
 {% endblock %}

@@ -531,7 +531,9 @@ def group_list(request):
 def group_detail(request, pk):
     group = Group.objects.filter(pk=pk).first()
     if group:
-        return render(request, 'parsing/admin_dashboard/group/detail.html', {'group': group})
+        users = group.user_set.all()
+        users = get_paginator(request, users, count=12)
+        return render(request, 'parsing/admin_dashboard/group/detail.html', {'group': group, 'users': users})
     return redirect('group_list')
 
 
