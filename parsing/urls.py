@@ -29,6 +29,7 @@ urlpatterns = [
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
     path('profile/', views.profile, name="profile"),
     path('reviews/', views.all_reviews, name="all_reviews"),
+    path('user/<str:username>/reviews/', views.user_reviews, name="user_reviews"),
     path('my/reviews', views.my_reviews, name="my_reviews"),
     path('my/reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
     path('registration/', views.registration, name="registration"),

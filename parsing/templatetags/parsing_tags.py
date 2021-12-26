@@ -37,6 +37,7 @@ def hasGroup(user, group_name):
         return False
     return True
 
+
 @register.filter(name="toJson")
 def toJson(data):
     return json.dumps(data)
@@ -46,15 +47,18 @@ def toJson(data):
 def getValue(dic, key):
     return dic[key]
 
+
 @register.filter(name="toString")
 def toString(variable):
     return str(variable)
+
 
 @register.filter(name="isValue")
 def isValue(value, returned=' - '):
     if value:
         return value
     return returned
+
 
 @register.filter(name="getImg")
 def getImg(img):
@@ -102,9 +106,52 @@ def isSite(site):
     if site[:4] == 'http':
         return site
     else:
-        return 'http://'+site
+        return 'http://' + site
 
 
 @register.filter(name="toRange")
 def toRange(number):
-    return range(1, number+1)
+    return range(1, number + 1)
+
+
+@register.filter(name="numberToStars")
+def numberToStars(number=5.0, star_count=5):
+    stars = ''
+    filled_star = '''<svg viewBox="0 0 40 40" class="full-star" fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.2466 35.1135C10.0601 35.7278 8.67346 34.7356 8.90005 33.4346L10.5718 23.8358L3.49016 17.038C2.53029 16.1166 3.05996 14.5113 4.38646 14.3214L14.1731 12.921L18.5498 4.18778C19.143 3.00406 20.857 3.00406 21.4502 4.18778L25.8269 12.921L35.6135 14.3214C36.94 14.5113 37.4697 16.1166 36.5098 17.038L29.4282 23.8358L31.0999 33.4346C31.3265 34.7356 29.9399 35.7278 28.7534 35.1135L20 30.5816L11.2466 35.1135Z"
+                              fill="#FAA500"></path>
+                     </svg>'''
+    empty_star = '''<svg viewBox="0 0 40 40" class="full-star" fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.2466 35.1135C10.0601 35.7278 8.67346 34.7356 8.90005 33.4346L10.5718 23.8358L3.49016 17.038C2.53029 16.1166 3.05996 14.5113 4.38646 14.3214L14.1731 12.921L18.5498 4.18778C19.143 3.00406 20.857 3.00406 21.4502 4.18778L25.8269 12.921L35.6135 14.3214C36.94 14.5113 37.4697 16.1166 36.5098 17.038L29.4282 23.8358L31.0999 33.4346C31.3265 34.7356 29.9399 35.7278 28.7534 35.1135L20 30.5816L11.2466 35.1135Z"
+                              fill="#EAEAEA"></path>
+                     </svg>'''
+    percent_star = '''<svg viewBox="0 0 40 40" class="percentage-star" fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="offset-70575">
+                                <stop offset="0%" stop-color="#FAA500"></stop>
+                                <stop offset="{percent}%" stop-color="#FAA500"></stop>
+                                <stop offset="{percent}%" stop-color="#EAEAEA"></stop>
+                                <stop offset="100%" stop-color="#EAEAEA"></stop>
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#offset-70575)" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M11.2466 35.1135C10.0601 35.7278 8.67346 34.7356 8.90005 33.4346L10.5718 23.8358L3.49016 17.038C2.53029 16.1166 3.05996 14.5113 4.38646 14.3214L14.1731 12.921L18.5498 4.18778C19.143 3.00406 20.857 3.00406 21.4502 4.18778L25.8269 12.921L35.6135 14.3214C36.94 14.5113 37.4697 16.1166 36.5098 17.038L29.4282 23.8358L31.0999 33.4346C31.3265 34.7356 29.9399 35.7278 28.7534 35.1135L20 30.5816L11.2466 35.1135Z"></path>
+                    </svg>'''
+
+    filled_count = int(float(number))
+    empty = star_count - filled_count
+    percent = int(str(number)[-1])
+    percent *= 10
+
+    stars += filled_count * filled_star
+
+    if percent:
+        empty -= 1
+        stars += percent_star.format(percent=percent)
+
+    stars += empty * empty_star
+    stars = f'<div style="display: flex; justify-content: center;">{stars}</div>'
+    return safe(stars)

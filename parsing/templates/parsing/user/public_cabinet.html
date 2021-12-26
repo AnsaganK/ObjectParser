@@ -33,8 +33,8 @@
             Email: {{ user.email }}
         </div>
         <br>
-        <div style="align-self: center" class="button is-outlined">
-            <a href="">Reviews</a>
-        </div>
+        <a href="{% url 'parsing:user_reviews' user.username %}" style="align-self: center" class="button is-outlined">
+          Reviews
+        </a>
     </div>
 {% endblock %}

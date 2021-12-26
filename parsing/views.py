@@ -473,6 +473,14 @@ def all_reviews(request):
 
 
 @login_required()
+def user_reviews(request, username):
+    user = get_object_or_404(User, username=username)
+    reviews = user.reviews.all()
+    reviews = get_paginator(request, reviews, 12)
+    return render(request, 'parsing/user/reviews.html', {'user': user, 'reviews': reviews})
+
+
+@login_required()
 def my_reviews(request):
     user = request.user
     reviews = user.reviews.all()

@@ -4,11 +4,13 @@
     <div class="card column is-12 review-card" style="background-color: #FAFAFA; border-radius: 10px">
         <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px; padding-bottom: 10px">
                     <span style="display: flex; justify-content: center; align-items: center">
-                        <img src="{% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
+                        <img src="
+                                {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                     <span>
                         <a class="link"
                            href="
+
 
                                    {% if review.user %}{% url 'parsing:public_cabinet' review.user.username %}{% endif %}">
                             {{ review.get_user_name }}
@@ -31,7 +33,10 @@
         </p>
         {% if review.parts.exists %}
             <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
-                <div style="width: 10%;font-size: 40px; color: gold; font-weight: 600;">{{ review.get_rating }}</div>
+                <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
+                    {{ review.get_rating }}
+                    {{ review.get_rating|numberToStars }}
+                </div>
                 <div class="rating_parts">
                     {% for part in review.parts.all %}
                         <div class="rating_part">
