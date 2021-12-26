@@ -38,27 +38,28 @@
 
     <hr>
     <div class="columns is-centered">
-        <div class="column is-9">
-            <h4 style="text-align: center">Description</h4>
+        <div class="column is-10">
+{#            <h4 style="text-align: center">Description</h4>#}
             {% if request.user|hasGroup:'Admin' %}
-                <a href="{% url 'parsing:query_edit' query.slug %}" class="button is-success is-light is-outlined centered"
-                   style="width: fit-content"><i class="fa fa-edit"></i></a>
+                <div style="display: flex; position:absolute;right: 10px;width: 120px;">
+                    <a href="{% url 'parsing:query_edit' query.slug %}"
+                       class="button is-success is-light is-outlined centered"
+                       style="width: fit-content"><i class="fa fa-edit"></i></a>
+                    <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined"
+                       style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
+                </div>
             {% endif %}
             <div>
                 {{ query.content|isValue:'<span style="color: grey; margin: 10px auto; display: block; width: fit-content;">Описание не найдено</span>'|safe }}
             </div>
             <br>
-            <div style="display:flex; justify-content: center">
+            <div>
                 {% for tag in query.tags.all %}
-                    <span class="tag is-medium is-info" style="margin: 3px;">{{ tag.name }}</span>
+                    <span class="tag is-medium" style="margin: 3px; background-color: grey; color: white">{{ tag.name }}</span>
                 {% endfor %}
             </div>
         </div>
     </div>
-    {% if request.user.is_authenticated %}
-        <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined is-large"
-           style="margin: 10px auto; display: block; width: fit-content ">Edit rating</a>
-    {% endif %}
     <div class="columns is-centered is-multiline">
         {% for place in top_places %}
             {% include 'parsing/include/place/preview_card.html' with place=place %}
