@@ -744,7 +744,8 @@ def parse_places(driver, query_id):
     time.sleep(3)
     try:
         places = driver.find_elements_by_class_name('uMdZh')
-    except:
+    except Exception as e:
+        print(e, e.__class__.__name__)
         return False
     print(len(places))
     if len(places) == 0:
