@@ -1,10 +1,13 @@
-{% load parsing_tags %}
+{% load parsing_tags static %}
 
-<body>
+<body class="inner_body">
 <style>
-    body {
-        font-family: 'National', 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
-        line-height: 1.42857143;
+    .inner_body {
+        color: #4a4a4a;
+        font-size: 1em;
+        font-weight: 400;
+        line-height: 1.5;
+        padding: 10px;
     }
 
     .block_title {
@@ -59,7 +62,7 @@
         color: #4a4a4a;
         padding: 1.25rem;
         margin: 10px;
-        width: 100%;
+        width: -webkit-fill-available;
     }
 
     .review {
@@ -82,6 +85,43 @@
     .letter_place {
         color: #62657a;
     }
+
+    .link {
+        color: #90c1ff;
+        text-decoration: none;
+    }
+
+    .inner_body {
+        font-family: 'BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif';
+        font-family: sans-serif;
+    }
+
+    .more_text {
+        display: none;
+    }
+
+    .rating_parts {
+        display: flex;
+        justify-content: end;
+        flex-wrap: wrap;
+    }
+
+    .rating_part {
+        padding: 10px;
+        margin: 6px;
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+    }
+    .hr_line{
+        height: 1px;
+        background-color: #c8c8c8;
+        width: 99%;
+        display: block;
+        margin: 10px auto;
+    }
 </style>
 <style>
     @media (max-width: 630px) {
@@ -98,61 +138,153 @@
         }
     }
 </style>
-<div class="header">
-    <h2 class="block_title">{{ query.name.capitalize }}</h2>
+
+
+<h1 class="block_title" style="font-size: 21px"> {{ query.name }}
+    <div style="right: 15px;position: absolute;color: #878787;margin-top: -20px;">
+        <a href="{% url 'parsing:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
+        <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
+    </div>
+</h1>
+
+<div style="padding: 20px;">
+    <div style="font-size: 16px">
+        {#            <h4 style="text-align: center">Description</h4>#}
+        <div>
+            {{ query.content|isValue:'<span style="color: grey; margin: 10px auto; display: block; width: fit-content;">Описание не найдено</span>'|safe }}
+        </div>
+        <br>
+        <div>
+            {% for tag in query.tags.all %}
+                <span style="margin: 3px; background-color: grey; color: white; padding: 3px; border-radius: 3px">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+    </div>
 </div>
-<div class="places">
+<div>
     {% for place in top_places %}
-        <div class="box">
-            <div class="place">
-                <img src="{{ place.cloud_img.get_default_img }}" alt="" class="place_img">
-                <div class="place_content">
-                    <h5 class="place_title"> {{ place.name }} </h5>
-                    <div>
-                        <span>Rating:</span>
-                        <span>{{ place.rating }}</span>
-                    </div>
-                    <div>
-                        <span>Address:</span>
-                        <span>{{ place.address }}</span>
-                    </div>
-                    <div>
-                        <span>Phone:</span>
-                        <span>{{ place.phone_number }}</span>
-                    </div>
-                    <div>
-                        <span>Description:</span>
-                        <span>{{ place.get_description }}</span>
+        <div style="padding: 10px; box-sizing: border-box;">
+            <div class="box place_little_card">
+                <div style="display: flex; ">
+                    <a href="{{ place.google_url }}">
+                        <img src="{{ place.cloud_img.get_default_img }}" alt=""
+                             style="width: 300px !important; min-width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px; border-radius: 5px">
+                    </a>
+                    <div style="flex-grow: 1;">
+                <span style="color: black;
+    text-align: center;
+    display: block;
+    border-bottom: 1px solid grey;margin: 0px;
+;">
+                    <h2 style="font-size: 17px"><a class="link" href="{{ place.google_url }}">{{ place.name }}</a></h2>
+                </span>
+                        <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
+                        <span><b>Address</b>: {{ place.address|isValue }}</span><br>
+                        <span><b>Phone</b>: <a class="link"
+                                               href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
+                        <span><b>Description</b>:
+                                {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
+                                    {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
                     </div>
                 </div>
-            </div>
+{#                <span>Reviews: {{ place.reviews.count }}</span>#}
+                {% with place.get_more_text as review %}
+                    {% if review %}
+                        <div style="margin: 20px auto;">
 
-            {% with place.get_more_text as review %}
-                {% if review %}
-                    <div class="review">
-                        <div class="">
-                            <span>{{ review.get_user_name }}</span>
-                            <span>{{ review.get_rating }}</span>
+                            <div class="columns is-centered" style="margin-bottom: 30px">
+                                <div class="card column is-12 review-card"
+                                     style="background-color: #FAFAFA; border-radius: 10px; padding: 10px 20px">
+                                    <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px; padding-bottom: 10px">
+                    <span style="display: flex; justify-content: center; align-items: center">
+                        <img src="
+
+
+
+
+
+                                {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
+                             style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
+                    <span>
+                        <a class="link">
+                            {{ review.get_user_name }}
+                        </a>
+                        <span style="color:grey; font-size: 11px;display: block">{{ review.date_create }}</span>
+                    </span>
+                    </span>
+                                    </p>
+                                    {% if review.parts.exists %}
+                                        <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
+                                            <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
+                                                {{ review.get_rating }}
+                                                {{ review.get_rating|numberToStars }}
+                                            </div>
+                                            <div class="rating_parts">
+                                                {% for part in review.parts.all %}
+                                                    <div class="rating_part">
+                                                        {{ part.review_type.name }}
+                                                        <div>
+                                                            {{ part.rating|getRating|safe }}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        {{ review.rating|getRating|safe }}
+                                    {% endif %}
+                                    {% if review.text|length > 320 %}
+                                        <p>
+                                            {{ review.text|slice:":320" }}<span class="dots">...</span><span
+                                                class="more_text">{{ review.text|slice:"320:" }}</span>
+                                            <span class="link" onclick="showMore(this)">More text</span>
+                                        </p>
+                                    {% else %}
+                                        <p>{{ review.text }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
-                        <hr>
-                        {{ review.text }}
-                    </div>
-                {% endif %}
-            {% endwith %}
+                    {% endif %}
+                {% endwith %}
+            </div>
         </div>
     {% endfor %}
 </div>
+<span class="hr_line"></span>
+
 <h4 class="block_title">All places</h4>
-<div class="letters">
+<div style="display: flex; justify-content: space-between">
     {% for letter in letters %}
-        <div class="letter">
-            <hr>
+        <div style="width: 30%">
+           <span class="hr_line"></span>
             <span style="color: cornflowerblue">{{ letter }}</span>
             {% for place in places_letter|getValue:letter|getValue:'places' %}
-                <p class="letter_place">{{ place.name }}</p>
+                <p><a href="{{ place.google_url }}" class="link">{{ place.name }}</a></p>
             {% endfor %}
         </div>
     {% endfor %}
 </div>
+<span class="hr_line"></span>
+<div style="color: grey">
+    <p>Total {{ places.count }} places</p>
+</div>
+<script>
+    function showMore(elem) {
+        let text_block = elem.parentNode;
+        console.log(elem)
+        let dots = text_block.querySelector('span.dots')
+        let more_text = text_block.querySelector('span.more_text')
+        if (more_text.style.display === 'inline') {
+            elem.innerHTML = 'More text'
+            dots.innerHTML = '...';
+            more_text.style.display = 'none';
+        } else {
+            elem.innerHTML = 'Less text'
+            dots.innerHTML = ''
+            more_text.style.display = 'inline'
+        }
+    }
+</script>
 
 </body>

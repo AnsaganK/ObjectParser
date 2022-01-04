@@ -14,7 +14,7 @@
     display: block;
     border-bottom: 1px solid grey;margin: 0px;
 ;">
-                    <a href="{{ place.get_absolute_url }}">{{ place.name }}</a>
+                    <h2 style="font-size: 18px"><a href="{{ place.get_absolute_url }}">{{ place.name }}</a></h2>
                 </span>
                 <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
                 <span><b>Address</b>: {{ place.address|isValue }}</span><br>

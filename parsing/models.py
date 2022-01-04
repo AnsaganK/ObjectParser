@@ -186,6 +186,10 @@ class Place(models.Model):
             return self.description
         return self.get_meta_description()
 
+    @property
+    def google_url(self):
+        return 'https://maps.google.com/?cid={0}'.format(str(self.cid))
+
     # @property
     # def get_img(self):
     #     url = '/static/parsing/img/not_found_place.png'
