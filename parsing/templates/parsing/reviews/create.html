@@ -1,0 +1,11 @@
+{% extends 'parsing/base.html' %}
+{% load static %}
+
+{% block title %}
+    Create review
+{% endblock %}
+
+{% block content %}
+    {% include 'parsing/include/review/form.html' %}
+    <script src="{% static 'parsing/js/rating_check.js' %}"></script>
+{% endblock %}

@@ -390,10 +390,21 @@ def create_or_update_review_types(post, review):
 @login_required()
 def place_detail(request, slug):
     place = get_object_or_404(Place, slug=slug)
+    reviews = place.reviews.all()
+    reviews = get_paginator(request, reviews, 10)
+    my_review = Review.objects.filter(place=place).filter(user=request.user).first()
+    return render(request, 'parsing/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
+
+
+@login_required()
+def review_create(request, slug):
+    place = get_object_or_404(Place, slug=slug)
+    user = request.user
+    review_types = ReviewType.objects.all()
+    if Review.objects.filter(user=request.user).filter(place=place).first():
+        messages.error(request, 'You cannot leave more than one review.')
+        return redirect(place.get_absolute_url())
     if request.method == 'POST':
-        if Review.objects.filter(user=request.user).filter(place=place).first():
-            messages.error(request, 'You cannot leave more than one review.')
-            return redirect(place.get_absolute_url())
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
@@ -405,13 +416,7 @@ def place_detail(request, slug):
         else:
             show_form_errors(request, form.errors)
         return redirect(place.get_absolute_url())
-
-    reviews = place.reviews.all()
-    reviews = get_paginator(request, reviews, 10)
-    review_types = ReviewType.objects.all()
-    my_review = Review.objects.filter(place=place).filter(user=request.user).first()
-    return render(request, 'parsing/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review,
-                                                         'review_types': review_types})
+    return render(request, 'parsing/reviews/create.html', {'place': place, 'user': user, 'review_types': review_types})
 
 
 @login_required()

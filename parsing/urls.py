@@ -24,14 +24,15 @@ urlpatterns = [
 
     path('place/<str:cid>/edit', views.place_edit, name="place_edit"),
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
+    path('place/<slug:slug>/review/create', views.review_create, name="review_create"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
     path('profile/', views.profile, name="profile"),
-    path('reviews/', views.all_reviews, name="all_reviews"),
     path('user/<str:username>/reviews/', views.user_reviews, name="user_reviews"),
-    path('my/reviews', views.my_reviews, name="my_reviews"),
-    path('my/reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
+    path('reviews/all', views.all_reviews, name="all_reviews"),
+    path('reviews/my', views.my_reviews, name="my_reviews"),
+    path('reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
     path('registration/', views.registration, name="registration"),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
