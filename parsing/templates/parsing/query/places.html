@@ -34,6 +34,30 @@
         }
         </script>
     {% endif %}
+
+    <style>
+        .place_img {
+            width: 300px !important;
+            min-width: 300px !important;
+            height: 200px !important;
+            max-height: 100%;
+            margin-right: 20px;
+            border-radius: 5px
+        }
+    </style>
+    <style>
+        @media (max-width: 630px) {
+            .place {
+                flex-direction: column !important;
+            }
+
+            .place_img {
+                margin-bottom: 10px;
+                width: 100% !important;
+                height: auto !important;
+            }
+        }
+    </style>
 {% endblock %}
 
 

@@ -3,10 +3,9 @@
     <div class="box place_little_card">
         <span class="top_place_number">{{ forloop.counter }}</span>
         <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
-        <div style="display: flex; ">
+        <div style="display: flex; " class="place">
             <a href="{{ place.get_absolute_url }}">
-                <img src="{{ place.cloud_img.get_default_img }}" alt=""
-                     style="width: 300px !important; min-width: 300px !important; height: 200px !important; max-height: 100%;margin-right: 20px; border-radius: 5px">
+                <img src="{{ place.cloud_img.get_default_img }}" alt="{{ place.name }}" class="place_img">
             </a>
             <div style="flex-grow: 1;">
                 <span style="color: black;
