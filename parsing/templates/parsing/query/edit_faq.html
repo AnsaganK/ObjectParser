@@ -1,0 +1,13 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    Edit FAQ
+{% endblock %}
+
+{% block content %}
+    <h1>
+        FAQ
+    </h1>
+    <span class="has-text-grey">{{ query.name }}</span>
+    {% include 'parsing/include/faq/form.html' with questions=query.faq.questions.all %}
+{% endblock %}

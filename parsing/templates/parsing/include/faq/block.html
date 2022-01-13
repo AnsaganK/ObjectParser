@@ -1,0 +1,29 @@
+{% if query.faq and query.faq.questions.count > 0 %}
+    <section class="cd-faq js-cd-faq container max-width-md margin-top-lg margin-bottom-lg">
+        <ul class="cd-faq__categories" style="display:none;">
+            <li><a class="cd-faq__category cd-faq__category-selected truncate" href="#basics">Basics</a></li>
+            <li><a class="cd-faq__category truncate" href=""></a></li>
+            <li><a class="cd-faq__category truncate" href=""></a></li>
+            <li><a class="cd-faq__category truncate" href=""></a></li>
+            <li><a class="cd-faq__category truncate" href=""></a></li>
+            <li><a class="cd-faq__category truncate" href=""></a></li>
+        </ul>
+        <div class="cd-faq__items" style="padding: 0">
+            <ul id="basics" class="cd-faq__group">
+                <li class="cd-faq__title"><h2>FAQ</h2></li>
+                {% for question in query.faq.questions.all %}
+                    <li class="cd-faq__item">
+                        <a class="cd-faq__trigger" href="#0"><span>{{ question.question }}</span></a>
+                        <div class="cd-faq__content">
+                            <div class="text-component">
+                                <p>{{ question.answer }}</p>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <a href="#0" class="cd-faq__close-panel text-replace">Close</a>
+        <div class="cd-faq__overlay" aria-hidden="true"></div>
+    </section>
+{% endif %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart, CloudImage
+from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart, CloudImage, FAQ, FAQQuestion
 
 
 @admin.register(Query)
@@ -35,6 +35,10 @@ class ReviewPartAdmin(admin.ModelAdmin):
 admin.site.register(Profile)
 admin.site.register(QueryPlace)
 admin.site.register(CloudImage)
+admin.site.register(FAQ)
+admin.site.register(FAQQuestion)
+
+
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['id', 'date_create']

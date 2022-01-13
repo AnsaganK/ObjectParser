@@ -9,6 +9,14 @@
 {% endblock %}
 
 {% block style %}
+    <script>document.getElementsByTagName("html")[0].className += " js";</script>
+    <link rel="stylesheet" href="{% static 'parsing/faq/css/style.css' %}">
+    <style>
+        .cd-faq__trigger {
+            color: inherit;
+        }
+    </style>
+
     <link rel="stylesheet" href="{% static 'parsing/chief-slider/chief-slider.min.css' %}">
     <script src="{% static 'parsing/chief-slider/chief-slider.min.js' %}"></script>
     <script>
@@ -34,7 +42,8 @@
             font-size: 7rem;
             padding: 5px;
         }
-        .slider__item img{
+
+        .slider__item img {
             height: 100%;
             margin: 0px 10px;
         }
@@ -93,6 +102,9 @@
 {% endblock %}
 
 {% block script %}
+    <script src="{% static 'parsing/faq/js/util.js' %}"></script>
+    <script src="{% static 'parsing/faq/js/main.js' %}"></script>
+
     <script>
         function showImg() {
             let modal = document.getElementById('modal');

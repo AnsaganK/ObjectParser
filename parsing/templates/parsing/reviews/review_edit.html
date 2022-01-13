@@ -6,9 +6,6 @@
 {% endblock %}
 
 {% block content %}
-    <h4 class="block_title">Change review to <a href="{{ review.place.get_absolute_url }}"
-                                                class="link">{{ review.place.name }}</a></h4>
-
     {% include 'parsing/include/review/form.html' %}
 {% endblock %}
 

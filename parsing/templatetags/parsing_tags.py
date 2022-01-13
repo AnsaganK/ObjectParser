@@ -43,6 +43,8 @@ def getRating(rating):
 
 @register.filter(name="hasGroup")
 def hasGroup(user, group_name):
+    if not user.is_authenticated:
+        return False
     group = user.groups.first()
     if not group:
         return False

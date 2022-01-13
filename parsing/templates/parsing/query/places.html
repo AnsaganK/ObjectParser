@@ -7,6 +7,33 @@
 
 
 {% block style %}
+    <script>document.getElementsByTagName("html")[0].className += " js";</script>
+    <link rel="stylesheet" href="{% static 'parsing/faq/css/style.css' %}">
+    <style>
+        .cd-faq__trigger {
+            color: inherit;
+        }
+    </style>
+    {% if query.faq and query.faq.questions %}
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+          {% for question in query.faq.questions.all|slice:"3" %}
+              {
+                "@type": "Question",
+                "name": "{{ question.question }}",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "{{ question.answer }}"
+                }
+              }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          ]
+        }
+        </script>
+    {% endif %}
 {% endblock %}
 
 
@@ -29,7 +56,20 @@
         <button class="modal-close is-large" onclick="closeModal()" aria-label="close"></button>
     </div>
 
-    <h1 class="block_title" style="font-size: 22px !important;"> {{ query.name }}
+    <h1 class="block_title" style="font-size: 22px !important;">
+        {% if request.user|hasGroup:'Admin' %}
+            <div style="display: flex; position:absolute;left: 15px;width: 120px;">
+                <a href="{% url 'parsing:query_edit' query.slug %}"
+                   class="button is-success is-light is-outlined centered mr-1"
+                   style="width: fit-content"><i class="fa fa-edit"></i></a>
+                <a href="{% url 'parsing:query_edit_faq' query.slug %}"
+                   class="button is-warning is-light is-outlined centered mr-1"
+                   style="width: fit-content"><i class="fa fa-question"></i></a>
+                <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined"
+                   style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
+            </div>
+        {% endif %}
+        {{ query.name }}
         <div style="right: 15px;position: absolute;color: #878787;margin-top: -20px;">
             <a href="{% url 'parsing:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
             <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
@@ -39,23 +79,16 @@
     <hr>
     <div class="columns is-centered">
         <div class="column is-10">
-{#            <h4 style="text-align: center">Description</h4>#}
-            {% if request.user|hasGroup:'Admin' %}
-                <div style="display: flex; position:absolute;right: 10px;width: 120px;">
-                    <a href="{% url 'parsing:query_edit' query.slug %}"
-                       class="button is-success is-light is-outlined centered"
-                       style="width: fit-content"><i class="fa fa-edit"></i></a>
-                    <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined"
-                       style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
-                </div>
-            {% endif %}
+            {#            <h4 style="text-align: center">Description</h4>#}
+
             <div>
                 {{ query.content|isValue:'<span style="color: grey; margin: 10px auto; display: block; width: fit-content;">Description not found</span>'|safe }}
             </div>
             <br>
             <div>
                 {% for tag in query.tags.all %}
-                    <span class="tag is-medium" style="margin: 3px; background-color: grey; color: white">{{ tag.name }}</span>
+                    <span class="tag is-medium"
+                          style="margin: 3px; background-color: grey; color: white">{{ tag.name }}</span>
                 {% endfor %}
             </div>
         </div>
@@ -83,9 +116,12 @@
     <div style="color: grey">
         <p>Total {{ places.count }} places</p>
     </div>
+    {% include 'parsing/include/faq/block.html' %}
 {% endblock %}
 
 
 {% block script %}
+    <script src="{% static 'parsing/faq/js/util.js' %}"></script>
+    <script src="{% static 'parsing/faq/js/main.js' %}"></script>
     <script src="{% static 'parsing/js/copy_place.js' %}"></script>
 {% endblock %}

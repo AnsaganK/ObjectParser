@@ -76,6 +76,8 @@ class Query(models.Model):
     content = models.TextField(null=True, blank=True, verbose_name='Контент')
     tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='queries')
 
+    faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='query')
+
     access = models.BooleanField(default=False)
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     status_choices = (
@@ -166,6 +168,8 @@ class Place(models.Model):
 
     is_redirect = models.BooleanField(default=False)
     redirect = models.TextField(null=True, blank=True, default='')
+
+    faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='place')
 
     @property
     def get_rating(self):
@@ -308,19 +312,43 @@ class Review(models.Model):
         ordering = ['-pk']
 
 
-class Location(models.Model):
-    name = models.CharField(max_length=250)
-    text = models.TextField(null=True, blank=True)
-    rating = models.CharField(max_length=250, null=True, blank=True)
+# class Location(models.Model):
+#     name = models.CharField(max_length=250)
+#     text = models.TextField(null=True, blank=True)
+#     rating = models.CharField(max_length=250, null=True, blank=True)
+#
+#     place = models.OneToOneField(Place, related_name='location', on_delete=models.CASCADE)
+#
+#     def __str__(self):
+#         return self.name
+#
+#     class Meta:
+#         verbose_name = 'Местоположение'
+#         verbose_name_plural = 'Местоположения'
 
-    place = models.OneToOneField(Place, related_name='location', on_delete=models.CASCADE)
+
+class FAQQuestion(models.Model):
+    question = models.TextField(null=True, blank=True)
+    answer = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return str(self.question[:100])
 
     class Meta:
-        verbose_name = 'Местоположение'
-        verbose_name_plural = 'Местоположения'
+        verbose_name = 'FAQ question'
+        verbose_name_plural = 'FAQ questions'
+        ordering = ['-pk']
+
+
+class FAQ(models.Model):
+    questions = models.ManyToManyField(FAQQuestion, null=True, blank=True, related_name='FAQ')
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'FAQ'
+        verbose_name_plural = 'FAQ`s'
 
 
 class Profile(models.Model):

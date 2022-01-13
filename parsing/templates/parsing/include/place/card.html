@@ -2,7 +2,6 @@
 <div class="" id="detail_data" style="padding-bottom: 50px">
     {% if request.user|hasGroup:'Admin' %}
         <div style="display: flex; justify-content: end; flex-direction: row; position:absolute; right: 0px">
-
             <a href="{% url 'parsing:place_edit' place.cid %}" class="button is-warning mr-3">
                 Edit</a>
             <a href="{% url 'parsing:place_update' place.pk %}"
@@ -85,14 +84,16 @@
                 </a>
             {% else %}
                 <span href="{% url 'parsing:review_create' place.slug %}" class="button is-success"
-                   style="position: absolute;margin-top: -45px;right: 0px;">
+                      style="position: absolute;margin-top: -45px;right: 0px;">
                     <span>Review saved</span>
                 </span>
             {% endif %}
             <br>
             <div class="columns is-centered">
                 <div class="column is-12">
-
+                    {% if my_review %}
+                        {% include 'parsing/include/review/card.html' with review=my_review border_color='#48c78e' %}
+                    {% endif %}
                     {% for review in reviews %}
                         {% include 'parsing/include/review/card.html' with review=review %}
                     {% endfor %}

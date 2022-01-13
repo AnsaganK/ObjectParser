@@ -1,16 +1,19 @@
 {% load parsing_tags static %}
 
 <div class="columns is-centered" style="margin-bottom: 30px">
-    <div class="card column is-12 review-card" style="background-color: #FAFAFA; border-radius: 10px">
+    <div class="card column is-12 review-card"
+         style="background-color: #FAFAFA; border-radius: 10px;{% if border_color %} border:3px solid {{ border_color }}{% endif %}">
         <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px; padding-bottom: 10px">
                     <span style="display: flex; justify-content: center; align-items: center">
                         <img src="
+
 
                                 {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                     <span>
                         <a class="link"
                            href="
+
 
 
 

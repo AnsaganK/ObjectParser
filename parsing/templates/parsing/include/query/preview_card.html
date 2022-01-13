@@ -1,3 +1,4 @@
+{% load parsing_tags %}
 <div class="column is-4" style="padding: 10px; box-sizing: border-box">
     <div class="box" style="display: flex; min-height: 140px">
         <a href="{% url 'parsing:places' query.slug %}"
@@ -17,14 +18,16 @@
                 {% endfor %}
             </div>
         </div>
-        <div style="flex-grow: 1;display: flex;justify-content: end;">
-            <a href="{% url 'parsing:query_edit_access' query.slug %}">
-                {% if query.access %}
-                    <i class="fa fa-lock-open" style="color: #00d1b2"></i>
-                {% else %}
-                    <i class="fa fa-lock" style="color: #ff784e;"></i>
-                {% endif %}
-            </a>
-        </div>
+        {% if request.user|hasGroup:"Redactor" %}
+            <div style="flex-grow: 1;display: flex;justify-content: end;">
+                <a href="{% url 'parsing:query_edit_access' query.slug %}">
+                    {% if query.access %}
+                        <i class="fa fa-lock-open" style="color: #00d1b2"></i>
+                    {% else %}
+                        <i class="fa fa-lock" style="color: #ff784e;"></i>
+                    {% endif %}
+                </a>
+            </div>
+        {% endif %}
     </div>
 </div>

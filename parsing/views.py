@@ -19,7 +19,7 @@ from rest_framework.views import APIView
 from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
     QueryContentForm, ReviewTypeForm
-from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart
+from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
@@ -195,6 +195,40 @@ def query_edit_access(request, slug):
     query.access = not (query.access)
     query.save()
     return redirect(reverse('parsing:queries'))
+
+
+def get_faq_questions(query):
+    faq = query.faq
+    if not faq:
+        faq = FAQ()
+        faq.save()
+        query.faq = faq
+        query.save()
+    questions = query.faq.questions.all()
+    return questions
+
+
+def save_questions(query, questions_and_answers):
+    faq = query.faq
+    faq.questions.all().delete()
+    for q in questions_and_answers:
+        question = FAQQuestion(question=q, answer=questions_and_answers[q])
+        question.save()
+        faq.questions.add(question)
+    faq.save()
+
+
+@login_required()
+def query_edit_faq(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    if request.method == 'POST':
+        post = dict(request.POST)
+        questions_and_answers = dict(zip(post['questions'], post['answers']))
+        questions = get_faq_questions(query)
+        save_questions(query, questions_and_answers)
+        messages.success(request, 'FAQ updated')
+        return redirect(reverse('parsing:places', args=[query.slug]))
+    return render(request, 'parsing/query/edit_faq.html', {'query': query})
 
 
 @login_required()
@@ -387,12 +421,15 @@ def create_or_update_review_types(post, review):
             review_part.save()
 
 
-@login_required()
 def place_detail(request, slug):
     place = get_object_or_404(Place, slug=slug)
-    reviews = place.reviews.all()
+    my_review = False
+    if request.user.is_authenticated:
+        reviews = place.reviews.exclude(user=request.user)
+        my_review = Review.objects.filter(place=place).filter(user=request.user).first()
+    else:
+        reviews = place.reviews.all()
     reviews = get_paginator(request, reviews, 10)
-    my_review = Review.objects.filter(place=place).filter(user=request.user).first()
     return render(request, 'parsing/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
 
 
