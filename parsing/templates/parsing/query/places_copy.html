@@ -1,6 +1,7 @@
 {% load parsing_tags static %}
-
 <body class="inner_body">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
     .inner_body {
         color: #4a4a4a;
@@ -127,6 +128,7 @@
         .place_img {
             margin-bottom: 10px;
             width: 100% !important;
+            min-width: auto !important;
             height: auto !important;
         }
     }
@@ -139,7 +141,6 @@
         <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
     </div>
 </h1>
-
 <div style="padding: 20px;">
     <div style="font-size: 16px">
         {#            <h4 style="text-align: center">Description</h4>#}
@@ -191,6 +192,9 @@
                                     <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between; margin-bottom: 3px; padding-bottom: 10px">
                     <span style="display: flex; justify-content: center; align-items: center">
                         <img src="
+
+
+
 
 
 

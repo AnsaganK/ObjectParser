@@ -28,7 +28,7 @@ function messageHidden() {
 }
 
 function get_query_url(slug){
-    return `http://${host}/query/${slug}/places/copy`
+    return `/query/${slug}/places/copy`
 }
 
 function get_url(cid) {
@@ -44,6 +44,7 @@ async function copy_query_data(slug) {
             if (response.status === 200) {
                 text = 'Copied'
             } else {
+                console.log(response.status);
                 text = 'Error'
             }
             messageShow(text);
