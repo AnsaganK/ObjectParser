@@ -447,7 +447,7 @@
                 <img src="{% static 'parsing/img/GoogleParser.png' %}" width="120px">
             </a>
 
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" id="burger-menu"
                data-target="navbarBasicExample">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
@@ -572,6 +572,12 @@
             more_text.style.display = 'inline'
         }
     }
+
+    let burger_menu = document.getElementById('burger-menu');
+    burger_menu.addEventListener('click', () => {
+        let navbar = document.getElementById('navbarBasicExample');
+        navbar.classList.toggle('show');
+    })
 </script>
 
 {% block script %}
