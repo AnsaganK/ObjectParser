@@ -9,12 +9,10 @@
                 Update</a>
         </div>
     {% endif %}
-    <div style="display:flex;" class="columns">
-
-        <div class="box column is-4"
+    <div class="columns place_card">
+        <div class="box column is-one-third-desktop is-full-mobile is-full-tablet is-narrow"
              style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">
-            <img src="{{ place.cloud_img.get_default_img }}" alt=""
-                 style="height: 360px !important; width:100%; margin-right: 30px; border-radius: 3px;">
+            <img src="{{ place.cloud_img.get_default_img }}" alt="" class="place_base_img">
             <div class="place-info" style="padding: 10px">
                 <p><h5>Name:</h5> <span>{{ place.name }}</span></p>
                 <hr>
@@ -33,7 +31,7 @@
                 {% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% endif %}
             </div>
         </div>
-        <div class="column is-8">
+        <div class="column is-two-thirds-desktop is-full-mobile is-full-tablet">
             <h5>Description:</h5>
             <span>
                         {% if place.description %}

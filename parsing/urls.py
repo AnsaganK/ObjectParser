@@ -1,8 +1,5 @@
 from django.urls import path
 from . import views
-
-app_name = 'parsing'
-
 urlpatterns = [
     path('', views.index, name="index"),
 
@@ -29,8 +26,8 @@ urlpatterns = [
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
+    path('cabinet/<str:username>/reviews/', views.user_reviews, name="user_reviews"),
     path('profile/', views.profile, name="profile"),
-    path('user/<str:username>/reviews/', views.user_reviews, name="user_reviews"),
     path('reviews/all', views.all_reviews, name="all_reviews"),
     path('reviews/my', views.my_reviews, name="my_reviews"),
     path('reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
@@ -52,6 +49,9 @@ urlpatterns = [
     path('admin_dashboard/users/', views.user_list, name="user_list"),
     path('admin_dashboard/users/<int:pk>', views.user_detail, name="user_detail"),
 ]
+
+app_name = 'parsing'
+
 
 urlpatterns += [
     path('api/v1/tags', views.TagList.as_view(), name='tag_list_api'),
