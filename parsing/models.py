@@ -237,8 +237,8 @@ class Place(models.Model):
     def get_preview_url(self):
         return reverse('parsing:place_html_api', args=[self.cid])
 
-    def get_absolute_url(self):
-        return reverse('parsing:place_detail', args=[self.slug])
+    # def get_absolute_url(self):
+    #     return reverse('parsing:place_detail', args=[self.slug])
 
 
 class PlacePhoto(models.Model):

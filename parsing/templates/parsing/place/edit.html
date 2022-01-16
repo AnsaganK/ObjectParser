@@ -5,6 +5,19 @@
     Place edit
 {% endblock %}
 
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li><a href="{% url 'parsing:queries' %}">Places</a></li>
+            <li><a href="{% url 'parsing:places' query.slug %}">{{ query.name.capitalize }}</a></li>
+            <li><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a>
+            </li>
+            <li class="is-active"><a href="{% url 'parsing:places' query.slug %}">Edit</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
 {% block style %}
     <link rel="stylesheet" href="{% static 'parsing/css/switch.css' %}">
 {% endblock %}
@@ -28,8 +41,8 @@
             </label>
             <div class="control">
                 <textarea type="text" required class="textarea" name="meta"
-                          placeholder='<meta name="description" content="content">'>{% if place.meta %}
-                    {{ place.meta }}{% else %}<meta>{% endif %}</textarea>
+                          placeholder='<meta name="description" content="content">'>{% if place.meta %}{{ place.meta }}
+                {% else %}<meta>{% endif %}</textarea>
             </div>
         </div>
         <div class="field">
@@ -78,8 +91,9 @@
         function redirect_change() {
             let redirect = document.getElementById('redirect')
             console.log(is_redirect.checked)
-            redirect.disabled =  !is_redirect.checked;
+            redirect.disabled = !is_redirect.checked;
         }
+
         redirect_change()
         is_redirect.addEventListener('change', redirect_change)
     </script>

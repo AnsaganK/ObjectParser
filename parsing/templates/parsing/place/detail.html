@@ -101,7 +101,7 @@
         </div>
         <button class="modal-close is-large" aria-label="close" onclick="closeModal()"></button>
     </div>
-    {% include 'parsing/include/place/card.html' with place=place %}
+    {% include 'parsing/include/place/card.html' with place=place query=query %}
     <hr>
 {% endblock %}
 

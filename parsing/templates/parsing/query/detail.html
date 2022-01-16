@@ -35,7 +35,7 @@
 
         {% for place in places %}
             <tr>
-                <td><a href="{{ place.get_absolute_url }}">{{ place.cid }}</a></td>
+                <td><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.cid }}</a></td>
                 <td>{{ place.name }}</td>
                 <td>{{ place.address|isValue }}</td>
                 <td>{{ place.rating }}</td>

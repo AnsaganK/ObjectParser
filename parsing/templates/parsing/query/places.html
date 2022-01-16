@@ -120,7 +120,7 @@
     </div>
     <div class="columns is-centered is-multiline">
         {% for place in top_places %}
-            {% include 'parsing/include/place/preview_card.html' with place=place %}
+            {% include 'parsing/include/place/preview_card.html' with query=query place=place %}
         {% endfor %}
     </div>
     <hr>
@@ -132,7 +132,8 @@
                 <hr>
                 <span style="color: cornflowerblue">{{ letter }}</span>
                 {% for place in places_letter|getValue:letter|getValue:'places' %}
-                    <p><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}" class="hover_link">{{ place.name }}</a></p>
+                    <p><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}"
+                          class="hover_link">{{ place.name }}</a></p>
                 {% endfor %}
             </div>
         {% endfor %}
@@ -141,7 +142,9 @@
     <div style="color: grey">
         <p>Total {{ places.count }} places</p>
     </div>
-    {% include 'parsing/include/faq/block.html' %}
+    {% if query.faq %}
+        {% include 'parsing/include/faq/block.html' with questions=query.faq.questions %}
+    {% endif %}
 {% endblock %}
 
 

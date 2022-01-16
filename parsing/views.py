@@ -197,19 +197,19 @@ def query_edit_access(request, slug):
     return redirect(reverse('parsing:queries'))
 
 
-def get_faq_questions(query):
-    faq = query.faq
+def get_faq_questions(query_or_place):
+    faq = query_or_place.faq
     if not faq:
         faq = FAQ()
         faq.save()
-        query.faq = faq
-        query.save()
-    questions = query.faq.questions.all()
+        query_or_place.faq = faq
+        query_or_place.save()
+    questions = query_or_place.faq.questions.all()
     return questions
 
 
-def save_questions(query, questions_and_answers):
-    faq = query.faq
+def save_questions(query_or_place, questions_and_answers):
+    faq = query_or_place.faq
     faq.questions.all().delete()
     for q in questions_and_answers:
         question = FAQQuestion(question=q, answer=questions_and_answers[q])
@@ -444,12 +444,14 @@ def get_place_reviews(request, place):
     reviews = get_paginator(request, reviews, 10)
     return {'my_review': my_review, 'reviews': reviews}
 
+
 def query_place_detail(request, query_slug, place_slug):
     query = get_object_or_404(Query, slug=query_slug)
     place = get_object_or_404(Place, slug=place_slug)
     reviews = get_place_reviews(request, place)
     return render(request, 'parsing/place/detail.html',
-                  {'query': query,'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
+                  {'query': query, 'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
+
 
 def place_detail(request, slug):
     place = get_object_or_404(Place, slug=slug)
@@ -459,13 +461,14 @@ def place_detail(request, slug):
 
 
 @login_required()
-def review_create(request, slug):
-    place = get_object_or_404(Place, slug=slug)
+def review_create(request, query_slug, place_slug):
+    query = get_object_or_404(Query, slug=query_slug)
+    place = get_object_or_404(Place, slug=place_slug)
     user = request.user
     review_types = ReviewType.objects.all()
     if Review.objects.filter(user=request.user).filter(place=place).first():
         messages.error(request, 'You cannot leave more than one review.')
-        return redirect(place.get_absolute_url())
+        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
@@ -477,13 +480,14 @@ def review_create(request, slug):
             messages.success(request, 'Your review has been saved')
         else:
             show_form_errors(request, form.errors)
-        return redirect(place.get_absolute_url())
-    return render(request, 'parsing/reviews/create.html', {'place': place, 'user': user, 'review_types': review_types})
+        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
+    return render(request, 'parsing/reviews/create.html', {'query': query, 'place': place, 'user': user, 'review_types': review_types})
 
 
 @login_required()
-def place_edit(request, cid):
-    place = get_object_or_404(Place, cid=cid)
+def place_edit(request, query_slug, place_slug):
+    query = get_object_or_404(Query, slug=query_slug)
+    place = get_object_or_404(Place, slug=place_slug)
     if request.method == 'POST':
         form = PlaceForm(request.POST, instance=place)
         if form.is_valid():
@@ -491,8 +495,15 @@ def place_edit(request, cid):
             messages.success(request, 'Place changed')
         else:
             show_form_errors(request, form.errors)
-        return redirect(place.get_absolute_url())
-    return render(request, 'parsing/place/edit.html', {'place': place})
+        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
+    return render(request, 'parsing/place/edit.html', {'query': query, 'place': place})
+
+
+@login_required()
+def place_edit_faq(request, query_slug, place_slug):
+    query = get_object_or_404(Query, slug=query_slug)
+    place = get_object_or_404(Place, slug=place_slug)
+    return render(request, 'parsing/place/edit_faq.html', {'query': query, 'place': place})
 
 
 @login_required()

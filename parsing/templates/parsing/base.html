@@ -140,7 +140,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 360px;
             margin: 0px auto;
         }
 
@@ -470,10 +469,35 @@
             margin-top: -20px;
         }
 
-        @media (max-width: 1024px) {
+        .place_admin_buttons {
+            display: flex;
+            justify-content: end;
+            flex-direction: row;
+            position: absolute;
+            right: 0px
+        }
+
+        @media screen and (max-width: 1024px) {
             .place_card {
                 flex-wrap: wrap;
                 padding: 10px;
+            }
+
+            .place_admin_buttons {
+                flex-direction: column;
+                width: 45px;
+                right: 2px;
+            }
+            .place_admin_buttons a{
+                width: 100% !important;
+            }
+
+            .place_card_info {
+                width: 100% !important;
+            }
+
+            .place_card_description {
+                width: 100% !important;
             }
 
             .place_base_img {
@@ -484,14 +508,16 @@
             }
 
             .slider__item {
-                flex: 0 0 50%;
+                flex: none !important;
                 max-width: 250px;
+                width: 250px;
             }
 
             .queries_admin_button {
                 margin-top: -40px;
             }
-            .queries_copy_button{
+
+            .queries_copy_button {
                 margin-top: -60px;
             }
         }

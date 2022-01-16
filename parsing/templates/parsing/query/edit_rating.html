@@ -58,7 +58,7 @@
             <tr {% if forloop.counter <= 20 %} style="background-color: #ffe395" {% endif %}>
                 <td style="display: none" class="place_position" data-place-id="{{ place.id }}"></td>
                 <td class="place_position">{{ forloop.counter }}</td>
-                <td class="place_name"><a href="{{ place.get_absolute_url }}">{{ place.name }}</a></td>
+                <td class="place_name"><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a></td>
                 <td>{{ place.rating }} | {{ place.rating_user_count }} | {{ place.reviews.count }}</td>
                 <td title="{{ place.address }}">{{ place.address|truncatechars:20 }}</td>
                 <td>{{ place.get_description|truncatechars:20 }}</td>

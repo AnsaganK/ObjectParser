@@ -20,10 +20,11 @@ urlpatterns = [
     path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),
     path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
 
-    path('place/<str:cid>/edit', views.place_edit, name="place_edit"),
+    path('query/<slug:query_slug>/places/<slug:place_slug>/edit', views.place_edit, name="place_edit"),
+    path('query/<slug:query_slug>/places/<slug:place_slug>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
-    path('place/<slug:slug>/review/create', views.review_create, name="review_create"),
+    path('query/<slug:query_slug>/places/<slug:place_slug>/review/create', views.review_create, name="review_create"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),

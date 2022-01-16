@@ -1,8 +1,7 @@
 {% extends 'parsing/base.html' %}
-{% load static %}
 
 {% block title %}
-    Create review
+    Edit FAQ
 {% endblock %}
 
 {% block breadcrumb %}
@@ -11,14 +10,16 @@
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
             <li><a href="{% url 'parsing:queries' %}">Places</a></li>
             <li><a href="{% url 'parsing:places' query.slug %}">{{ query.name.capitalize }}</a></li>
-            <li><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a>
-            </li>
-            <li class="is-active"><a href="{% url 'parsing:places' query.slug %}">Write review</a></li>
+            <li><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a></li>
+            <li class="is-active"><a href="{% url 'parsing:places' query.slug %}">FAQ</a></li>
         </ul>
     </nav>
 {% endblock %}
 
 {% block content %}
-    {% include 'parsing/include/review/form.html' %}
-    <script src="{% static 'parsing/js/rating_check.js' %}"></script>
+    <h1>
+        FAQ
+    </h1>
+    <span class="has-text-grey">{{ place.name }}</span>
+    {% include 'parsing/include/faq/form.html' with questions=place.faq.questions.all %}
 {% endblock %}
