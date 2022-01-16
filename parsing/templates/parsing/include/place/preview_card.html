@@ -4,7 +4,7 @@
         <span class="top_place_number">{{ forloop.counter }}</span>
         <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
         <div style="display: flex; " class="place">
-            <a href="{{ place.get_absolute_url }}">
+            <a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">
                 <img src="{{ place.cloud_img.get_default_img }}" alt="{{ place.name }}" class="place_img">
             </a>
             <div style="flex-grow: 1;">

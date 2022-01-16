@@ -434,8 +434,7 @@ def create_or_update_review_types(post, review):
             review_part.save()
 
 
-def place_detail(request, place_slug):
-    place = get_object_or_404(Place, slug=place_slug)
+def get_place_reviews(request, place):
     my_review = False
     if request.user.is_authenticated:
         reviews = place.reviews.exclude(user=request.user)
@@ -443,7 +442,20 @@ def place_detail(request, place_slug):
     else:
         reviews = place.reviews.all()
     reviews = get_paginator(request, reviews, 10)
-    return render(request, 'parsing/place/detail.html', {'place': place, 'reviews': reviews, 'my_review': my_review})
+    return {'my_review': my_review, 'reviews': reviews}
+
+def query_place_detail(request, query_slug, place_slug):
+    query = get_object_or_404(Query, slug=query_slug)
+    place = get_object_or_404(Place, slug=place_slug)
+    reviews = get_place_reviews(request, place)
+    return render(request, 'parsing/place/detail.html',
+                  {'query': query,'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
+
+def place_detail(request, slug):
+    place = get_object_or_404(Place, slug=slug)
+    reviews = get_place_reviews(request, place)
+    return render(request, 'parsing/place/detail.html',
+                  {'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
 
 
 @login_required()

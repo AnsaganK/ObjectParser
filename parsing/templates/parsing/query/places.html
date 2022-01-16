@@ -132,7 +132,7 @@
                 <hr>
                 <span style="color: cornflowerblue">{{ letter }}</span>
                 {% for place in places_letter|getValue:letter|getValue:'places' %}
-                    <p><a href="{{ place.get_absolute_url }}" class="hover_link">{{ place.name }}</a></p>
+                    <p><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}" class="hover_link">{{ place.name }}</a></p>
                 {% endfor %}
             </div>
         {% endfor %}
