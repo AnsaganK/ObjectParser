@@ -79,7 +79,8 @@
 {% block breadcrumb %}
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
-            <li><a href="{% url 'parsing:query_list' %}">My queries</a></li>
+            <li><a href="{% url 'parsing:queries' %}">Places</a></li>
+            <li><a href="{% url 'parsing:queries' %}"></a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
             <li class="is-active"><a href="#" aria-current="page">{{ place.name }}</a></li>
         </ul>

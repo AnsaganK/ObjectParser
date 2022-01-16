@@ -21,7 +21,8 @@ urlpatterns = [
     path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
 
     path('place/<str:cid>/edit', views.place_edit, name="place_edit"),
-    path('place/<slug:slug>', views.place_detail, name="place_detail"),
+    # path('place/<slug:query_slug>/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
+    path('place/<slug:place_slug>', views.place_detail, name="place_detail"),
     path('place/<slug:slug>/review/create', views.review_create, name="review_create"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 

@@ -447,16 +447,52 @@
             border-radius: 3px;
         }
 
+        .slider__wrapper {
+            background-color: rgb(248, 248, 248);
+            border-radius: 10px;
+        }
+
+        .slider__item {
+            box-shadow: 0 0 0 1px rgb(10 10 10 / 2%);
+        }
+
+        .queries_admin_button {
+            display: flex;
+            position: absolute;
+            left: 15px;
+        }
+
+        .queries_copy_button {
+
+            right: 15px;
+            position: absolute;
+            color: #878787;
+            margin-top: -20px;
+        }
+
         @media (max-width: 1024px) {
             .place_card {
                 flex-wrap: wrap;
                 padding: 10px;
             }
-            .place_base_img{
+
+            .place_base_img {
                 height: auto !important;
                 width: 80% !important;
                 margin: auto;
                 display: block;
+            }
+
+            .slider__item {
+                flex: 0 0 50%;
+                max-width: 250px;
+            }
+
+            .queries_admin_button {
+                margin-top: -40px;
+            }
+            .queries_copy_button{
+                margin-top: -60px;
             }
         }
     </style>

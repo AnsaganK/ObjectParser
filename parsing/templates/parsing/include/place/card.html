@@ -14,18 +14,18 @@
              style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">
             <img src="{{ place.cloud_img.get_default_img }}" alt="" class="place_base_img">
             <div class="place-info" style="padding: 10px">
-                <p><h5>Name:</h5> <span>{{ place.name }}</span></p>
+                <p><i class="fa fa-building has-text-success"></i> <span>{{ place.name }}</span></p>
                 <hr>
-                <p><h5>Address:</h5> <span>{{ place.address|isValue }}</span></p>
+                <p><i class="fa fa-map-marker-alt has-text-success"></i> <span>{{ place.address|isValue }}</span></p>
                 <hr>
-                <p><h5>Site:</h5> <span><a
-                    href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
+                <p><i class="fa fa-globe has-text-success"></i> <span><a
+                        href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
                 <hr>
-                <p><h5>Phone number:</h5> <span><a
-                    href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
+                <p><i class="fa fa-phone has-text-success"></i> <span><a
+                        href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span></p>
                 <hr>
-                <p><h5>Rating:</h5> <span>{{ place.rating }} (<span
-                    style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
+                <p><i class="fa fa-star has-text-success"></i> <span>{{ place.rating }} (<span
+                        style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
             </div>
             <div class="maps">
                 {% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% endif %}
@@ -47,9 +47,9 @@
                         <div class="slider__wrapper">
                             <div class="slider__items">
                                 {% for photo in place.photos.all %}
-                                    <div class="slider__item">
-                                        <img src="{{ photo.cloud_img.get_thumbnail_img }}" alt=""
-                                             style="height: 100%;margin: 3px; border-radius: 10px;"
+                                    <div class="slider__item box m-2">
+                                        <img src="{{ photo.cloud_img.get_thumbnail_img }}" alt="" class=""
+                                             style="height: 100%;margin: 3px;width: 100%; border-radius: 10px;"
                                              onclick="showModalImg('{{ photo.cloud_img.get_thumbnail_img }}')">
                                     </div>
                                 {% endfor %}

@@ -83,7 +83,7 @@
 
     <h1 class="block_title" style="font-size: 22px !important;">
         {% if request.user|hasGroup:'Admin' %}
-            <div style="display: flex; position:absolute;left: 15px;width: 120px;">
+            <div class="queries_admin_button">
                 <a href="{% url 'parsing:query_edit' query.slug %}"
                    class="button is-success is-light is-outlined centered mr-1"
                    style="width: fit-content"><i class="fa fa-edit"></i></a>
@@ -95,7 +95,7 @@
             </div>
         {% endif %}
         {{ query.name }}
-        <div style="right: 15px;position: absolute;color: #878787;margin-top: -20px;">
+        <div class="queries_copy_button">
             <a href="{% url 'parsing:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
             <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
         </div>

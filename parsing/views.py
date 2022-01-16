@@ -434,8 +434,8 @@ def create_or_update_review_types(post, review):
             review_part.save()
 
 
-def place_detail(request, slug):
-    place = get_object_or_404(Place, slug=slug)
+def place_detail(request, place_slug):
+    place = get_object_or_404(Place, slug=place_slug)
     my_review = False
     if request.user.is_authenticated:
         reviews = place.reviews.exclude(user=request.user)
