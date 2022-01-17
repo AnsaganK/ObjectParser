@@ -11,7 +11,7 @@
         <div class="cd-faq__items" style="padding: 0">
             <ul id="basics" class="cd-faq__group">
                 <li class="cd-faq__title"><h2>FAQ</h2></li>
-                {% for question in query.faq.questions.all %}
+                {% for question in questions.all %}
                     <li class="cd-faq__item">
                         <a class="cd-faq__trigger" href="#0"><span>{{ question.question }}</span></a>
                         <div class="cd-faq__content">

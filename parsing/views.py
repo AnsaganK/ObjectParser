@@ -481,7 +481,8 @@ def review_create(request, query_slug, place_slug):
         else:
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
-    return render(request, 'parsing/reviews/create.html', {'query': query, 'place': place, 'user': user, 'review_types': review_types})
+    return render(request, 'parsing/reviews/create.html',
+                  {'query': query, 'place': place, 'user': user, 'review_types': review_types})
 
 
 @login_required()
@@ -503,6 +504,13 @@ def place_edit(request, query_slug, place_slug):
 def place_edit_faq(request, query_slug, place_slug):
     query = get_object_or_404(Query, slug=query_slug)
     place = get_object_or_404(Place, slug=place_slug)
+    if request.method == 'POST':
+        post = dict(request.POST)
+        questions_and_answers = dict(zip(post['questions'], post['answers']))
+        questions = get_faq_questions(place)
+        save_questions(place, questions_and_answers)
+        messages.success(request, 'FAQ updated')
+        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
     return render(request, 'parsing/place/edit_faq.html', {'query': query, 'place': place})
 
 
