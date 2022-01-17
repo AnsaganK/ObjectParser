@@ -13,9 +13,10 @@
     {% if request.user|hasGroup:'Admin' %}
 
     {% endif %}
-    <div class="columns place_card">
+    <div class="columns place_card mt-4">
         <div class="box place_card_info column is-one-third-desktop is-full-mobile is-full-tablet is-narrow"
              style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">
+            <h1 class="place_img_name has-text-centered mt-2">{{ place.name }}</h1>
             <img src="{{ place.cloud_img.get_default_img }}" alt="" class="place_base_img">
             <div class="place-info" style="padding: 10px">
                 <p><i class="fa fa-building has-text-success"></i> <span>{{ place.name }}</span></p>

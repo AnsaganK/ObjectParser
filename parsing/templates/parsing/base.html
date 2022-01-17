@@ -477,6 +477,14 @@
             right: 0px
         }
 
+        .place_img_name {
+            position: absolute;
+            color: #4a4a4a;
+            word-break: break-word;
+            width: inherit;
+            font-size: 20px !important;
+        }
+
         @media screen and (max-width: 1024px) {
             .place_card {
                 flex-wrap: wrap;
@@ -488,8 +496,14 @@
                 width: 45px;
                 right: 2px;
             }
-            .place_admin_buttons a{
+
+            .place_admin_buttons a {
                 width: 100% !important;
+            }
+            .place_img_name{
+                font-size: 17px !important;
+                margin: auto 10%;
+                width: -webkit-fill-available;
             }
 
             .place_card_info {
