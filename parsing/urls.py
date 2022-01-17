@@ -15,6 +15,7 @@ urlpatterns = [
 
     path('query/<slug:slug>/places', views.places, name='places'),
     path('query/<slug:slug>/places/copy', views.places_copy, name='places_copy'),
+    path('query/<slug:slug>/places/copy/code', views.places_copy_code, name='places_copy_code'),
     path('query/<slug:slug>/edit/access', views.query_edit_access, name='query_edit_access'),
     path('query/<slug:slug>/edit/faq', views.query_edit_faq, name='query_edit_faq'),
     path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),

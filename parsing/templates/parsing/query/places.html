@@ -97,7 +97,8 @@
         {{ query.name }}
         <div class="queries_copy_button">
             <a href="{% url 'parsing:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
-            <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
+            <a href="{% url 'parsing:places_copy_code' query.slug %}"><i class="fa fa-copy"></i></a>
+{#            <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>#}
         </div>
     </h1>
 

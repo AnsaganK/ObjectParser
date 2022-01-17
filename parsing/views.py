@@ -402,7 +402,7 @@ def places_copy_code(request, slug):
     places = get_sorted_places(query)
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
-    return render(request, 'parsing/query/places_copy.html', {'query': query,
+    return render(request, 'parsing/query/places_copy_code.html', {'query': query,
                                                               'top_places': top_places,
                                                               'places': places,
                                                               'places_letter': places_and_letters['places_letter'],
@@ -423,6 +423,21 @@ def places_copy(request, slug):
                                                               'places_letter': places_and_letters['places_letter'],
                                                               'letters': places_and_letters['letters']})
 
+
+# @login_required()
+# def places_copy_code(request, slug):
+#     query = Query.objects.filter(slug=slug).first()
+#     if not query:
+#         return redirect('parsing:index')
+#     places = get_sorted_places(query)
+#     top_places = places[:20]
+#     places_and_letters = places_to_sorted_letters(places)
+#
+#     return render(request, 'parsing/query/places_copy_code.html', {'query': query,
+#                                                               'top_places': top_places,
+#                                                               'places': places,
+#                                                               'places_letter': places_and_letters['places_letter'],
+#                                                               'letters': places_and_letters['letters']})
 
 def create_or_update_review_types(post, review):
     for i in post:
