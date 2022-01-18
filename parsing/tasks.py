@@ -563,7 +563,7 @@ def get_info(driver):
     }
     try:
         timetable = driver.find_element_by_class_name('y0skZc-jyrRxf-Tydcue')
-        timetable = timetable.get_attribute('innerText')
+        timetable = timetable.get_attribute('innerHTML')
     except Exception as e:
         timetable = ''
         print('Ошибка при взятии расписания: ', e.__class__.__name__)
@@ -619,6 +619,7 @@ def set_info(data, place):
     place.address = data['address'] if 'address' in data else None
     place.phone_number = data['phone_number'] if 'phone_number' in data else None
     place.site = data['site'] if 'site' in data else None
+    place.timetable = data['timetable'] if 'timetable' in data else None
     place.save()
 
 

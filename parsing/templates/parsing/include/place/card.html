@@ -23,6 +23,15 @@
                 <hr>
                 <p><i class="fa fa-map-marker-alt has-text-success"></i> <span>{{ place.address|isValue }}</span></p>
                 <hr>
+                {% if place.timetable %}
+                    <span style="display: flex;">
+                        <i class="fa fa-calendar-alt has-text-success mt-1"></i>
+                            <table class="place_timetable">
+                                {{ place.timetable|safe }}
+                            </table>
+                    </span>
+                    <hr>
+                {% endif %}
                 <p><i class="fa fa-globe has-text-success"></i> <span><a
                         href="{{ place.site|isSite }}">{{ place.site|isSite }}</a></span></p>
                 <hr>

@@ -158,6 +158,8 @@ class Place(models.Model):
     rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
     rating_user_count = models.IntegerField(null=True, blank=True, default=0)
 
+    timetable = models.TextField(null=True, blank=True)
+
     data = models.JSONField(null=True, blank=True, verbose_name='Данные JSON')
     detail_data = models.JSONField(null=True, blank=True, verbose_name='Детальные данные JSON')
 
