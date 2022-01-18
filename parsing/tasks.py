@@ -797,6 +797,7 @@ def startParsing(query_name, query_id, pages=None):
         display = Display(visible=False, size=(800, 600))
         display.start()
         driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
+        print(driver.get_cookies())
     else:
         driver = startFireFox(url=CUSTOM_URL.format(query_name))
     try:
