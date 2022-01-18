@@ -440,7 +440,7 @@
         }
 
         .place_base_img {
-            height: 360px !important;
+            max-height: 360px !important;
             width: 100%;
             margin-right: 30px;
             border-radius: 3px;
@@ -483,6 +483,9 @@
             word-break: break-word;
             width: inherit;
             font-size: 20px !important;
+            background: #fff;
+            padding: 5px 0px;
+            opacity: .8;
         }
 
         @media screen and (max-width: 1024px) {
@@ -504,6 +507,8 @@
                 font-size: 17px !important;
                 margin: auto 10%;
                 width: -webkit-fill-available;
+                position: relative;
+                margin-bottom: -30px !important;
             }
 
             .place_card_info {
