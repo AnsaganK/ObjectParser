@@ -50,7 +50,7 @@
             </article>
             <article>
                 <div style="display: flex; justify-content: space-between;flex-wrap: wrap; margin: 15px auto">
-                    {% if place.photos.count > 3 %}
+                    {% if place.photos.count > 0 %}
                         <div class="slider">
                             <div class="slider__wrapper">
                                 <div class="slider__items">
@@ -67,13 +67,6 @@
                             <a href="#" class="slider__control" data-slide="next"></a>
                         </div>
                     {% else %}
-                        {% for photo in place.photos.all %}
-                            <div class="slider__item">
-                                <img src="{{ photo.cloud_img.get_thumbnail_img }}" alt=""
-                                     style="height: 100%;margin: 3px; border-radius: 10px;"
-                                     onclick="showModalImg('{{ photo.cloud_img.get_thumbnail_img }}')">
-                            </div>
-                        {% endfor %}
                     {% endif %}
                 </div>
             </article>
