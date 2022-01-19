@@ -136,10 +136,6 @@
 
 
 <h1 class="block_title" style="font-size: 21px"> {{ query.name }}
-    <div style="right: 15px;position: absolute;color: #878787;margin-top: -20px;">
-        <a href="{% url 'parsing:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
-        <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>
-    </div>
 </h1>
 <div style="padding: 20px;">
     <div style="font-size: 16px">
@@ -161,7 +157,7 @@
         <div style="padding: 10px; box-sizing: border-box;">
             <div class="box place_little_card">
                 <div style="display: flex; " class="place">
-                    <a href="{{ place.google_url }}">
+                    <a href="{{ place.google_url }}" rel="nofollow">
                         <img src="{{ place.cloud_img.get_default_img }}" class="place_img" alt=""
                              style="">
                     </a>
@@ -225,15 +221,7 @@
                                     {% else %}
                                         {{ review.rating|getRating|safe }}
                                     {% endif %}
-                                    {% if review.text|length > 320 %}
-                                        <p>
-                                            {{ review.text|slice:":320" }}<span class="dots">...</span><span
-                                                class="more_text">{{ review.text|slice:"320:" }}</span>
-                                            <span class="link" onclick="showMore(this)">More text</span>
-                                        </p>
-                                    {% else %}
                                         <p>{{ review.text }}</p>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -252,7 +240,7 @@
             <span class="hr_line"></span>
             <span style="color: cornflowerblue">{{ letter }}</span>
             {% for place in places_letter|getValue:letter|getValue:'places' %}
-                <p><a href="{{ place.google_url }}" class="link">{{ place.name }}</a></p>
+                <p><a href="{{ place.google_url }}" rel="nofollow" class="link">{{ place.name }}</a></p>
             {% endfor %}
         </div>
     {% endfor %}
@@ -261,21 +249,5 @@
 <div style="color: grey">
     <p>Total {{ places.count }} places</p>
 </div>
-<script>
-    function showMore(elem) {
-        let text_block = elem.parentNode;
-        console.log(elem)
-        let dots = text_block.querySelector('span.dots')
-        let more_text = text_block.querySelector('span.more_text')
-        if (more_text.style.display === 'inline') {
-            elem.innerHTML = 'More text'
-            dots.innerHTML = '...';
-            more_text.style.display = 'none';
-        } else {
-            elem.innerHTML = 'Less text'
-            dots.innerHTML = ''
-            more_text.style.display = 'inline'
-        }
-    }
-</script>
+
 </body>
