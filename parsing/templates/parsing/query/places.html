@@ -57,8 +57,15 @@
                 min-width: auto !important;
                 height: auto !important;
             }
-            .top_place_number{
+
+            .top_place_number {
                 display: none;
+            }
+
+            .rating_part {
+                padding: 1px;
+                font-size: 11px;
+                color: grey;
             }
         }
     </style>
@@ -104,7 +111,7 @@
         <div class="queries_copy_button">
             <a href="{% url 'parsing:places_copy' query.slug %}"><i class="fa fa-link"></i></a>
             <a href="{% url 'parsing:places_copy_code' query.slug %}"><i class="fa fa-copy"></i></a>
-{#            <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>#}
+            {#            <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>#}
         </div>
     </h1>
 
