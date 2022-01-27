@@ -12,7 +12,7 @@ def show_form_errors(request, errors):
         messages.error(request, f'{error} {errors[error]}')
 
 
-def get_paginator(request, queryset, count):
+def get_paginator(request, queryset, count=12):
     paginator = Paginator(queryset, count)
     page = request.GET.get('page')
     try:
