@@ -55,7 +55,8 @@
         </div>
         <div class="field">
             <label for="" class="label">
-                Place description
+                Place description (<a href="{% url 'parsing:place_generate_description' query.slug place.slug %}"
+                                     class="link is-info">Generate description</a>)
             </label>
             <div class="control">
                 <textarea type="text" required class="textarea" name="description"
@@ -82,7 +83,6 @@
         <button type="submit" class="button is-info centered">Edit</button>
     </form>
 
-    <a href="{% url 'parsing:place_generate_description' query.slug place.slug %}" class="button is-info">Generate description</a>
 {% endblock %}
 
 
