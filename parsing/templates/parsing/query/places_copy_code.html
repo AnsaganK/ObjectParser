@@ -64,8 +64,8 @@
                         <span><b>Phone</b>: <a class="link_copySite"
                                                href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
                         <span><b>Description</b>:
-        {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
-            {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
+        {% if place.description %}{{ place.description }}{% else %}
+            {{ place.get_meta_description }}{% endif %}</span><br>
                     </div>
                 </div>
                 {#                <span>Reviews: {{ place.reviews.count }}</span>#}
