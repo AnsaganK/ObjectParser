@@ -47,7 +47,8 @@
                         <div class="rating_part">
                             {{ part.review_type.name }}
                             <div>
-                                {{ part.rating|getRating|safe }}
+                                <span class="rating_stars">{{ part.rating|getRating|safe }}</span>
+                                <span class="rating_numbers">{{ part.rating }} / 5</span>
                             </div>
                         </div>
                     {% endfor %}
