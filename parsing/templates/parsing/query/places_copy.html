@@ -4,101 +4,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
     @media (max-width: 4096px) {
-
-        .inner_body_copySite {
-            color: #4a4a4a;
-            font-size: 1em;
-            font-weight: 400;
-            line-height: 1.5;
-            padding: 10px;
-            {#font-family: 'BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif';#}
-            font-family: sans-serif;
-        }
-
-        .block_title_copySite {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-
-        .box_copySite {
-            background-color: #fff;
-            border-radius: 6px;
-            box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
-            color: #4a4a4a;
-            padding: 1.25rem;
-            margin: 10px;
-            width: -webkit-fill-available;
-        }
-
-        .link_copySite {
-            color: #90c1ff;
-            text-decoration: none;
-        }
-
-
-        .rating_parts_copySite {
-            display: flex;
-            justify-content: end;
-            flex-wrap: wrap;
-        }
-
-        .rating_part_copySite {
-            padding: 10px;
-            margin: 6px;
-            border: 1px solid lightgrey;
-            border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            flex-direction: column;
-        }
-
-        .hr_line_copySite {
-            height: 1px;
-            background-color: #c8c8c8;
-            width: 99%;
-            display: block;
-            margin: 10px auto;
-        }
-
-        .place_img_copySite {
-            width: 300px !important;
-            min-width: 300px !important;
-            height: 200px !important;
-            max-height: 100%;
-            margin-right: 20px;
-            border-radius: 5px
-        }
-
-        .letter_copySite {
-            width: 30%;
-        }
-
-        .review-card_copySite {
-            box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
-            color: #4a4a4a;
-            max-width: 100%;
-            position: relative;
-        }
+        .inner_body_copySite {color: #4a4a4a;font-size: 1em;font-weight: 400;line-height: 1.5;padding: 10px;{#font-family: 'BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif';#} font-family: sans-serif;}
+        .block_title_copySite {display: flex;justify-content: center;align-items: center;}
+        .box_copySite {background-color: #fff;border-radius: 6px;box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);color: #4a4a4a;padding: 1.25rem;margin: 10px;width: -webkit-fill-available;}
+        .link_copySite {color: #90c1ff;text-decoration: none;}
+        .rating_parts_copySite {display: flex;justify-content: end;flex-wrap: wrap;}
+        .rating_part_copySite {padding: 10px;margin: 6px;border: 1px solid lightgrey;border-radius: 5px;display: flex;justify-content: space-between;flex-direction: column;}
+        .hr_line_copySite {height: 1px;background-color: #c8c8c8;width: 99%;display: block;margin: 10px auto;}
+        .place_img_copySite {width: 300px !important;min-width: 300px !important;height: 200px !important;max-height: 100%;margin-right: 20px;border-radius: 5px}
+        .letter_copySite {width: 30%;}
+        .review-card_copySite {box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);color: #4a4a4a;max-width: 100%;position: relative;}
     }
 </style>
 <style>
     @media (max-width: 630px) {
-        .place_copySite {
-            flex-direction: column !important;
-        }
-
-        .place_img_copySite {
-            margin-bottom: 10px;
-            width: 100% !important;
-            min-width: auto !important;
-            height: auto !important;
-        }
-
-        .letter_copySite {
-            width: 100%;
-        }
+        .place_copySite {flex-direction: column !important;}
+        .place_img_copySite {margin-bottom: 10px;width: 100% !important;min-width: auto !important;height: auto !important;}
+        .letter_copySite {width: 100%;}
     }
 </style>
 
@@ -142,8 +64,8 @@
                         <span><b>Phone</b>: <a class="link_copySite"
                                                href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
                         <span><b>Description</b>:
-        {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
-            {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
+        {% if place.description %}{{ place.description }}{% else %}
+            {{ place.get_meta_description }}{% endif %}</span><br>
                     </div>
                 </div>
                 {#                <span>Reviews: {{ place.reviews.count }}</span>#}

@@ -93,6 +93,9 @@
                 <a href="{% url 'parsing:query_edit_faq' query.slug %}"
                    class="button is-warning is-light is-outlined centered mr-1"
                    style="width: fit-content"><i class="fa fa-question"></i></a>
+                <a href="{% url 'parsing:query_places_generate_description' query.slug %}"
+                   class="button is-info is-light is-outlined centered mr-1"
+                   style="width: fit-content"><i class="fa fa-comment"></i></a>
                 <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined"
                    style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
             </div>

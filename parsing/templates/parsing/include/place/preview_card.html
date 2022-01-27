@@ -13,14 +13,16 @@
     display: block;
     border-bottom: 1px solid grey;margin: 0px;
 ;">
-                    <h2 style="font-size: 18px"><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a></h2>
+                    <h2 style="font-size: 18px"><a
+                            href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a></h2>
                 </span>
                 <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
                 <span><b>Address</b>: {{ place.address|isValue }}</span><br>
                 <span><b>Phone</b>: <a
                         href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
                 <span><b>Description</b>:
-                                {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
+                                {% if place.description %}{{ place.description|truncatechars:200 }}
+                                    <a class="link" href="{% url 'parsing:query_place_detail' query.slug place.slug %}">more</a>{% else %}
                                     {{ place.get_meta_description|truncatechars:200 }}{% endif %}</span><br>
             </div>
         </div>

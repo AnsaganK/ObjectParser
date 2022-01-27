@@ -515,18 +515,32 @@ def place_edit(request, query_slug, place_slug):
     return render(request, 'parsing/place/edit.html', {'query': query, 'place': place})
 
 
+def place_set_description(place):
+    if not place.description or len(place.description) < 100:
+        reviews = place.reviews.all()[:20]
+        text = ''
+        for review in reviews:
+            text += review.text
+        description = sumextract(text, 5)
+        place.description = place.name + ' - ' + description
+        place.save()
+
+
 @login_required()
 def place_generate_description(request, query_slug, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
-    reviews = place.reviews.all()[:20]
-    text = ''
-    for review in reviews:
-        text += review.text
-    description = sumextract(text, 5)
-    place.description = place.name + ' - ' + description
-    place.save()
+    place_set_description(place)
     messages.success(request, "Description generated")
     return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
+
+
+@login_required()
+def query_places_generate_description(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    places = Place.objects.filter(queries__query=query)
+    for place in places:
+        place_set_description(place)
+    return redirect(reverse('parsing:places', args=[slug]))
 
 
 @login_required()
