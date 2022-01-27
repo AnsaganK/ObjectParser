@@ -21,6 +21,7 @@ urlpatterns = [
     path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),
     path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
 
+    path('query/<slug:query_slug>/places/<slug:place_slug>/generate/description', views.place_generate_description, name="place_generate_description"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/edit', views.place_edit, name="place_edit"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),

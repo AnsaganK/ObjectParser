@@ -14,3 +14,8 @@ requests==2.26.0
 selenium==3.141.0
 sqlparse==0.4.2
 mimesis==5.1.0
+nltk==3.6.7
+networkx==2.6.3
+numpy==1.22.1
+scipy==1.7.3
+

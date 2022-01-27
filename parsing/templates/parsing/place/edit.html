@@ -81,6 +81,8 @@
         {#        </label>#}
         <button type="submit" class="button is-info centered">Edit</button>
     </form>
+
+    <a href="{% url 'parsing:place_generate_description' query.slug place.slug %}" class="button is-info">Generate description</a>
 {% endblock %}
 
 

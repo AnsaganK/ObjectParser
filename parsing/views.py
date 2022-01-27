@@ -24,7 +24,7 @@ from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerial
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file
-from parsing.utils import show_form_errors, has_group, get_paginator
+from parsing.utils import show_form_errors, has_group, get_paginator, sumextract
 
 
 def index(request):
@@ -403,10 +403,10 @@ def places_copy_code(request, slug):
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
     return render(request, 'parsing/query/places_copy_code.html', {'query': query,
-                                                              'top_places': top_places,
-                                                              'places': places,
-                                                              'places_letter': places_and_letters['places_letter'],
-                                                              'letters': places_and_letters['letters']})
+                                                                   'top_places': top_places,
+                                                                   'places': places,
+                                                                   'places_letter': places_and_letters['places_letter'],
+                                                                   'letters': places_and_letters['letters']})
 
 
 @login_required()
@@ -513,6 +513,20 @@ def place_edit(request, query_slug, place_slug):
             show_form_errors(request, form.errors)
         return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
     return render(request, 'parsing/place/edit.html', {'query': query, 'place': place})
+
+
+@login_required()
+def place_generate_description(request, query_slug, place_slug):
+    place = get_object_or_404(Place, slug=place_slug)
+    reviews = place.reviews.all()[:20]
+    text = ''
+    for review in reviews:
+        text += review.text
+    description = sumextract(text, 5)
+    place.description = place.name + ' - ' + description
+    place.save()
+    messages.success(request, "Description generated")
+    return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
 
 
 @login_required()
