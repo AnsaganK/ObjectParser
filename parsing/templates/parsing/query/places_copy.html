@@ -1,128 +1,109 @@
 {% load parsing_tags static %}
-<body class="inner_body">
+<body class="inner_body_copySite">
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-    @media (max-width: 4096px){
-    .inner_body {
-        color: #4a4a4a;
-        font-size: 1em;
-        font-weight: 400;
-        line-height: 1.5;
-        padding: 10px;
-    }
+    @media (max-width: 4096px) {
 
-    .block_title {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+        .inner_body_copySite {
+            color: #4a4a4a;
+            font-size: 1em;
+            font-weight: 400;
+            line-height: 1.5;
+            padding: 10px;
+            {#font-family: 'BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif';#}
+            font-family: sans-serif;
+        }
 
-    .places {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        margin: auto;
-        width: 80%;
-    }
+        .block_title_copySite {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
 
-    .place_content {
-        flex-grow: 1;
-        padding: 0px 10px;
-        display: flex;
-        align-items: start;
-        flex-direction: column;
+        .box_copySite {
+            background-color: #fff;
+            border-radius: 6px;
+            box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+            color: #4a4a4a;
+            padding: 1.25rem;
+            margin: 10px;
+            width: -webkit-fill-available;
+        }
 
-    }
-
-    .place_title {
-        align-self: center;
-        margin-top: 5px;
-    }
-
-    .box_copySite {
-        background-color: #fff;
-        border-radius: 6px;
-        box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
-        color: #4a4a4a;
-        padding: 1.25rem;
-        margin: 10px;
-        width: -webkit-fill-available;
-    }
+        .link_copySite {
+            color: #90c1ff;
+            text-decoration: none;
+        }
 
 
-    .letter_place {
-        color: #62657a;
-    }
+        .rating_parts_copySite {
+            display: flex;
+            justify-content: end;
+            flex-wrap: wrap;
+        }
 
-    .link {
-        color: #90c1ff;
-        text-decoration: none;
-    }
+        .rating_part_copySite {
+            padding: 10px;
+            margin: 6px;
+            border: 1px solid lightgrey;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+        }
 
-    .inner_body {
-        font-family: 'BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif';
-        font-family: sans-serif;
-    }
+        .hr_line_copySite {
+            height: 1px;
+            background-color: #c8c8c8;
+            width: 99%;
+            display: block;
+            margin: 10px auto;
+        }
 
-    .more_text {
-        display: none;
-    }
+        .place_img_copySite {
+            width: 300px !important;
+            min-width: 300px !important;
+            height: 200px !important;
+            max-height: 100%;
+            margin-right: 20px;
+            border-radius: 5px
+        }
 
-    .rating_parts {
-        display: flex;
-        justify-content: end;
-        flex-wrap: wrap;
-    }
+        .letter_copySite {
+            width: 30%;
+        }
 
-    .rating_part {
-        padding: 10px;
-        margin: 6px;
-        border: 1px solid lightgrey;
-        border-radius: 5px;
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-    }
-
-    .hr_line {
-        height: 1px;
-        background-color: #c8c8c8;
-        width: 99%;
-        display: block;
-        margin: 10px auto;
-    }
-
-    .place_img {
-        width: 300px !important;
-        min-width: 300px !important;
-        height: 200px !important;
-        max-height: 100%;
-        margin-right: 20px;
-        border-radius: 5px
-    }
-
+        .review-card_copySite {
+            box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+            color: #4a4a4a;
+            max-width: 100%;
+            position: relative;
+        }
     }
 </style>
 <style>
     @media (max-width: 630px) {
-        .place {
+        .place_copySite {
             flex-direction: column !important;
         }
 
-        .place_img {
+        .place_img_copySite {
             margin-bottom: 10px;
             width: 100% !important;
             min-width: auto !important;
             height: auto !important;
         }
+
+        .letter_copySite {
+            width: 100%;
+        }
     }
 </style>
 
 
-<h1 class="block_title" style="font-size: 21px"> {{ query.name }}
+<h1 class="block_title_copySite" style="font-size: 21px"> {{ query.name }}
 </h1>
 <div style="padding: 20px;">
     <div style="font-size: 16px">
@@ -142,10 +123,10 @@
 <div>
     {% for place in top_places %}
         <div style="padding: 10px; box-sizing: border-box;">
-            <div class="box_copySite place_little_card">
-                <div style="display: flex; " class="place">
+            <div class="box_copySite">
+                <div style="display: flex; " class="place_copySite">
                     <a href="{{ place.google_url }}" rel="nofollow">
-                        <img src="{{ place.cloud_img.get_default_img }}" class="place_img" alt=""
+                        <img src="{{ place.cloud_img.get_default_img }}" class="place_img_copySite" alt=""
                              style="">
                     </a>
                     <div style="flex-grow: 1;">
@@ -154,11 +135,11 @@
         display: block;
         border-bottom: 1px solid grey;margin: 0px;
         ;">
-        <h2 style="font-size: 17px"><a class="link" href="{{ place.google_url }}">{{ place.name }}</a></h2>
+        <h2 style="font-size: 17px"><a class="link_copySite" href="{{ place.google_url }}">{{ place.name }}</a></h2>
         </span>
                         <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
                         <span><b>Address</b>: {{ place.address|isValue }}</span><br>
-                        <span><b>Phone</b>: <a class="link"
+                        <span><b>Phone</b>: <a class="link_copySite"
                                                href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
                         <span><b>Description</b>:
         {% if place.description %}{{ place.description|truncatechars:200 }}{% else %}
@@ -169,9 +150,8 @@
                 {% with place.get_more_text as review %}
                     {% if review %}
                         <div style="margin: 20px auto;">
-
-                            <div class="columns is-centered" style="margin-bottom: 30px">
-                                <div class="card column is-12 review-card"
+                            <div style="margin-bottom: 30px">
+                                <div class="review-card_copySite"
                                      style="background-color: #FAFAFA; border-radius: 10px; padding: 10px 20px">
                                     <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between;
                 margin-bottom: 3px; padding-bottom: 10px">
@@ -181,7 +161,7 @@
                 {% endif %}"
                      style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                 <span>
-                <a class="link">
+                <a class="link_copySite">
                 {{ review.get_user_name }}
                 </a>
 {#                <span style="color:grey; font-size: 11px;display: block">{{ review.date_create }}</span>#}
@@ -195,9 +175,9 @@
                                                 {{ review.get_rating }}
                                                 {{ review.get_rating|numberToStars }}
                                             </div>
-                                            <div class="rating_parts">
+                                            <div class="rating_parts_copySite">
                                                 {% for part in review.parts.all %}
-                                                    <div class="rating_part">
+                                                    <div class="rating_part_copySite">
                                                         {{ part.review_type.name }}
                                                         <div>
                                                             {{ part.rating|getRating|safe }}
@@ -219,21 +199,21 @@
         </div>
     {% endfor %}
 </div>
-<span class="hr_line"></span>
+<span class="hr_line_copySite"></span>
 
-<h4 class="block_title">All places</h4>
+<h4 class="block_title_copySite">All places</h4>
 <div style="display: flex; justify-content: space-between; flex-wrap: wrap">
     {% for letter in letters %}
-        <div style="width: 30%">
-            <span class="hr_line"></span>
+        <div class="letter_copySite">
+            <span class="hr_line_copySite"></span>
             <span style="color: cornflowerblue">{{ letter }}</span>
             {% for place in places_letter|getValue:letter|getValue:'places' %}
-                <p><a href="{{ place.google_url }}" rel="nofollow" class="link">{{ place.name }}</a></p>
+                <p><a href="{{ place.google_url }}" rel="nofollow" class="link_copySite">{{ place.name }}</a></p>
             {% endfor %}
         </div>
     {% endfor %}
 </div>
-<span class="hr_line"></span>
+<span class="hr_line_copySite"></span>
 <div style="color: grey">
     <p>Total {{ places.count }} places</p>
 </div>
