@@ -29,6 +29,10 @@
             width: -webkit-fill-available;
         }
 
+        .box_copySite p {
+            margin-bottom: 0px !important;
+        }
+
         .link_copySite {
             color: #90c1ff;
             text-decoration: none;
@@ -76,6 +80,12 @@
             color: #4a4a4a;
             max-width: 100%;
             position: relative;
+        }
+
+        .rating_stars_copySite {
+            display: flex;
+            height: 21px;
+            font-size: 40px
         }
 
         .rating_numbers_copySite {
@@ -179,6 +189,8 @@
                 margin-bottom: 3px; padding-bottom: 10px">
                 <span style="display: flex; justify-content: center; align-items: center">
                 <img src="
+
+
                         {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
                      style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                 <span>
@@ -196,7 +208,8 @@
                                                 {% for part in review.parts.all %}
                                                     <div class="rating_part_copySite">
                                                         {{ part.review_type.name }}
-                                                        <div><span class="rating_stars_copySite">{{ part.rating|getRating|safe }}</span>
+                                                        <div><span
+                                                                class="rating_stars_copySite">{{ part.rating|getRating|safe }}</span>
                                                             <span class="rating_numbers_copySite">{{ part.rating }} / 5</span>
                                                         </div>
                                                     </div>
