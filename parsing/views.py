@@ -154,9 +154,6 @@ def query_list(request):
     return render(request, 'parsing/query/list.html', {'queries': queries})
 
 
-# def rating_sorted(query):
-#     return query.get_rating
-
 @login_required()
 def query_detail(request, slug):
     query = Query.objects.filter(slug=slug).first()

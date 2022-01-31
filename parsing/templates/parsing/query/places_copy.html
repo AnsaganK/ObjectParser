@@ -182,7 +182,7 @@
                 {% with place.get_more_text as review %}
                     {% if review %}
                         <div style="margin: 20px auto;">
-                            <div style="margin-bottom: 30px">
+                            <div>
                                 <div class="review-card_copySite"
                                      style="background-color: #FAFAFA; border-radius: 10px; padding: 10px 20px">
                                     <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between;
@@ -191,19 +191,21 @@
                 <img src="
 
 
+
                         {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
                      style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                 <span>
                 <a class="link_copySite">{{ review.get_user_name }}</a>
                 </span>
                 </span></p>
-                                    {% if review.parts.exists %}
-                                        <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px
+                                    <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px
                     solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
-                                            <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
-                                                {{ review.get_rating }}
-                                                {{ review.get_rating|numberToStars }}
-                                            </div>
+                                        <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
+                                            {{ review.get_rating }}
+                                            {{ review.get_rating|numberToStars }}
+                                        </div>
+                                        {% if review.parts.exists %}
+
                                             <div class="rating_parts_copySite">
                                                 {% for part in review.parts.all %}
                                                     <div class="rating_part_copySite">
@@ -215,10 +217,9 @@
                                                     </div>
                                                 {% endfor %}
                                             </div>
-                                        </div>
-                                    {% else %}
-                                        {{ review.rating|getRating|safe }}
-                                    {% endif %}
+                                        {% endif %}
+
+                                    </div>
                                     <p>{{ review.text }}</p>
                                 </div>
                             </div>

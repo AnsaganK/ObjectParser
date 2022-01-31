@@ -305,8 +305,10 @@ class Review(models.Model):
         if self.parts.exists():
             r = self.parts.all().aggregate(rating=Sum('rating'))
             c = self.parts.all().aggregate(count=Count('rating'))
-            return str(round(r['rating'] / c['count'], 1)).replace(',', '.')
-        return self.rating
+            rating = round(r['rating'] / c['count'], 1)
+        else:
+            rating = float(self.rating)
+        return str(rating).replace(',', '.')
 
     class Meta:
         verbose_name = 'Отзыв'
