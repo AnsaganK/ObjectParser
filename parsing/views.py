@@ -515,14 +515,13 @@ def place_edit(request, query_slug, place_slug):
 
 
 def place_set_description(place):
-    if not place.description or len(place.description) < 100:
-        reviews = place.reviews.all()[:20]
-        text = ''
-        for review in reviews:
-            text += review.text
-        description = sumextract(text, 5)
-        place.description = place.name + ' - ' + description
-        place.save()
+    reviews = place.reviews.all()[:20]
+    text = ''
+    for review in reviews:
+        text += review.text
+    description = sumextract(text, 5)
+    place.description = place.name + ' - ' + description
+    place.save()
 
 
 @login_required()
