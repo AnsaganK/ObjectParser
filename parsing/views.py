@@ -668,6 +668,7 @@ def query_reviews_uniqueize(request, slug):
 @login_required()
 def unique_reviews_list(request):
     unique_reviews = UniqueReview.objects.all().order_by('-pk')
+    unique_reviews = get_paginator(request, unique_reviews)
     return render(request, 'parsing/unique_reviews/list.html', {
         'unique_reviews': unique_reviews
     })

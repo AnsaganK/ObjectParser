@@ -23,7 +23,7 @@
                 <span style="">
                     {{ unique_review.date_create|date:'Y-m-d H:i' }}
                     {% if unique_review.date_end %}
-                    - {{ unique_review.date_end|date:'H:i' }}
+                        - {{ unique_review.date_end|date:'H:i' }}
                     {% endif %}
                 </span>
             </div>
@@ -35,4 +35,6 @@
             Uniqueize review not created
         </div>
     {% endfor %}
+
+    {% include 'parsing/include/pagination.html' with page=unique_reviews %}
 {% endblock %}
