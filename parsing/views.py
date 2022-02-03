@@ -23,7 +23,7 @@ from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FA
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
-from parsing.tasks import startParsing, generate_file
+from parsing.tasks import startParsing, generate_file, uniqueize_places_task, uniqueize_text_task
 from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
@@ -651,11 +651,16 @@ def review_uniqueize(request, pk):
 @login_required()
 def place_reviews_uniqueize(request, query_slug, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
-    reviews = place.reviews.all()
-    for review in reviews:
-        review.text = uniqueize_text(review.text)
-        review.save()
+    uniqueize_text_task.delay(place_id=place.id)
+    messages.success(request, 'Reviews uniqueize started')
     return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
+
+@login_required()
+def query_reviews_uniqueize(request, slug):
+    query = get_object_or_404(Query, slug=slug)
+    uniqueize_text_task.delay(query_id=query.id)
+    messages.success(request, 'Reviews uniqueize started')
+    return redirect(reverse('parsing:places', args=[slug]))
 
 
 def registration(request):

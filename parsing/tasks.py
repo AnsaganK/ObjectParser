@@ -15,7 +15,7 @@ from mimesis.enums import Gender
 from pytils.translit import slugify
 
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart
-from .utils import save_image
+from .utils import save_image, uniqueize_text
 
 
 @shared_task
@@ -269,7 +269,6 @@ def set_photo_url(img_url, place_id, base=True):
         return 'Фото не назначено {}'.format(place_id)
     except Exception as e:
         print(f'Ошиька при назначении фото: {img_url}', e.__class__.__name__)
-
 
 
 def set_photo_content(content, place_id, file_name='no_name'):
@@ -907,3 +906,27 @@ def generate_file(file_name, places):
     )
     response['Content-Disposition'] = f'attachment;filename={file_name}.csv'
     return response
+
+
+# Uniqueize reviews
+def uniqueize_reviews_task(place):
+    reviews = place.reviews.all()
+    for review in reviews:
+        review.text = uniqueize_text(review.text)
+        review.save()
+
+
+def uniqueize_places_task(query):
+    places = Place.objects.filter(queries__query=query)
+    for place in places:
+        uniqueize_reviews_task(place)
+
+
+@shared_task
+def uniqueize_text_task(query_id=None, place_id=None):
+    if query_id:
+        query = Query.objects.filter(id=query_id).first()
+        uniqueize_places_task(query)
+    if place_id:
+        place = Place.objects.filter(id=place_id).first()
+        uniqueize_reviews_task(place)
