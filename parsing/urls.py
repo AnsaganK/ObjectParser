@@ -1,19 +1,8 @@
-from django.shortcuts import redirect
 from django.urls import path
 from . import views
-from .models import Review
-
-
-def text_to_original_text(request):
-    reviews = Review.objects.all()
-    for review in reviews:
-        review.original_text = review.text
-        review.save()
-    return redirect('/')
 
 urlpatterns = [
     path('', views.index, name="index"),
-    path('text_to_original_text', text_to_original_text),
     path('query/', views.queries, name='queries'),
     path('query/tags/<int:pk>', views.tag_queries, name="tag_queries"),
 
