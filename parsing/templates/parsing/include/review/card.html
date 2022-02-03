@@ -10,11 +10,31 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
                                 {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}{% static 'parsing/img/not_avatar.svg' %}{% endif %}"
                              style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                     <span>
                         <a class="link"
                            href="
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -28,14 +48,22 @@
                     </span>
                     </span>
             {% if review.user == request.user or request.user|hasGroup:'Redactor' %}
-                <a href="{% url 'parsing:review_edit' review.pk %}">
-                    {% if review.is_edit %}
-                        <span style="color: grey">edited:{{ review.date_update }}</span>
-                    {% endif %}
-                    <span class="icon" style="color: orange">
-                            <i class="fas fa-edit"></i>
-                        </span>
-                </a>
+                <span>
+                    {% ifnotequal review.text review.original_text %}
+                        <span class="icon" onclick="showOriginalText(this)"
+                              style="color: cornflowerblue; cursor:pointer;">
+                                <i class="fa fa-history"></i>
+                            </span>
+                    {% endifnotequal %}
+                    <a href="{% url 'parsing:review_edit' review.pk %}">
+{#                        {% if review.is_edit %}#}
+{#                            <span style="color: grey">edited:{{ review.date_update }}</span>#}
+{#                        {% endif %}#}
+                        <span class="icon" style="color: orange">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                    </a>
+                </span>
             {% else %}
                 <p></p>
             {% endif %}
@@ -61,14 +89,22 @@
             {% endif %}
 
         </div>
-        {% if review.text|length > 320 %}
-            <p>
+        <p class="review_text" style="display: inline">
+            {% if review.text|length > 320 %}
                 {{ review.text|slice:":320" }}<span class="dots">...</span><span
                     class="more_text">{{ review.text|slice:"320:" }}</span>
                 <span class="link" onclick="showMore(this)">More text</span>
-            </p>
-        {% else %}
-            <p>{{ review.text }}</p>
+
+            {% else %}
+                {{ review.text }}
+            {% endif %}
+        </p>
+        {% if request.user|hasGroup:'Redactor' %}
+            {% ifnotequal review.text review.original_text %}
+                <p class="original_text" style="color: #ff8181; width: fit-content">
+                    {{ review.original_text }}
+                </p>
+            {% endifnotequal %}
         {% endif %}
     </div>
 </div>

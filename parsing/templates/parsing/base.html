@@ -594,6 +594,12 @@
                 margin-top: -60px;
             }
         }
+        .original_text{
+            display: none;
+        }
+        .review_text{
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -755,6 +761,17 @@ window.onload = function () {
 </script>
 
 <script>
+    function showOriginalText(elem){
+        let review_block = elem.parentNode.parentNode.parentNode;
+        console.log(review_block);
+        let review_text = review_block.querySelector('p.review_text');
+        console.log(review_text.style.display === 'none' || review_text.style.display === '')
+        console.log(review_text.style.display)
+        review_text.style.display = review_text.style.display === 'none' || review_text.style.display === '' ? 'inline' : 'none';
+        let original_text = review_block.querySelector('p.original_text')
+        original_text.style.display = original_text.style.display === 'none' || original_text.style.display === '' ? 'inline' : 'none';
+        console.log(original_text)
+    }
     function showMore(elem) {
         let text_block = elem.parentNode;
         console.log(elem)

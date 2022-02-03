@@ -11,12 +11,15 @@
     {% if request.user|hasGroup:'Admin' %}
         <div class="place_admin_buttons">
             <a href="{% url 'parsing:place_edit' query.slug place.slug %}"
+               title="Edit"
                class="button is-success is-light is-outlined centered mr-1"
                style="width: fit-content"><i class="fa fa-edit"></i></a>
             <a href="{% url 'parsing:place_edit_faq' query.slug place.slug %}"
+               title="FAQ"
                class="button is-warning is-light is-outlined centered mr-1"
                style="width: fit-content"><i class="fa fa-question"></i></a>
             <a href="{% url 'parsing:place_reviews_uniqueize' query.slug place.slug %}"
+               title="Uniqueize"
                class="button is-info is-light is-outlined centered mr-1"
                style="width: fit-content"><i class="fa fa-comment-alt"></i></a>
         </div>

@@ -116,5 +116,5 @@ def uniqueize_text(text):
         }
     })
     for i in output:
-        unique_sentences += i['generated_text'] + ' '
+        unique_sentences += str(i['generated_text']) + ' '
     return unique_sentences

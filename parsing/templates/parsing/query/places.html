@@ -91,15 +91,20 @@
         {% if request.user|hasGroup:'Admin' %}
             <div class="queries_admin_button">
                 <a href="{% url 'parsing:query_edit' query.slug %}"
+                   title="Edit"
                    class="button is-success is-light is-outlined centered mr-1"
                    style="width: fit-content"><i class="fa fa-edit"></i></a>
                 <a href="{% url 'parsing:query_edit_faq' query.slug %}"
+                   title="FAQ"
                    class="button is-warning is-light is-outlined centered mr-1"
                    style="width: fit-content"><i class="fa fa-question"></i></a>
                 <a href="{% url 'parsing:query_places_generate_description' query.slug %}"
+                   title="Generate Description"
                    class="button is-info is-light is-outlined centered mr-1"
                    style="width: fit-content"><i class="fa fa-comment"></i></a>
-                <a href="{% url 'parsing:query_rating_edit' query.slug %}" class="button is-outlined"
+                <a href="{% url 'parsing:query_rating_edit' query.slug %}"
+                   title="Change rating"
+                   class="button is-outlined"
                    style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
             </div>
         {% endif %}
