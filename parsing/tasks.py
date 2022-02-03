@@ -927,6 +927,8 @@ def uniqueize_text_task(query_id=None, place_id=None):
     if query_id:
         query = Query.objects.filter(id=query_id).first()
         uniqueize_places_task(query)
+        review_count = Review.objects.filter(place__queries__query=query).count()
     if place_id:
         place = Place.objects.filter(id=place_id).first()
         uniqueize_reviews_task(place)
+        review_count = place.reviews.count()
