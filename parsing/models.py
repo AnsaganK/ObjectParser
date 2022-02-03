@@ -343,7 +343,7 @@ class UniqueReview(models.Model):
         return round((self.reviews_checked / self.reviews_count) * 100)
 
     def get_name(self):
-        if self.query and self.place:
+        if self.place:
             return f'{self.place.name}'
         else:
             return f'{self.query.name} (places)'
