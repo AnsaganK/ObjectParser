@@ -19,11 +19,12 @@ from rest_framework.views import APIView
 from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
     QueryContentForm, ReviewTypeForm
-from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion
+from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
-from parsing.tasks import startParsing, generate_file, uniqueize_places_task, uniqueize_text_task
+from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, uniqueize_query_reviews_task, \
+    uniqueize_text_task
 from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
@@ -649,10 +650,12 @@ def review_uniqueize(request, pk):
 
 @login_required()
 def place_reviews_uniqueize(request, query_slug, place_slug):
+    query = get_object_or_404(Query, slug=query_slug)
     place = get_object_or_404(Place, slug=place_slug)
-    uniqueize_text_task.delay(place_id=place.id)
+    uniqueize_text_task.delay(query_id=query.id, place_id=place.id)
     messages.success(request, 'Reviews uniqueize started')
     return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
+
 
 @login_required()
 def query_reviews_uniqueize(request, slug):
@@ -660,6 +663,14 @@ def query_reviews_uniqueize(request, slug):
     uniqueize_text_task.delay(query_id=query.id)
     messages.success(request, 'Reviews uniqueize started')
     return redirect(reverse('parsing:places', args=[slug]))
+
+
+@login_required()
+def unique_reviews_list(request):
+    unique_reviews = UniqueReview.objects.all().order_by('-pk')
+    return render(request, 'parsing/unique_reviews/list.html', {
+        'unique_reviews': unique_reviews
+    })
 
 
 def registration(request):

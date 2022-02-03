@@ -34,6 +34,7 @@ urlpatterns = [
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
     path('cabinet/<str:username>/reviews/', views.user_reviews, name="user_reviews"),
     path('profile/', views.profile, name="profile"),
+    path('reviews/progress', views.unique_reviews_list, name="unique_reviews_list"),
     path('reviews/all', views.all_reviews, name="all_reviews"),
     path('reviews/my', views.my_reviews, name="my_reviews"),
     path('reviews/<int:pk>/edit', views.review_edit, name="review_edit"),

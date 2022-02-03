@@ -317,6 +317,43 @@ class Review(models.Model):
         ordering = ['-pk']
 
 
+class UniqueReview(models.Model):
+    reviews_count = models.IntegerField(default=0)
+    reviews_checked = models.IntegerField(default=0)
+    place = models.ForeignKey(Place, on_delete=models.CASCADE, null=True, blank=True)
+    query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True)
+    date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    date_end = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return str(self.id)
+
+    @property
+    def status_color(self):
+        if self.percent < 50:
+            status_color = 'danger'
+        elif self.percent >= 50 and self.percent < 80:
+            status_color = 'warning'
+        else:
+            status_color = 'success'
+        return status_color
+
+    @property
+    def percent(self):
+        return round((self.reviews_checked / self.reviews_count) * 100)
+
+    def get_name(self):
+        if self.query and self.place:
+            return f'{self.place.name}'
+        else:
+            return f'{self.query.name} (places)'
+
+    class Meta:
+        verbose_name = 'Unique review'
+        verbose_name_plural = 'Unique reviews'
+        ordering = ['-pk']
+
+
 # class Location(models.Model):
 #     name = models.CharField(max_length=250)
 #     text = models.TextField(null=True, blank=True)

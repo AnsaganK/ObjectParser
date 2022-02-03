@@ -14,7 +14,7 @@ from mimesis import Person
 from mimesis.enums import Gender
 from pytils.translit import slugify
 
-from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart
+from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview
 from .utils import save_image, uniqueize_text
 
 
@@ -909,26 +909,38 @@ def generate_file(file_name, places):
 
 
 # Uniqueize reviews
-def uniqueize_reviews_task(place):
+def uniqueize_place_reviews_task(place):
     reviews = place.reviews.all()
     for review in reviews:
         review.text = uniqueize_text(review.text)
         review.save()
 
 
-def uniqueize_places_task(query):
+def uniqueize_query_reviews_task(query):
     places = Place.objects.filter(queries__query=query)
     for place in places:
-        uniqueize_reviews_task(place)
+        uniqueize_place_reviews_task(place)
+
+
+def uniqueize_reviews_task(reviews, unique_review):
+    for review in reviews:
+        review.text = uniqueize_text(review.text)
+        review.save()
+        unique_review.reviews_checked += 1
+        unique_review.save()
+    unique_review.date_end = datetime.now()
+    unique_review.save()
 
 
 @shared_task
-def uniqueize_text_task(query_id=None, place_id=None):
-    if query_id:
-        query = Query.objects.filter(id=query_id).first()
-        uniqueize_places_task(query)
-        review_count = Review.objects.filter(place__queries__query=query).count()
+def uniqueize_text_task(query_id, place_id=None):
+    query = Query.objects.filter(id=query_id).first()
     if place_id:
         place = Place.objects.filter(id=place_id).first()
-        uniqueize_reviews_task(place)
-        review_count = place.reviews.count()
+        reviews = place.reviews.all().order_by('-pk')
+        unique_review = UniqueReview(reviews_count=reviews.count(), query=query, place=place)
+    else:
+        reviews = Review.objects.filter(place__queries__query=query).order_by('-pk')
+        unique_review = UniqueReview(reviews_count=reviews.count(), query=query)
+    unique_review.save()
+    uniqueize_reviews_task(reviews, unique_review)
