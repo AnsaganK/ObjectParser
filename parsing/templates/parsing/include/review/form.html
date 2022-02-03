@@ -53,6 +53,9 @@
                 {{ request.user.first_name }}{% endif %}
             <textarea name="text" class="textarea" id="" cols="" rows="8">{% if review %}{{ review.text }}{% endif %}</textarea>
             <button type="submit" class="button is-info block_centered">Send</button>
+            {% if review %}
+                <a href="{% url 'parsing:review_uniqueize' review.id %}" class="link">Uniqueize</a>
+            {% endif %}
         </form>
     </div>
 </div>

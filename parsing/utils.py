@@ -25,6 +25,8 @@ def get_paginator(request, queryset, count=12):
 
 
 def has_group(user, group_name):
+    if not user.is_authenticated:
+        return False
     group = user.groups.first()
     if not group:
         return False
@@ -54,6 +56,7 @@ def save_image(image):
     return None
 
 
+# Суммаризация Description
 
 from itertools import combinations
 import nltk
@@ -89,3 +92,29 @@ def sumextract(text, n=5):
     top_n = sorted(tr[:n])
     return ' '.join(x[2] for x in top_n)
 
+
+# Уникализация текста
+# import requests
+
+API_URL = "https://api-inference.huggingface.co/models/tuner007/pegasus_paraphrase"
+headers = {"Authorization": "Bearer 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"}
+
+
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+
+def uniqueize_text(text):
+    sentences = text.split('.')[:-1]
+    sentences = [i for i in sentences if len(i) > 2]
+    unique_sentences = ''
+    output = query({
+        "inputs": sentences,
+        "parameters": {
+            'truncation': 'only_first'
+        }
+    })
+    for i in output:
+        unique_sentences += i['generated_text'] + ' '
+    return unique_sentences

@@ -28,7 +28,7 @@
                     </span>
                     </span>
             {% if review.user == request.user or request.user|hasGroup:'Redactor' %}
-                <a href="{% url 'parsing:my_review_edit' review.pk %}">
+                <a href="{% url 'parsing:review_edit' review.pk %}">
                     {% if review.is_edit %}
                         <span style="color: grey">edited:{{ review.date_update }}</span>
                     {% endif %}

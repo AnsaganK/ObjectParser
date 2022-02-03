@@ -1,8 +1,19 @@
+from django.shortcuts import redirect
 from django.urls import path
 from . import views
+from .models import Review
+
+
+def text_to_original_text(request):
+    reviews = Review.objects.all()
+    for review in reviews:
+        review.original_text = review.text
+        review.save()
+    return redirect('/')
+
 urlpatterns = [
     path('', views.index, name="index"),
-
+    path('text_to_original_text', text_to_original_text),
     path('query/', views.queries, name='queries'),
     path('query/tags/<int:pk>', views.tag_queries, name="tag_queries"),
 
@@ -22,6 +33,7 @@ urlpatterns = [
     path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),
     path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
 
+    path('query/<slug:query_slug>/places/<slug:place_slug>/reviews/uniqueize', views.place_reviews_uniqueize, name="place_reviews_uniqueize"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/generate/description', views.place_generate_description, name="place_generate_description"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/edit', views.place_edit, name="place_edit"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
@@ -35,7 +47,8 @@ urlpatterns = [
     path('profile/', views.profile, name="profile"),
     path('reviews/all', views.all_reviews, name="all_reviews"),
     path('reviews/my', views.my_reviews, name="my_reviews"),
-    path('reviews/<int:pk>/edit', views.my_review_edit, name="my_review_edit"),
+    path('reviews/<int:pk>/edit', views.review_edit, name="review_edit"),
+    path('reviews/<int:pk>/uniqueize', views.review_uniqueize, name="review_uniqueize"),
     path('registration/', views.registration, name="registration"),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),

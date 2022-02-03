@@ -24,7 +24,7 @@ from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerial
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file
-from parsing.utils import show_form_errors, has_group, get_paginator, sumextract
+from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
 def index(request):
@@ -460,6 +460,8 @@ def get_place_reviews(request, place):
 def query_place_detail(request, query_slug, place_slug):
     query = get_object_or_404(Query, slug=query_slug)
     place = get_object_or_404(Place, slug=place_slug)
+    if place.is_redirect and not has_group(request.user, 'Redactor'):
+        return redirect(place.redirect)
     reviews = get_place_reviews(request, place)
     return render(request, 'parsing/place/detail.html',
                   {'query': query, 'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
@@ -615,7 +617,7 @@ def my_reviews(request):
 
 
 @login_required()
-def my_review_edit(request, pk):
+def review_edit(request, pk):
     review = Review.objects.filter(pk=pk).first()
     if (not review or request.user != review.user) and not has_group(request.user, 'Redactor'):
         return redirect('parsing:my_reviews')
@@ -629,13 +631,31 @@ def my_review_edit(request, pk):
             messages.success(request, 'Review changed')
         else:
             show_form_errors(request, form.errors)
-        return redirect(reverse('parsing:my_review_edit', args=[review.id]))
+        return redirect(reverse('parsing:review_edit', args=[review.id]))
 
     review_types = ReviewType.objects.filter(reviews__review=review)
     review_parts = ReviewPart.objects.values('review_type', 'rating').filter(review=review)
     print(review_parts)
     return render(request, 'parsing/reviews/review_edit.html',
                   {'review': review, 'review_types': review_types, 'review_parts': review_parts})
+
+
+@login_required()
+def review_uniqueize(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    review.text = uniqueize_text(review.text)
+    review.save()
+    return redirect(reverse('parsing:review_edit', args=[review.id]))
+
+
+@login_required()
+def place_reviews_uniqueize(request, query_slug, place_slug):
+    place = get_object_or_404(Place, slug=place_slug)
+    reviews = place.reviews.all()
+    for review in reviews:
+        review.text = uniqueize_text(review.text)
+        review.save()
+    return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
 
 
 def registration(request):

@@ -513,6 +513,7 @@ def set_reviews(review_list, place):
             review = Review.objects.create(user=user,
                                            rating=review['rating'],
                                            text=text,
+                                           original_text=text,
                                            place=place)
             review.save()
             try:

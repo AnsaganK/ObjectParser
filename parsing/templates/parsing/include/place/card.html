@@ -1,5 +1,13 @@
 {% load parsing_tags %}
 <div class="" id="detail_data" style="padding-bottom: 50px">
+    {% if place.is_redirect and request.user|hasGroup:'Redactor' %}
+        <article class="message is-warning">
+            <div class="message-body">
+                This page has a <a href="{{ place.redirect }}" class="link">redirect</a>, it is visible only to the site administrator
+            </div>
+        </article>
+    {% endif %}
+
     {% if request.user|hasGroup:'Admin' %}
         <div class="place_admin_buttons">
             <a href="{% url 'parsing:place_edit' query.slug place.slug %}"
@@ -8,11 +16,12 @@
             <a href="{% url 'parsing:place_edit_faq' query.slug place.slug %}"
                class="button is-warning is-light is-outlined centered mr-1"
                style="width: fit-content"><i class="fa fa-question"></i></a>
+            <a href="{% url 'parsing:place_reviews_uniqueize' query.slug place.slug %}"
+               class="button is-info is-light is-outlined centered mr-1"
+               style="width: fit-content"><i class="fa fa-comment-alt"></i></a>
         </div>
     {% endif %}
-    {% if request.user|hasGroup:'Admin' %}
 
-    {% endif %}
     <div class="columns place_card mt-4">
         <div class="box place_card_info column is-one-third-desktop is-full-mobile is-full-tablet is-narrow"
              style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">

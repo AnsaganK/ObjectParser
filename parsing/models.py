@@ -285,7 +285,8 @@ class ReviewPart(models.Model):
 class Review(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
-    text = models.TextField()
+    text = models.TextField(null=True, blank=True)
+    original_text = models.TextField(null=True, blank=True)
     stars_choices = ((i, i) for i in range(1, 6))
     rating = models.IntegerField(default=1, choices=stars_choices, null=True, blank=True)
 
