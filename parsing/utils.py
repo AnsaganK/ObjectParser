@@ -106,7 +106,7 @@ def query(payload):
 
 
 def uniqueize_text(text):
-    sentences = text.split('.')[:-1]
+    sentences = text.split('.')
     sentences = [i for i in sentences if len(i) > 2]
     unique_sentences = ''
     output = query({
