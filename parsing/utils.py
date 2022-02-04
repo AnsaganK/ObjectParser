@@ -101,9 +101,12 @@ headers = {"Authorization": "Bearer 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"}
 
 
 def query(payload):
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return response.json()
-
+    try:
+        response = requests.post(API_URL, headers=headers, json=payload)
+        if response.status_code == 200:
+            return response.json()
+    except:
+        return None
 
 def uniqueize_text(text):
     sentences = text.split('.')
@@ -115,6 +118,8 @@ def uniqueize_text(text):
             'truncation': 'only_first'
         }
     })
-    for i in output:
-        unique_sentences += str(i['generated_text']) + ' '
-    return unique_sentences
+    if output:
+        for i in output:
+            unique_sentences += str(i['generated_text']) + ' '
+        return unique_sentences
+    return text
