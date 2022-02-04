@@ -490,6 +490,7 @@ def review_create(request, query_slug, place_slug):
             review = form.save(commit=False)
             review.user = request.user
             review.place = place
+            review.original_text = request.POST['text']
             review.save()
             create_or_update_review_types(request.POST, review)
             messages.success(request, 'Your review has been saved')
@@ -626,6 +627,7 @@ def review_edit(request, pk):
         if form.is_valid():
             review = form.save(commit=False)
             review.is_edit = True
+            review.original_text = request.POST['text']
             review.save()
             create_or_update_review_types(request.POST, review)
             messages.success(request, 'Review changed')
