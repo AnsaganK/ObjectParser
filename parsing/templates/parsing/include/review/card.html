@@ -49,12 +49,12 @@
                     </span>
             {% if review.user == request.user or request.user|hasGroup:'Redactor' %}
                 <span>
-                    {% ifnotequal review.text review.original_text %}
+                    {% if review.text != review.original_text %}
                         <span class="icon" onclick="showOriginalText(this)"
                               style="color: cornflowerblue; cursor:pointer;">
                                 <i class="fa fa-history"></i>
                             </span>
-                    {% endifnotequal %}
+                    {% endif %}
                     <a href="{% url 'parsing:review_edit' review.pk %}">
 {#                        {% if review.is_edit %}#}
 {#                            <span style="color: grey">edited:{{ review.date_update }}</span>#}
@@ -100,11 +100,11 @@
             {% endif %}
         </p>
         {% if request.user|hasGroup:'Redactor' %}
-            {% ifnotequal review.text review.original_text %}
+            {% if review.text != review.original_text %}
                 <p class="original_text" style="color: #ff8181; width: fit-content">
                     {{ review.original_text }}
                 </p>
-            {% endifnotequal %}
+            {% endif %}
         {% endif %}
     </div>
 </div>
