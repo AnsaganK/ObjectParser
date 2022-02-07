@@ -998,14 +998,16 @@ def cities_img_parser():
     for table in tables:
         data += get_table_data(table)
     for city in data:
-        img_link = get_city_img(city['link'])
-        img_link = 'https:' + img_link if img_link else None
-        city_item = {
-            'name': city['name'],
-            'link': city['link'],
-            'img_link': img_link
-        }
-        set_city_img(city_item)
+        city_object = City.objects.filter(name=city['name']).first()
+        if city_object and not city_object.cloud_img:
+            img_link = get_city_img(city['link'])
+            img_link = 'https:' + img_link if img_link else None
+            city_item = {
+                'name': city['name'],
+                'link': city['link'],
+                'img_link': img_link
+            }
+            set_city_img(city_item)
 
 
 def set_city_img(city_item):
