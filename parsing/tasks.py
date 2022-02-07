@@ -980,14 +980,21 @@ def get_table_data(table):
     return cities
 
 
-def get_city_img(link):
+def get_city_data(link):
     url = base_url + link
-    print(url)
     soup = get_soup(get_site(url))
+
     infobox = soup.find(class_='infobox')
     img = infobox.find('img')
-    img_link = img.get('src')
-    return img_link
+    img_link = img['src']
+
+    body = soup.find("div", {"id": "mw-content-text"}).find(class_='mw-parser-output')
+    description = body.find_all('p')[1]
+
+    return {
+        'img_link': img_link,
+        'description': description.text
+    }
 
 
 @shared_task()
@@ -999,29 +1006,30 @@ def cities_img_parser():
         data += get_table_data(table)
     for city in data:
         city_object = City.objects.filter(name=city['name']).first()
-        if city_object and not city_object.cloud_img:
-            img_link = get_city_img(city['link'])
-            img_link = 'https:' + img_link if img_link else None
+        if city_object and (not city_object.cloud_img or not city_object.description):
+            city_data = get_city_data(city['link'])
+            description = city_data.get('description')
+            img_link = 'https:' + city_data.get('img_link')
             city_item = {
                 'name': city['name'],
                 'link': city['link'],
-                'img_link': img_link
+                'img_link': img_link,
+                'description': description
             }
-            set_city_img(city_item)
+            set_city_data(city_item)
 
 
-def set_city_img(city_item):
+def set_city_data(city_item):
     print(city_item['name'])
     city = City.objects.filter(name=city_item['name']).first()
-    if city and not city.cloud_img and city_item['img_link']:
-        time.sleep(5)
-        r = requests.get(city_item['img_link'], headers={'User-Agent': 'Mozilla/5.0'})
-        print(city.id)
-        print(city_item['img_link'])
-        print("Status: " + str(r.status_code))
-        if r.status_code == 200:
-            city.cloud_img = save_image(r.content)
-            city.save()
-            print('Yes')
-    else:
-        pass
+    if city:
+        if not city.cloud_img:
+            time.sleep(5)
+            r = requests.get(city_item['img_link'], headers={'User-Agent': 'Mozilla/5.0'})
+            print("Img Status: " + str(r.status_code))
+            if r.status_code == 200:
+                city.cloud_img = save_image(r.content)
+        if not city.description:
+            city.description = city_item['description']
+            print('Description')
+        city.save()

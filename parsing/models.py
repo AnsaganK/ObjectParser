@@ -143,6 +143,8 @@ class City(models.Model):
     slug = models.SlugField(max_length=500)
     map_name = models.CharField(max_length=500)
 
+    description = models.TextField(null=True, blank=True, default='')
+
     cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
 
     def __str__(self):

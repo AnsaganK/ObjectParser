@@ -15,6 +15,15 @@
     </style>
 {% endblock %}
 
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li><a href="#">Service</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
 {% block content %}
     <form action="" method="post">
         {% csrf_token %}
