@@ -762,14 +762,16 @@ def city_service_create(city=None, service=None):
     cities_and_services = []
     if city:
         services = Service.objects.all()
-        for service in services:
-            city_service = CityService(city=city, service=service)
-            cities_and_services.append(city_service)
+        if services:
+            for service in services:
+                city_service = CityService(city=city, service=service)
+                cities_and_services.append(city_service)
     elif service:
         cities = City.objects.all()
-        for city in cities:
-            city_service = CityService(city=city, service=service)
-            cities_and_services.append(city_service)
+        if cities:
+            for city in cities:
+                city_service = CityService(city=city, service=service)
+                cities_and_services.append(city_service)
     CityService.objects.bulk_create(cities_and_services)
 
 
