@@ -26,7 +26,7 @@
                     City name: <a href="{% url 'parsing:city_detail' city.slug %}">{{ city.name }} </a><br>
                     City slug: {{ city.slug }} <br>
                     City map_name: {{ city.map_name }} <br>
-                    City img: {{ city.cloud_img.get_default_img }} <br>
+                    City img: {{ city.cloud_img }} <br>
                 </div>
             </div>
         {% empty %}

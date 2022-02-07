@@ -49,6 +49,7 @@ def save_image(image):
     r = requests.post(url, files=files, headers=headers)
     if r.status_code == 200:
         response = r.json()
+        print(response['success'])
         if response['success'] == True:
             cloud_image = CloudImage(image_id=response['result']['id'], image_response=response)
             cloud_image.save()

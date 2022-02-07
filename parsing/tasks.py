@@ -1009,12 +1009,17 @@ def cities_img_parser():
 
 
 def set_city_img(city_item):
+    print(city_item['name'])
     city = City.objects.filter(name=city_item['name']).first()
     if city and not city.cloud_img and city_item['img_link']:
-        r = requests.get(city_item['img_link'])
+        time.sleep(5)
+        r = requests.get(city_item['img_link'], headers={'User-Agent': 'Mozilla/5.0'})
+        print(city.id)
+        print(city_item['img_link'])
+        print("Status: "+str(r.status_code))
         if r.status_code == 200:
-            pass
             city.cloud_img = save_image(r.content)
             city.save()
+            print('Yes')
     else:
         pass
