@@ -180,6 +180,9 @@ class CityService(models.Model):
     def __str__(self):
         return f'{self.city.name} - {self.service.name}'
 
+    def get_absolute_url(self):
+        return reverse('parsing:city_service_detail', args=[self.city.slug, self.service.slug])
+
     class Meta:
         verbose_name = 'City and Service'
         verbose_name_plural = 'Cities and Services'

@@ -1,0 +1,12 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    {{ city_service.city.name }} - {{ city_service.service.name }}
+{% endblock %}
+
+{% block content %}
+    {% for place in places %}
+    {% empty %}
+        <span class="has-text-grey">Places not found</span>
+    {% endfor %}
+{% endblock %}

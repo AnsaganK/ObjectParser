@@ -4,6 +4,17 @@
     Services
 {% endblock %}
 
+{% block style %}
+    <style>
+        .service_card {
+            border: 1px solid orange;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
     <form action="" method="post">
         {% csrf_token %}
@@ -14,11 +25,9 @@
     </form>
     <div class="columns is-multiline mt-3">
         {% for service in services %}
-            <div class="column is-4">
-                <div class="card p-3">
-                    {{ forloop.counter }} <br>
-                    Service name: {{ service.name }} <br>
-                    Service slug: {{ service.slug }} <br>
+            <div class="column is-3">
+                <div class="card p-3 service_card has-text-warning">
+                    {{ service.name }}
                 </div>
             </div>
         {% empty %}

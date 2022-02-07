@@ -833,9 +833,10 @@ def city_list(request):
 @login_required()
 def city_detail(request, slug):
     city = get_object_or_404(City, slug=slug)
-    services = Service.objects.filter(city_service__city=city)
+    city_services = CityService.objects.filter(city=city)
     return render(request, 'parsing/city/detail.html', {
-        'services': services
+        'city': city,
+        'city_services': city_services
     })
 
 
@@ -851,6 +852,16 @@ def service_list(request):
         return redirect(reverse('parsing:service_list'))
     return render(request, 'parsing/service/list.html', {
         'services': services
+    })
+
+
+@login_required()
+def city_service_detail(request, city_slug, service_slug):
+    city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
+    places = Place.objects.filter(city_service=city_service)
+    return render(request, 'parsing/service_city/places.html', {
+        'city_service': city_service,
+        'places': places
     })
 
 #

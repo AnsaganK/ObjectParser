@@ -4,16 +4,51 @@
     {{ city.name }}
 {% endblock %}
 
+{% block style %}
+    <style>
+        .services {
+            justify-content: space-between;
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .service {
+            width: 30%;
+            margin-bottom: 10px;
+        }
+
+        .service .link {
+            padding: 5px;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .service .link:hover {
+            background: #ffe1b3;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
+    <div class="columns">
+        <img src="{{ city.cloud_img.get_default_img }}" class="column is-3"
+             style="height: 300px !important; border-radius: 15px" alt="">
+        <div class="column is-10">
+            <h3>Services</h3>
+            <div class="services">
+                {% for city_service in city_services %}
+                    <div class="service">
+                        <a href="{{ city_service.get_absolute_url }}" class="link"
+                           style="font-size: 14px">{{ city_service.service.name }}</a>
+                    </div>
+                {% empty %}
+                    <span class="has-text-gray">
+                        Services not found
+                    </span>
+                {% endfor %}
 
-    <h3>Services</h3>
-    {% for service in services %}
-        {{ service.name }}
-    {% endfor %}
-
-    <hr>
-    <h3>Cities</h3>
-    {% for city in cities %}
-        {{ city.name }}
-    {% endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
