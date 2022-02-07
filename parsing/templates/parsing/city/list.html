@@ -1,0 +1,36 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    Cities
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="text" class="input" style="width: 430px" name="name">
+        <button type="submit" class="button is-success text-center">
+            create
+        </button>
+        <a href="{% url 'parsing:city_autocreate' %}" type="submit" class="button is-warning text-center">
+            autocreate
+        </a>
+        <a href="{% url 'parsing:city_img_autocreate' %}" type="submit" class="button is-warning text-center">
+            autocreate img
+        </a>
+    </form>
+    <div class="columns is-multiline mt-3">
+        {% for city in cities %}
+            <div class="column is-4">
+                <div class="card p-3" style="background: url('{{ city.cloud_img.get_default_img }}'); background-size: cover">
+                    {{ forloop.counter }} <br>
+                    City name: <a href="{% url 'parsing:city_detail' city.slug %}">{{ city.name }} </a><br>
+                    City slug: {{ city.slug }} <br>
+                    City map_name: {{ city.map_name }} <br>
+                    City img: {{ city.cloud_img.get_default_img }} <br>
+                </div>
+            </div>
+        {% empty %}
+            <span class="has-text-grey">City not found</span>
+        {% endfor %}
+    </div>
+{% endblock %}

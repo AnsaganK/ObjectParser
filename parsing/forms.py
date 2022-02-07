@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from parsing.models import Review, Place, Tag, Query, ReviewType, Profile
+from parsing.models import Review, Place, Tag, Query, ReviewType, Profile, City, Service
 
 
 class QueryForm(forms.Form):
@@ -64,3 +64,15 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['user']
+
+
+class CityForm(forms.ModelForm):
+    class Meta:
+        model = City
+        fields = ['name']
+
+
+class ServiceForm(forms.ModelForm):
+    class Meta:
+        model = Service
+        fields = ['name']

@@ -1,0 +1,28 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    Services
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="text" class="input" style="width: 430px" name="name">
+        <button type="submit" class="button is-success text-center">
+            create
+        </button>
+    </form>
+    <div class="columns is-multiline mt-3">
+        {% for service in services %}
+            <div class="column is-4">
+                <div class="card p-3">
+                    {{ forloop.counter }} <br>
+                    Service name: {{ service.name }} <br>
+                    Service slug: {{ service.slug }} <br>
+                </div>
+            </div>
+        {% empty %}
+            <span class="has-text-grey">Services not found</span>
+        {% endfor %}
+    </div>
+{% endblock %}

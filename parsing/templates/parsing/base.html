@@ -669,6 +669,8 @@ window.onload = function () {
                     {% endif %}
                     {% if request.user|hasGroup:'SuperAdmin' %}
                         <a class="navbar-item" href="{% url 'parsing:query_all' %}">All queries</a>
+                        <a class="navbar-item" href="{% url 'parsing:city_list' %}">City</a>
+                        <a class="navbar-item" href="{% url 'parsing:service_list' %}">Service</a>
                     {% endif %}
                     <a class="navbar-item" href="{% url 'parsing:my_reviews' %}">My reviews</a>
                     {% if request.user|hasGroup:'Redactor' %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart, CloudImage, FAQ, \
-    FAQQuestion, UniqueReview
+    FAQQuestion, UniqueReview, City, Service, CityService
 
 
 @admin.register(Query)
@@ -39,6 +39,9 @@ admin.site.register(CloudImage)
 admin.site.register(FAQ)
 admin.site.register(FAQQuestion)
 admin.site.register(UniqueReview)
+admin.site.register(City)
+admin.site.register(Service)
+admin.site.register(CityService)
 
 
 @admin.register(Review)

@@ -29,7 +29,7 @@
         <span>Reviews: {{ place.reviews.count }}</span>
         {% with place.get_more_text as review %}
             {% if review %}
-                <div style="margin: 20px auto">
+                <div style="margin-top: 5px;">
                     {% include 'parsing/include/review/card.html' with review=review %}
                 </div>
             {% endif %}

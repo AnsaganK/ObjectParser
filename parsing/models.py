@@ -138,6 +138,54 @@ class QueryPlace(models.Model):
         ordering = ['-pk']
 
 
+class City(models.Model):
+    name = models.CharField(max_length=500)
+    slug = models.SlugField(max_length=500)
+    map_name = models.CharField(max_length=500)
+
+    cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('parsing:city_detail', args=[self.slug])
+
+    class Meta:
+        verbose_name = 'City'
+        verbose_name_plural = 'Cities'
+        ordering = ['name']
+
+
+class Service(models.Model):
+    name = models.CharField(max_length=500)
+    slug = models.SlugField(max_length=500)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Service'
+        verbose_name_plural = 'Services'
+        ordering = ['name']
+
+
+class CityService(models.Model):
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='city_service')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='city_service')
+
+    search_text = models.TextField(null=True, blank=True)
+    link = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.city.name} - {self.service.name}'
+
+    class Meta:
+        verbose_name = 'City and Service'
+        verbose_name_plural = 'Cities and Services'
+        ordering = ['-pk']
+
+
 class Place(models.Model):
     place_id = models.TextField(verbose_name='Идентификатор в гугл картах', null=True, blank=True)
     title = models.TextField(null=True, blank=True, default='', verbose_name='Title')
@@ -172,6 +220,17 @@ class Place(models.Model):
     redirect = models.TextField(null=True, blank=True, default='')
 
     faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='place')
+
+    city_service = models.ForeignKey(CityService, null=True, blank=True, on_delete=models.CASCADE,
+                                     related_name='places')
+
+    @property
+    def city(self):
+        return self.city_service.city if self.city_service else ''
+
+    @property
+    def service(self):
+        return self.city_service.service if self.city_service else ''
 
     @property
     def get_rating(self):

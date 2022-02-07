@@ -18,13 +18,16 @@ urlpatterns = [
     path('query/<slug:slug>/places/copy/code', views.places_copy_code, name='places_copy_code'),
     path('query/<slug:slug>/edit/access', views.query_edit_access, name='query_edit_access'),
     path('query/<slug:slug>/edit/faq', views.query_edit_faq, name='query_edit_faq'),
-    path('query/<slug:slug>/generate/description', views.query_places_generate_description, name='query_places_generate_description'),
+    path('query/<slug:slug>/generate/description', views.query_places_generate_description,
+         name='query_places_generate_description'),
     path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),
     path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
     path('query/<slug:slug>/reviews/uniqueize', views.query_reviews_uniqueize, name='query_reviews_uniqueize'),
 
-    path('query/<slug:query_slug>/places/<slug:place_slug>/reviews/uniqueize', views.place_reviews_uniqueize, name="place_reviews_uniqueize"),
-    path('query/<slug:query_slug>/places/<slug:place_slug>/generate/description', views.place_generate_description, name="place_generate_description"),
+    path('query/<slug:query_slug>/places/<slug:place_slug>/reviews/uniqueize', views.place_reviews_uniqueize,
+         name="place_reviews_uniqueize"),
+    path('query/<slug:query_slug>/places/<slug:place_slug>/generate/description', views.place_generate_description,
+         name="place_generate_description"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/edit', views.place_edit, name="place_edit"),
     path('query/<slug:query_slug>/places/<slug:place_slug>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
@@ -41,6 +44,13 @@ urlpatterns = [
     path('reviews/<int:pk>/edit', views.review_edit, name="review_edit"),
     path('reviews/<int:pk>/uniqueize', views.review_uniqueize, name="review_uniqueize"),
     path('registration/', views.registration, name="registration"),
+
+    path('city', views.city_list, name='city_list'),
+    path('city/<slug:slug>', views.city_detail, name='city_detail'),
+    path('city/autocreate', views.city_autocreate, name='city_autocreate'),
+    path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
+
+    path('service', views.service_list, name='service_list'),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
 
@@ -61,19 +71,18 @@ urlpatterns = [
 
 app_name = 'parsing'
 
-
 urlpatterns += [
-    path('api/v1/tags', views.TagList.as_view(), name='tag_list_api'),
-    path('api/v1/query/add', views.QueryAdd.as_view(), name='query_add_api'),
-    path('api/v1/query/<slug:slug>/edit', views.QueryEdit.as_view(), name='query_edit_api'),
-    path('api/v1/user/<str:username>/queries', views.QueryUser.as_view(), name='query_user_api'),
-    path('api/v1/query/<slug:slug>/places', views.QueryPlaces.as_view(), name='query_places_api'),
-    path('api/v1/query/<slug:slug>/detail', views.QueryDetail.as_view(), name='query_detail_api'),
-    path('api/v1/place/<str:cid>/html', views.PlaceHTML.as_view(), name='place_html_api'),
-    path('api/v1/place/<slug:slug>', views.PlaceDetail.as_view(), name='place_detail_api'),
-    path('api/v1/review/types', views.ReviewTypeList.as_view(), name='review_type_list_api'),
-    path('api/v1/review/create', views.ReviewCreate.as_view(), name='review_create_api'),
-    path('api/v1/review/<int:pk>/types', views.ReviewTypeList.as_view(), name='review_type_list_for_review_api'),
-    path('api/v1/review/<int:pk>/edit', views.ReviewUpdateAPIView.as_view(), name='review_update_api'),
-    path('api/v1/review/<int:pk>', views.ReviewDetail.as_view(), name='review_detail_api'),
+    # path('api/v1/tags', views.TagList.as_view(), name='tag_list_api'),
+    # path('api/v1/query/add', views.QueryAdd.as_view(), name='query_add_api'),
+    # path('api/v1/query/<slug:slug>/edit', views.QueryEdit.as_view(), name='query_edit_api'),
+    # path('api/v1/user/<str:username>/queries', views.QueryUser.as_view(), name='query_user_api'),
+    # path('api/v1/query/<slug:slug>/places', views.QueryPlaces.as_view(), name='query_places_api'),
+    # path('api/v1/query/<slug:slug>/detail', views.QueryDetail.as_view(), name='query_detail_api'),
+    # path('api/v1/place/<str:cid>/html', views.PlaceHTML.as_view(), name='place_html_api'),
+    # path('api/v1/place/<slug:slug>', views.PlaceDetail.as_view(), name='place_detail_api'),
+    # path('api/v1/review/types', views.ReviewTypeList.as_view(), name='review_type_list_api'),
+    # path('api/v1/review/create', views.ReviewCreate.as_view(), name='review_create_api'),
+    # path('api/v1/review/<int:pk>/types', views.ReviewTypeList.as_view(), name='review_type_list_for_review_api'),
+    # path('api/v1/review/<int:pk>/edit', views.ReviewUpdateAPIView.as_view(), name='review_update_api'),
+    # path('api/v1/review/<int:pk>', views.ReviewDetail.as_view(), name='review_detail_api'),
 ]

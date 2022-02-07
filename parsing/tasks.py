@@ -14,7 +14,8 @@ from mimesis import Person
 from mimesis.enums import Gender
 from pytils.translit import slugify
 
-from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview
+from test2 import app
+from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City
 from .utils import save_image, uniqueize_text
 
 
@@ -857,8 +858,9 @@ def startParsing(query_name, query_id, pages=None):
         print('Критическая ошибка')
 
 
-# Все что ниже нужно для генерации CSV файла
-
+#
+#                                        Все что ниже нужно для генерации CSV файла
+#
 def get_headers():
     return {
         'cid': 'cid',
@@ -908,7 +910,9 @@ def generate_file(file_name, places):
     return response
 
 
-# Uniqueize reviews
+#
+#                                           Uniqueize reviews
+#
 def uniqueize_place_reviews_task(place):
     reviews = place.reviews.all()
     for review in reviews:
@@ -944,3 +948,73 @@ def uniqueize_text_task(query_id, place_id=None):
         unique_review = UniqueReview(reviews_count=reviews.count(), query=query)
     unique_review.save()
     uniqueize_reviews_task(reviews, unique_review)
+
+    #
+    #                               Загрузка картинок для городов
+    #
+
+
+base_url = 'https://en.wikipedia.org'
+cities_url = '/wiki/List_of_cities_and_counties_in_Virginia'
+
+
+def get_tr_data(tr):
+    city = tr.find('th').find('a')
+    if city:
+        city_name = city.text.replace('County', '').rstrip()
+        city_link = city.get('href')
+        return {
+            'name': city_name,
+            'link': city_link,
+        }
+    return None
+
+
+def get_table_data(table):
+    tbody = table.find('tbody')
+    trs = tbody.find_all('tr')
+    cities = []
+    for tr in trs:
+        city_data = get_tr_data(tr)
+        cities.append(city_data) if city_data else ''
+    return cities
+
+
+def get_city_img(link):
+    url = base_url + link
+    print(url)
+    soup = get_soup(get_site(url))
+    infobox = soup.find(class_='infobox')
+    img = infobox.find('img')
+    img_link = img.get('src')
+    return img_link
+
+
+@shared_task()
+def cities_img_parser():
+    soup = get_soup(get_site(base_url + cities_url))
+    tables = soup.find_all(class_='wikitable')
+    data = []
+    for table in tables:
+        data += get_table_data(table)
+    for city in data:
+        img_link = get_city_img(city['link'])
+        img_link = 'https:' + img_link if img_link else None
+        city_item = {
+            'name': city['name'],
+            'link': city['link'],
+            'img_link': img_link
+        }
+        set_city_img(city_item)
+
+
+def set_city_img(city_item):
+    city = City.objects.filter(name=city_item['name']).first()
+    if city and not city.cloud_img and city_item['img_link']:
+        r = requests.get(city_item['img_link'])
+        if r.status_code == 200:
+            pass
+            city.cloud_img = save_image(r.content)
+            city.save()
+    else:
+        pass

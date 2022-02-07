@@ -18,13 +18,14 @@ from rest_framework.views import APIView
 
 from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
-    QueryContentForm, ReviewTypeForm
-from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview
+    QueryContentForm, ReviewTypeForm, CityForm, ServiceForm
+from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview, City, \
+    Service, CityService
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, uniqueize_query_reviews_task, \
-    uniqueize_text_task
+    uniqueize_text_task, cities_img_parser
 from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
@@ -757,201 +758,295 @@ def user_detail(request, pk):
     return redirect('/')
 
 
-class QueryAdd(APIView):
-    def get(self, request, format=None):
-        username = request.GET.get('username')
-        query_name = request.GET.get('query_name')
-        query_page = request.GET.get('query_page')
-
-        user = User.objects.filter(username=username).first()
-        if not user:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            query_page = int(query_page)
-        except:
-            query_page = 1
-        if query_page == 0:
-            query_page = None
-        query = Query(user=user, name=query_name, page=query_page, status='wait')
-        query.save()
-        query_id = query.id
-        slug = slugify(query_name + '-' + str(query_id))
-        query.slug = slug
-        query.save()
-        try:
-            print(query_name)
-            startParsing.delay(query_name=query_name, query_id=query_id, pages=query_page)
-        except Exception as e:
-            print(e.__class__.__name__)
-            query.status = 'error'
-            query.save()
-
-        return Response({"message": "Парсинг начат"}, status=status.HTTP_200_OK)
+def city_service_create(city=None, service=None):
+    cities_and_services = []
+    if city:
+        services = Service.objects.all()
+        for service in services:
+            city_service = CityService(city=city, service=service)
+            cities_and_services.append(city_service)
+    elif service:
+        cities = City.objects.all()
+        for city in cities:
+            city_service = CityService(city=city, service=service)
+            cities_and_services.append(city_service)
+    CityService.objects.bulk_create(cities_and_services)
 
 
-class QueryUser(APIView):
-    def get(self, request, username, format=None):
-        user = User.objects.filter(username=username).first()
-        if not user:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        queries = user.queries.all()
-        tags = Tag.objects.filter(queries__in=queries).distinct()
-        query_serializer_data = QuerySerializer(queries, many=True).data
-        tags_serializer_data = TagSerializer(tags, many=True).data
-        return Response({'queries': query_serializer_data, 'tags': tags_serializer_data}, status=status.HTTP_200_OK)
-
-
-class QueryPlaces(APIView):
-    def get(self, request, slug, format=None):
-        query = Query.objects.filter(slug=slug).first()
-        if not query:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
-        places_letter = {
-
-        }
-        query = Query.objects.filter(slug=slug).first()
-        if not query:
-            return redirect('parsing:index')
-        places = get_sorted_places(query)
-        for i in places:
-            first_letter = i.name[0]
-            i = PlaceMinSerializer(i).data
-            if first_letter in places_letter:
-                places_letter[first_letter]['places'].append(i)
-            else:
-                places_letter[first_letter] = {
-                    'letter': first_letter,
-                    'places': [i]
-                }
-        letters = list(places_letter.keys())
-        letters = sorted(letters)
-
-        serializer = PlaceSerializer(places, many=True)
-        places_data = serializer.data
-        query_serializer = QuerySerializer(query, many=False)
-        query_data = query_serializer.data
-        data = {
-            'places': places_data,
-            'letters': letters,
-            'places_letter': places_letter,
-            'query': query_data,
-        }
-        return Response(data, status.HTTP_200_OK)
-
-
-class QueryDetail(RetrieveAPIView):
-    model = Query
-    serializer_class = QuerySerializer
-    queryset = model.objects.all()
-    lookup_field = 'slug'
-
-
-@method_decorator(xframe_options_exempt, name='dispatch')
-class PlaceHTML(DetailView):
-    model = Place
-    queryset = model.objects.all()
-    slug_field = 'cid'
-    slug_url_kwarg = 'cid'
-    template_name = 'parsing/place/copy.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['server_name'] = SERVER_NAME
-        return context
-
-
-class PlaceDetail(APIView):
-    def get(self, request, slug, format=None):
-        place = Place.objects.filter(slug=slug).first()
-        if not place:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
-
-        query_serializer_data = {}
-        query_place = place.queries.first()
-        if query_place:
-            query = query_place.query
-            query_serializer_data = QuerySerializer(query, many=False).data
-
-        serializer = PlaceSerializer(place)
-        serializer_data = serializer.data
-        serializer_data['query'] = query_serializer_data
-        return Response(serializer_data, status=status.HTTP_200_OK)
-
-    def post(self, request, slug, format=None):
-        place = Place.objects.filter(slug=slug).first()
-        if not place:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        data = request.data
-        form = PlaceForm(data, instance=place)
-        if form.is_valid():
-            form.save()
-            return Response({'status': 'success'}, status=status.HTTP_200_OK)
-        return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class QueryEdit(APIView):
-    def post(self, request, slug, format=None):
-        query = generics.get_object_or_404(Query, slug=slug)
-        print(request.POST)
-        form = QueryContentForm(request.POST, instance=query)
-        if form.is_valid():
-            form.save()
-            return Response({'status': 'success'}, status=status.HTTP_200_OK)
-        return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class TagList(ListAPIView):
-    model = Tag
-    serializer_class = TagSerializer
-    queryset = model.objects.all()
-
-
-class ReviewCreate(APIView):
-    def post(self, request, format=None):
-        post = request.POST
-        form = ReviewForm(post)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.dependent_user_id = post['user_id']
-            review.place = Place.objects.filter(slug=post['place_slug']).first()
-            review.dependent_site = post['site']
-            review.is_dependent = True
-            review.author_name = post['author_name']
-            review.save()
-            create_or_update_review_types(request.POST, review)
-            return Response({'message': 'success'}, status=status.HTTP_200_OK)
-
-        return Response({'message': 'error'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ReviewDetail(RetrieveAPIView):
-    model = Review
-    serializer_class = ReviewSerializer
-    queryset = model.objects.all()
-
-
-class ReviewUpdateAPIView(APIView):
-    def post(self, request, pk, format=None):
-        review = generics.get_object_or_404(Review, pk=pk)
-        form = ReviewForm(request.data, instance=review)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.is_edit = True
-            review.save()
-            create_or_update_review_types(request.data, review)
+@login_required()
+def city_autocreate(request):
+    cities = ['Accomack', 'Albemarle', 'Alexandria', 'Alleghany', 'Amelia', 'Amherst', 'Appomattox', 'Arlington',
+              'Augusta', 'Bath', 'Bedford', 'Bedford', 'Bland', 'Botetourt', 'Bristol', 'Brunswick', 'Buchanan',
+              'Buckingham', 'Buena_Vista', 'Campbell', 'Caroline', 'Carroll', 'Charles', 'Charlotte', 'Charlottesville',
+              'Chesapeake', 'Chesterfield', 'Clarke', 'Colonial_Heights', 'Covington', 'Craig', 'Culpeper',
+              'Cumberland', 'Danville', 'Dickenson', 'Dinwiddie', 'Emporia', 'Essex', 'Fairfax', 'Fairfax',
+              'Falls_Church', 'Fauquier', 'Floyd', 'Fluvanna', 'Franklin', 'Franklin', 'Frederick', 'Fredericksburg',
+              'Galax', 'Giles', 'Gloucester', 'Goochland', 'Grayson', 'Greene', 'Greensville', 'Halifax', 'Hampton',
+              'Hanover', 'Harrisonburg', 'Henrico', 'Henry', 'Highland', 'Hopewell', 'Isle_of_Wight', 'James',
+              'King_George', 'King_William', 'King_and_Queen', 'Lancaster', 'Lee', 'Lexington', 'Loudoun', 'Louisa',
+              'Lunenburg', 'Lynchburg', 'Madison', 'Manassas', 'Manassas_Park', 'Martinsville', 'Mathews',
+              'Mecklenburg', 'Middlesex', 'Montgomery', 'Nelson', 'New_Kent', 'Newport_News', 'Norfolk', 'Northampton',
+              'Northumberland', 'Norton', 'Nottoway', 'Orange', 'Page', 'Patrick', 'Petersburg', 'Pittsylvania',
+              'Poquoson', 'Portsmouth', 'Powhatan', 'Prince_Edward', 'Prince_George', 'Prince_William', 'Pulaski',
+              'Radford', 'Rappahannock', 'Richmond', 'Richmond', 'Roanoke', 'Roanoke', 'Rockbridge', 'Rockingham',
+              'Russell', 'Salem', 'Scott', 'Shenandoah', 'Smyth', 'Southampton', 'Spotsylvania', 'Stafford', 'Staunton',
+              'Suffolk', 'Surry', 'Sussex', 'Tazewell', 'Virginia_Beach', 'Warren', 'Washington', 'Waynesboro',
+              'Westmoreland', 'Williamsburg', 'Winchester', 'Wise', 'Wythe', 'York']
+    for map_name in cities:
+        name = map_name.replace('_', ' ')
+        slug = map_name.replace('_', '-')
+        city = City.objects.get_or_create(name=name, slug=slug, map_name=map_name)
+        if city[1]:
+            city[0].save()
+            city_service_create(city=city[0])
         else:
-            print(form.errors)
+            print(f'City repeated: {name}')
+    return redirect(reverse('parsing:city_list'))
 
 
-class ReviewTypeList(ListAPIView):
-    model = ReviewType
-    serializer_class = ReviewTypeSerializer
-    queryset = model.objects.all()
+@login_required()
+def city_img_autocreate(request):
+    cities_img_parser.delay()
+    messages.success(request, 'Parsing started')
+    return redirect(reverse('parsing:city_list'))
 
-    def get_queryset(self):
-        if 'pk' in self.kwargs:
-            return self.queryset.filter(
-                reviews__review_id=self.kwargs['pk']
-            ).distinct()
-        return self.queryset.all()
+
+@login_required()
+def city_list(request):
+    cities = City.objects.all()
+    if request.method == 'POST':
+        form = CityForm(request.POST)
+        if form.is_valid():
+            city = form.save(commit=False)
+            city.slug = slugify(request.POST['name'])
+            city.map_name = slugify(request.POST['name'])
+            city.save()
+            city_service_create(city=city)
+        return redirect(reverse('parsing:city_list'))
+    return render(request, 'parsing/city/list.html', {
+        'cities': cities
+    })
+
+
+@login_required()
+def city_detail(request, slug):
+    city = get_object_or_404(City, slug=slug)
+    services = Service.objects.filter(city_service__city=city)
+    return render(request, 'parsing/city/detail.html', {
+        'services': services
+    })
+
+
+@login_required()
+def service_list(request):
+    services = Service.objects.all()
+    if request.method == 'POST':
+        form = ServiceForm(request.POST)
+        service = form.save(commit=False)
+        service.slug = slugify(request.POST['name'])
+        service.save()
+        city_service_create(service=service)
+        return redirect(reverse('parsing:service_list'))
+    return render(request, 'parsing/service/list.html', {
+        'services': services
+    })
+
+#
+# class QueryAdd(APIView):
+#     def get(self, request, format=None):
+#         username = request.GET.get('username')
+#         query_name = request.GET.get('query_name')
+#         query_page = request.GET.get('query_page')
+#
+#         user = User.objects.filter(username=username).first()
+#         if not user:
+#             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+#         try:
+#             query_page = int(query_page)
+#         except:
+#             query_page = 1
+#         if query_page == 0:
+#             query_page = None
+#         query = Query(user=user, name=query_name, page=query_page, status='wait')
+#         query.save()
+#         query_id = query.id
+#         slug = slugify(query_name + '-' + str(query_id))
+#         query.slug = slug
+#         query.save()
+#         try:
+#             print(query_name)
+#             startParsing.delay(query_name=query_name, query_id=query_id, pages=query_page)
+#         except Exception as e:
+#             print(e.__class__.__name__)
+#             query.status = 'error'
+#             query.save()
+#
+#         return Response({"message": "Парсинг начат"}, status=status.HTTP_200_OK)
+#
+#
+# class QueryUser(APIView):
+#     def get(self, request, username, format=None):
+#         user = User.objects.filter(username=username).first()
+#         if not user:
+#             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+#         queries = user.queries.all()
+#         tags = Tag.objects.filter(queries__in=queries).distinct()
+#         query_serializer_data = QuerySerializer(queries, many=True).data
+#         tags_serializer_data = TagSerializer(tags, many=True).data
+#         return Response({'queries': query_serializer_data, 'tags': tags_serializer_data}, status=status.HTTP_200_OK)
+#
+#
+# class QueryPlaces(APIView):
+#     def get(self, request, slug, format=None):
+#         query = Query.objects.filter(slug=slug).first()
+#         if not query:
+#             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         places_letter = {
+#
+#         }
+#         query = Query.objects.filter(slug=slug).first()
+#         if not query:
+#             return redirect('parsing:index')
+#         places = get_sorted_places(query)
+#         for i in places:
+#             first_letter = i.name[0]
+#             i = PlaceMinSerializer(i).data
+#             if first_letter in places_letter:
+#                 places_letter[first_letter]['places'].append(i)
+#             else:
+#                 places_letter[first_letter] = {
+#                     'letter': first_letter,
+#                     'places': [i]
+#                 }
+#         letters = list(places_letter.keys())
+#         letters = sorted(letters)
+#
+#         serializer = PlaceSerializer(places, many=True)
+#         places_data = serializer.data
+#         query_serializer = QuerySerializer(query, many=False)
+#         query_data = query_serializer.data
+#         data = {
+#             'places': places_data,
+#             'letters': letters,
+#             'places_letter': places_letter,
+#             'query': query_data,
+#         }
+#         return Response(data, status.HTTP_200_OK)
+#
+#
+# class QueryDetail(RetrieveAPIView):
+#     model = Query
+#     serializer_class = QuerySerializer
+#     queryset = model.objects.all()
+#     lookup_field = 'slug'
+#
+#
+# @method_decorator(xframe_options_exempt, name='dispatch')
+# class PlaceHTML(DetailView):
+#     model = Place
+#     queryset = model.objects.all()
+#     slug_field = 'cid'
+#     slug_url_kwarg = 'cid'
+#     template_name = 'parsing/place/copy.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['server_name'] = SERVER_NAME
+#         return context
+#
+#
+# class PlaceDetail(APIView):
+#     def get(self, request, slug, format=None):
+#         place = Place.objects.filter(slug=slug).first()
+#         if not place:
+#             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         query_serializer_data = {}
+#         query_place = place.queries.first()
+#         if query_place:
+#             query = query_place.query
+#             query_serializer_data = QuerySerializer(query, many=False).data
+#
+#         serializer = PlaceSerializer(place)
+#         serializer_data = serializer.data
+#         serializer_data['query'] = query_serializer_data
+#         return Response(serializer_data, status=status.HTTP_200_OK)
+#
+#     def post(self, request, slug, format=None):
+#         place = Place.objects.filter(slug=slug).first()
+#         if not place:
+#             return Response({}, status=status.HTTP_400_BAD_REQUEST)
+#         data = request.data
+#         form = PlaceForm(data, instance=place)
+#         if form.is_valid():
+#             form.save()
+#             return Response({'status': 'success'}, status=status.HTTP_200_OK)
+#         return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# class QueryEdit(APIView):
+#     def post(self, request, slug, format=None):
+#         query = generics.get_object_or_404(Query, slug=slug)
+#         print(request.POST)
+#         form = QueryContentForm(request.POST, instance=query)
+#         if form.is_valid():
+#             form.save()
+#             return Response({'status': 'success'}, status=status.HTTP_200_OK)
+#         return Response({'status': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# class TagList(ListAPIView):
+#     model = Tag
+#     serializer_class = TagSerializer
+#     queryset = model.objects.all()
+#
+#
+# class ReviewCreate(APIView):
+#     def post(self, request, format=None):
+#         post = request.POST
+#         form = ReviewForm(post)
+#         if form.is_valid():
+#             review = form.save(commit=False)
+#             review.dependent_user_id = post['user_id']
+#             review.place = Place.objects.filter(slug=post['place_slug']).first()
+#             review.dependent_site = post['site']
+#             review.is_dependent = True
+#             review.author_name = post['author_name']
+#             review.save()
+#             create_or_update_review_types(request.POST, review)
+#             return Response({'message': 'success'}, status=status.HTTP_200_OK)
+#
+#         return Response({'message': 'error'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# class ReviewDetail(RetrieveAPIView):
+#     model = Review
+#     serializer_class = ReviewSerializer
+#     queryset = model.objects.all()
+#
+#
+# class ReviewUpdateAPIView(APIView):
+#     def post(self, request, pk, format=None):
+#         review = generics.get_object_or_404(Review, pk=pk)
+#         form = ReviewForm(request.data, instance=review)
+#         if form.is_valid():
+#             review = form.save(commit=False)
+#             review.is_edit = True
+#             review.save()
+#             create_or_update_review_types(request.data, review)
+#         else:
+#             print(form.errors)
+#
+#
+# class ReviewTypeList(ListAPIView):
+#     model = ReviewType
+#     serializer_class = ReviewTypeSerializer
+#     queryset = model.objects.all()
+#
+#     def get_queryset(self):
+#         if 'pk' in self.kwargs:
+#             return self.queryset.filter(
+#                 reviews__review_id=self.kwargs['pk']
+#             ).distinct()
+#         return self.queryset.all()
