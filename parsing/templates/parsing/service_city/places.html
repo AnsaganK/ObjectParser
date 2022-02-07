@@ -6,6 +6,7 @@
 
 {% block content %}
     {% for place in places %}
+        {{ place.name }}
     {% empty %}
         <span class="has-text-grey">Places not found</span>
     {% endfor %}
