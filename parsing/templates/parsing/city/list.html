@@ -4,6 +4,15 @@
     Cities
 {% endblock %}
 
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li><a href="#">City</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
 {% block style %}
     <style>
         .city_card {
