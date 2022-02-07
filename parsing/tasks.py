@@ -961,7 +961,7 @@ cities_url = '/wiki/List_of_cities_and_counties_in_Virginia'
 def get_tr_data(tr):
     city = tr.find('th').find('a')
     if city:
-        city_name = city.text.replace('County', '').rstrip()
+        city_name = city.text.replace('City County', '').replace('County', '').rstrip()
         city_link = city.get('href')
         return {
             'name': city_name,
@@ -1016,7 +1016,7 @@ def set_city_img(city_item):
         r = requests.get(city_item['img_link'], headers={'User-Agent': 'Mozilla/5.0'})
         print(city.id)
         print(city_item['img_link'])
-        print("Status: "+str(r.status_code))
+        print("Status: " + str(r.status_code))
         if r.status_code == 200:
             city.cloud_img = save_image(r.content)
             city.save()
