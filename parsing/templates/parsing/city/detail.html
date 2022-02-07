@@ -27,20 +27,37 @@
         .service .link:hover {
             background: #ffe1b3;
         }
+
+        .city_name {
+            position: absolute;
+            color: #000000;
+            background: #ffffffc4;
+            border-top-left-radius: 12px;
+            padding: 4px 10px;
+            font-size: 22px !important;
+            {#margin: 1px;#}
+            letter-spacing: 2px;
+            font-style: normal !important;
+            border-bottom-right-radius: 15px;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="columns">
-        <img src="{{ city.cloud_img.get_default_img }}" class="column is-3"
-             style="height: 300px !important; border-radius: 15px" alt="">
-        <div class="column is-10">
+        <div class="column is-3">
+            <span class="city_name">{{ city.name }}</span>
+            <img src="{{ city.cloud_img.get_default_img }}"
+                 style="height: 300px !important; border-radius: 15px" alt="">
+        </div>
+        <div class="column is-9">
             <h3>Services</h3>
             <div class="services">
                 {% for city_service in city_services %}
                     <div class="service">
                         <a href="{{ city_service.get_absolute_url }}" class="link"
-                           style="font-size: 14px">{{ city_service.service.name }}</a>
+                           style="font-size: 14px">{{ city_service.service.name }} <span
+                                class="has-text-dark">({{ city_service.places.count }})</span></a>
                     </div>
                 {% empty %}
                     <span class="has-text-gray">
