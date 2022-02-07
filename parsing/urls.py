@@ -50,7 +50,7 @@ urlpatterns = [
     path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
     path('<slug:slug>', views.city_detail, name='city_detail'),
     path('<slug:city_slug>/<slug:service_slug>', views.city_service_detail, name='city_service_detail'),
-    path('service', views.service_list, name='service_list'),
+    path('service/', views.service_list, name='service_list'),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
 
