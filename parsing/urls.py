@@ -46,8 +46,8 @@ urlpatterns = [
     path('registration/', views.registration, name="registration"),
 
     path('city', views.city_list, name='city_list'),
-    path('city/<slug:slug>', views.city_detail, name='city_detail'),
     path('city/autocreate', views.city_autocreate, name='city_autocreate'),
+    path('city/<slug:slug>', views.city_detail, name='city_detail'),
     path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
 
     path('service', views.service_list, name='service_list'),
