@@ -250,8 +250,9 @@ class Place(models.Model):
                                      related_name='places')
 
     def get_absolute_url(self):
-        return reverse('parsing:city_service_place_detail', args=[self.city_service.service.slug, self.slug])
-
+        if self.city_service:
+            return reverse('parsing:city_service_place_detail', args=[self.city_service.service.slug, self.slug])
+        return '/'
     @property
     def city(self):
         return self.city_service.city if self.city_service else ''
