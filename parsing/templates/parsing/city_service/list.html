@@ -31,7 +31,7 @@
                             {% if city_service.status == 'error' %}{% static 'parsing/img/error.svg' %}{% endif %}
                             " alt="" width="20px" height="20px">
 
-                        <a href="">{{ city_service.search_text }}</a>
+                        <a href="{{ city_service.get_absolute_url }}">{{ city_service.search_text }}</a>
                     </td>
                     <td>
                         <a class="link"
@@ -41,7 +41,7 @@
                     </td>
                     <td>{{ city_service.city.name }}</td>
                     <td>{{ city_service.service.name }}</td>
-                    <td>{% if city_service.page %}{{ city_service.page }}{% else %}All{% endif %}</td>
+                    <td>{% if city_service.page %}{{ city_service.page }}{% else %}All{% endif %} ({{ city_service.places_count }} places)</td>
                     <td>{{ city_service.date_create }}</td>
                 </tr>
             {% endfor %}
