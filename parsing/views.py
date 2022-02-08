@@ -68,9 +68,10 @@ def start_custom_parser(request, city_slug, service_slug):
             city_service.status = 'wait'
             city_service.save()
             try:
-                if city_service.objects.filter(status='wait').exists():
+                if CityService.objects.filter(status='wait').exists():
                     messages.warning(request, 'Please wait, there are tasks in the queue')
                 else:
+                    messages.success(request, 'Parsing started')
                     startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)
             except Exception as e:
                 print(e.__class__.__name__)
