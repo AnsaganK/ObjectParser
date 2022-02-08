@@ -408,6 +408,7 @@ class UniqueReview(models.Model):
     reviews_count = models.IntegerField(default=0)
     reviews_checked = models.IntegerField(default=0)
     place = models.ForeignKey(Place, on_delete=models.CASCADE, null=True, blank=True)
+    city_service = models.ForeignKey(CityService, on_delete=models.CASCADE, null=True, blank=True)
     query = models.ForeignKey(Query, on_delete=models.CASCADE, null=True, blank=True)
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     date_end = models.DateTimeField(null=True, blank=True)
@@ -433,7 +434,7 @@ class UniqueReview(models.Model):
         if self.place:
             return f'{self.place.name}'
         else:
-            return f'{self.query.name} (places)'
+            return f'{self.city_service.search_text} (places)' if self.city_service else ''
 
     class Meta:
         verbose_name = 'Unique review'

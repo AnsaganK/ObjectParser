@@ -12,9 +12,13 @@
                 <span>
                     <a href="
                     {% if unique_review.place %}
-                        {% url 'parsing:query_place_detail' unique_review.query.slug unique_review.place.slug %}
+                        {{ unique_review.place.get_absolute_url }}
                     {% else %}
-                        {% url 'parsing:places' unique_review.query.slug %}
+                        {% if unique_review.city_service %}
+                            {{ unique_review.city_service.get_absolute_url }}
+                        {% else %}
+                            #
+                        {% endif %}
                     {% endif %}
                     ">{{ unique_review.get_name }}</a><br>
                     <span class="has-text-{{ unique_review.status_color }}">{{ unique_review.reviews_checked }} reviews / {{ unique_review.reviews_count }} reviews</span><br>

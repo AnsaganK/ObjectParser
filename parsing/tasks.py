@@ -949,7 +949,7 @@ def uniqueize_text_task(city_service_id=None, place_id=None):
         unique_review = UniqueReview(reviews_count=reviews.count(), place=place)
     else:
         reviews = Review.objects.filter(place__city_service=city_service).order_by('-pk')
-        unique_review = UniqueReview(reviews_count=reviews.count())
+        unique_review = UniqueReview(reviews_count=reviews.count(), city_service=city_service)
     unique_review.save()
     uniqueize_reviews_task(reviews, unique_review)
 
