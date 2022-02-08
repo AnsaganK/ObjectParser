@@ -125,9 +125,9 @@ def start_custom_parser(request, city_slug, service_slug):
 #     return render(request, 'parsing/query/add.html')
 
 
-def get_sorted_places(query):
-    places = Place.objects.filter(queries__query=query)
-    if query.sorted:
+def get_sorted_places(city_service):
+    places = Place.objects.filter(city_service=city_service)
+    if city_service.sorted:
         places = places.order_by('position')
     else:
         places = places.order_by('-rating', '-rating_user_count')
@@ -897,9 +897,17 @@ def service_list(request):
 def city_service_detail(request, city_slug, service_slug):
     city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
     places = Place.objects.filter(city_service=city_service)
+
+    places = get_sorted_places(city_service)
+    top_places = places[:20]
+    places_and_letters = places_to_sorted_letters(places)
+
     return render(request, 'parsing/city_service/places.html', {
         'city_service': city_service,
-        'places': places
+        'top_places': top_places,
+        'places': places,
+        'places_letter': places_and_letters['places_letter'],
+        'letters': places_and_letters['letters']
     })
 
 

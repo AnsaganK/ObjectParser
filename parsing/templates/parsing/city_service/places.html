@@ -1,5 +1,5 @@
 {% extends 'parsing/base.html' %}
-{% load static %}
+{% load static parsing_tags %}
 {% block title %}
     {{ city_service.city.name }} - {{ city_service.service.name }}
 {% endblock %}
@@ -82,7 +82,7 @@
         <div style="position: absolute; right: 0px;">
             <a href="{% url 'parsing:start_custom_parser' city_service.city.slug city_service.service.slug %}"
                class="button is-success">START</a>
-{#            <a href="#" class="button is-success">START</a>#}
+            {#            <a href="#" class="button is-success">START</a>#}
         </div>
         <div class="columns is-centered is-multiline">
             {% for place in places %}
@@ -92,4 +92,25 @@
             {% endfor %}
         </div>
     </div>
+    <hr>
+    <h4 class="block_title">All places</h4>
+    <div class="columns is-multiline">
+        {% for letter in letters %}
+            <div class="column is-3">
+                <hr>
+                <span style="color: cornflowerblue">{{ letter }}</span>
+                {% for place in places_letter|getValue:letter|getValue:'places' %}
+                    <p><a href="{{ place.get_absolute_url }}"
+                          class="hover_link">{{ place.name }}</a></p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <hr>
+    <div style="color: grey">
+        <p>Total {{ places.count }} places</p>
+    </div>
+    {% if query.faq %}
+        {% include 'parsing/include/faq/block.html' with questions=city_service.faq.questions %}
+    {% endif %}
 {% endblock %}
