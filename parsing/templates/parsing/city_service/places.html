@@ -85,7 +85,7 @@
             {#            <a href="#" class="button is-success">START</a>#}
         </div>
         <div class="columns is-centered is-multiline">
-            {% for place in places %}
+            {% for place in top_places %}
                 {% include 'parsing/include/place/preview_card.html' with place=place %}
             {% empty %}
                 <span class="has-text-grey">Places not found</span>
