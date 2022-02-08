@@ -1,6 +1,6 @@
 import json
 from email.headerregistry import Group
-
+from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -16,7 +16,6 @@ from rest_framework import status, generics
 from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
     QueryContentForm, ReviewTypeForm, CityForm, ServiceForm
@@ -70,6 +69,7 @@ def start_custom_parser(request, city_slug, service_slug):
                     city_service.search_text = search_text
                     city_service.page = query_page
                     city_service.status = 'wait'
+                    city_service.date_parsing = datetime.now()
                     city_service.save()
                     messages.success(request, 'Parsing started')
                     startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)

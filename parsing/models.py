@@ -182,6 +182,7 @@ class CityService(models.Model):
     tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='city_service')
     faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='city_service')
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    date_parsing = models.DateTimeField(null=True, blank=True)
     status_choices = (
         ('wait', 'wait'),
         ('success', 'success'),
