@@ -176,14 +176,33 @@ class CityService(models.Model):
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='city_service')
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='city_service')
 
+    sorted = models.BooleanField(default=False)
+    page = models.IntegerField(null=True, blank=True)
+    content = models.TextField(null=True, blank=True, verbose_name='Контент')
+    tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='city_service')
+    faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='city_service')
+    date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    status_choices = (
+        ('wait', 'wait'),
+        ('success', 'success'),
+        ('warning', 'warning'),
+        ('error', 'error'),
+    )
+    status = models.CharField(choices=status_choices, default='success', max_length=100, null=True, blank=True)
+
     search_text = models.TextField(null=True, blank=True)
     link = models.TextField(null=True, blank=True)
+    access = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.city.name} - {self.service.name}'
 
     def get_absolute_url(self):
         return reverse('parsing:city_service_detail', args=[self.city.slug, self.service.slug])
+
+    @property
+    def places_count(self):
+        return Place.objects.filter(city_service__id=self.id).count()
 
     class Meta:
         verbose_name = 'City and Service'
@@ -228,6 +247,9 @@ class Place(models.Model):
 
     city_service = models.ForeignKey(CityService, null=True, blank=True, on_delete=models.CASCADE,
                                      related_name='places')
+
+    def get_absolute_url(self):
+        return reverse('parsing:city_service_place_detail', args=[self.city_service.service.slug, self.slug])
 
     @property
     def city(self):

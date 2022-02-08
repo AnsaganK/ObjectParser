@@ -101,10 +101,7 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
-            <li><a href="{% url 'parsing:queries' %}">Places</a></li>
-            {% if query %}
-                <li><a href="{% url 'parsing:places' query.slug %}">{{ query.name }}</a></li>
-            {% endif %}
+            <li><a href="">{{ place.city_service.service.name }}</a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
             <li class="is-active"><a href="#" aria-current="page">{{ place.name }}</a></li>
         </ul>
@@ -122,7 +119,7 @@
         </div>
         <button class="modal-close is-large" aria-label="close" onclick=""></button>
     </div>
-    {% include 'parsing/include/place/card.html' with place=place query=query %}
+    {% include 'parsing/include/place/card.html' with place=place %}
     <hr>
 {% endblock %}
 

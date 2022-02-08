@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -39,12 +40,19 @@ def index(request):
 
 
 @login_required()
-def query_add(request):
+def start_parser(request, city_slug, service_slug):
+    city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
+    return redirect(city_service.get_absolute_url())
+
+
+@login_required()
+def start_custom_parser(request, city_slug, service_slug):
+    city_service = get_object_or_404(CityService, city__slug=city_slug, service__slug=service_slug)
     if request.method == 'POST':
         form = QueryForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            query_name = cd['name']
+            search_text = cd['name']
             not_all = cd['not_all']
 
             if not_all:
@@ -55,40 +63,62 @@ def query_add(request):
                     query_page = 1
             else:
                 query_page = None
-
-            print(query_name, not_all, query_page)
-
-            query = Query(user=request.user, name=query_name, page=query_page, status='wait')
-            query.save()
-            query_id = query.id
-
-            slug = slugify(query_name + '-' + str(query_id))
-            query.slug = slug
-            query.save()
-
+            city_service.search_text = search_text
+            city_service.page = query_page
+            city_service.status = 'wait'
+            city_service.save()
             try:
-                startParsing.delay(query_name=query_name, query_id=query_id, pages=query_page)
+                startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)
             except Exception as e:
                 print(e.__class__.__name__)
-                query.status = 'error'
-                query.save()
-            # for q in queries:
-            #     if detail:
-            #         place = Query.objects.filter(place_id=q['place_id']).first()
-            #         if place:
-            #             place.data = q
-            #             place.save()
-            #         else:
-            #             place = Query(place_id=q['place_id'], type=query, data=q)
-            #             place.save()
-            #     else:
-            #         place = Query(place_id=q['place_id'], type=query, data=q)
-            #         place.save()
-            return redirect('/')
-        else:
-            show_form_errors(request, form.errors)
-            return render(request, 'parsing/query/add.html')
-    return render(request, 'parsing/query/add.html')
+                city_service.status = 'error'
+                city_service.save()
+        return redirect(city_service.get_absolute_url())
+    return render(request, 'parsing/city_service/start_parser.html', {
+        'city_service': city_service
+    })
+
+
+#
+# @login_required()
+# def query_add(request):
+#     if request.method == 'POST':
+#         form = QueryForm(request.POST)
+#         if form.is_valid():
+#             cd = form.cleaned_data
+#             query_name = cd['name']
+#             not_all = cd['not_all']
+#
+#             if not_all:
+#                 query_page = cd['page']
+#                 try:
+#                     query_page = int(query_page)
+#                 except:
+#                     query_page = 1
+#             else:
+#                 query_page = None
+#
+#             print(query_name, not_all, query_page)
+#
+#             query = Query(user=request.user, name=query_name, page=query_page, status='wait')
+#             query.save()
+#             query_id = query.id
+#
+#             slug = slugify(query_name + '-' + str(query_id))
+#             query.slug = slug
+#             query.save()
+#
+#             try:
+#                 startParsing.delay(query_name=query_name, query_id=query_id, pages=query_page)
+#             except Exception as e:
+#                 print(e.__class__.__name__)
+#                 query.status = 'error'
+#                 query.save()
+#             return redirect('/')
+#         else:
+#             show_form_errors(request, form.errors)
+#             return render(request, 'parsing/query/add.html')
+#     return render(request, 'parsing/query/add.html')
 
 
 def get_sorted_places(query):
@@ -154,6 +184,15 @@ def query_list(request):
     queries = Query.objects.filter(user=user)
     queries = get_paginator(request, queries, 20)
     return render(request, 'parsing/query/list.html', {'queries': queries})
+
+
+@login_required()
+def city_service_list(request):
+    city_services = CityService.objects.exclude(places=None)
+    city_services = get_paginator(request, city_services)
+    return render(request, 'parsing/city_service/list.html', {
+        'city_services': city_services,
+    })
 
 
 @login_required()
@@ -477,14 +516,13 @@ def place_detail(request, slug):
 
 
 @login_required()
-def review_create(request, query_slug, place_slug):
-    query = get_object_or_404(Query, slug=query_slug)
+def review_create(request, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
     user = request.user
     review_types = ReviewType.objects.all()
     if Review.objects.filter(user=request.user).filter(place=place).first():
         messages.error(request, 'You cannot leave more than one review.')
-        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
+        return redirect(place.get_absolute_url())
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
@@ -497,15 +535,14 @@ def review_create(request, query_slug, place_slug):
             messages.success(request, 'Your review has been saved')
         else:
             show_form_errors(request, form.errors)
-        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
+        return redirect(place.get_absolute_url())
     return render(request, 'parsing/reviews/create.html',
-                  {'query': query, 'place': place, 'user': user, 'review_types': review_types})
+                  {'place': place, 'user': user, 'review_types': review_types})
 
 
 @login_required()
-def place_edit(request, query_slug, place_slug):
-    query = get_object_or_404(Query, slug=query_slug)
-    place = get_object_or_404(Place, slug=place_slug)
+def place_edit(request, pk):
+    place = get_object_or_404(Place, pk=pk)
     if request.method == 'POST':
         form = PlaceForm(request.POST, instance=place)
         if form.is_valid():
@@ -513,8 +550,8 @@ def place_edit(request, query_slug, place_slug):
             messages.success(request, 'Place changed')
         else:
             show_form_errors(request, form.errors)
-        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
-    return render(request, 'parsing/place/edit.html', {'query': query, 'place': place})
+        return redirect(place.get_absolute_url())
+    return render(request, 'parsing/place/edit.html', {'place': place})
 
 
 def place_set_description(place):
@@ -528,11 +565,11 @@ def place_set_description(place):
 
 
 @login_required()
-def place_generate_description(request, query_slug, place_slug):
+def place_generate_description(request, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
     place_set_description(place)
     messages.success(request, "Description generated")
-    return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
+    return redirect(place.get_absolute_url())
 
 
 @login_required()
@@ -545,17 +582,16 @@ def query_places_generate_description(request, slug):
 
 
 @login_required()
-def place_edit_faq(request, query_slug, place_slug):
-    query = get_object_or_404(Query, slug=query_slug)
-    place = get_object_or_404(Place, slug=place_slug)
+def place_edit_faq(request, pk):
+    place = get_object_or_404(Place, pk=pk)
     if request.method == 'POST':
         post = dict(request.POST)
         questions_and_answers = dict(zip(post['questions'], post['answers']))
         questions = get_faq_questions(place)
         save_questions(place, questions_and_answers)
         messages.success(request, 'FAQ updated')
-        return redirect(reverse('parsing:query_place_detail', args=[query.slug, place.slug]))
-    return render(request, 'parsing/place/edit_faq.html', {'query': query, 'place': place})
+        return redirect(place.get_absolute_url())
+    return render(request, 'parsing/place/edit_faq.html', {'place': place})
 
 
 @login_required()
@@ -652,18 +688,17 @@ def review_uniqueize(request, pk):
 
 
 @login_required()
-def place_reviews_uniqueize(request, query_slug, place_slug):
-    query = get_object_or_404(Query, slug=query_slug)
-    place = get_object_or_404(Place, slug=place_slug)
-    uniqueize_text_task.delay(query_id=query.id, place_id=place.id)
+def place_reviews_uniqueize(request, pk):
+    place = get_object_or_404(Place, pk=pk)
+    uniqueize_text_task.delay(place_id=place.id)
     messages.success(request, 'Reviews uniqueize started')
-    return redirect(reverse('parsing:query_place_detail', args=[query_slug, place_slug]))
+    return redirect(place.get_absolute_url())
 
 
 @login_required()
 def query_reviews_uniqueize(request, slug):
     query = get_object_or_404(Query, slug=slug)
-    uniqueize_text_task.delay(query_id=query.id)
+    # uniqueize_text_task.delay(city_service_id=query.id)
     messages.success(request, 'Reviews uniqueize started')
     return redirect(reverse('parsing:places', args=[slug]))
 
@@ -813,10 +848,9 @@ def city_img_autocreate(request):
     return redirect(reverse('parsing:city_list'))
 
 
-@login_required()
 def city_list(request):
     cities = City.objects.all()
-    if request.method == 'POST':
+    if request.method == 'POST' and has_group(request.user, 'Redactor'):
         form = CityForm(request.POST)
         if form.is_valid():
             city = form.save(commit=False)
@@ -830,7 +864,6 @@ def city_list(request):
     })
 
 
-@login_required()
 def city_detail(request, slug):
     city = get_object_or_404(City, slug=slug)
     city_services = CityService.objects.filter(city=city)
@@ -855,14 +888,22 @@ def service_list(request):
     })
 
 
-@login_required()
 def city_service_detail(request, city_slug, service_slug):
     city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
     places = Place.objects.filter(city_service=city_service)
-    return render(request, 'parsing/service_city/places.html', {
+    return render(request, 'parsing/city_service/places.html', {
         'city_service': city_service,
         'places': places
     })
+
+
+def city_service_place_detail(request, service_slug, place_slug):
+    place = get_object_or_404(Place, slug=place_slug)
+    if place.is_redirect and not has_group(request.user, 'Redactor'):
+        return redirect(place.redirect)
+    reviews = get_place_reviews(request, place)
+    return render(request, 'parsing/place/detail.html',
+                  {'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
 
 #
 # class QueryAdd(APIView):

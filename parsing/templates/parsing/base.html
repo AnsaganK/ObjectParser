@@ -594,10 +594,12 @@
                 margin-top: -60px;
             }
         }
-        .original_text{
+
+        .original_text {
             display: none;
         }
-        .review_text{
+
+        .review_text {
             display: block;
         }
     </style>
@@ -663,12 +665,9 @@ window.onload = function () {
             <div class="navbar-start">
                 {% if request.user.is_authenticated %}
                     <a class="navbar-item" href="/">Home</a>
-                    <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>
-                    {% if request.user|hasGroup:'Admin' %}
-                        <a class="navbar-item" href="{% url 'parsing:query_list' %}">My queries</a>
-                    {% endif %}
+                    {#                    <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>#}
                     {% if request.user|hasGroup:'SuperAdmin' %}
-                        <a class="navbar-item" href="{% url 'parsing:query_all' %}">All queries</a>
+                        <a class="navbar-item" href="{% url 'parsing:city_service_list' %}">All queries</a>
                         <a class="navbar-item" href="{% url 'parsing:city_list' %}">City</a>
                         <a class="navbar-item" href="{% url 'parsing:service_list' %}">Service</a>
                     {% endif %}
@@ -678,7 +677,8 @@ window.onload = function () {
                     {% endif %}
                 {% else %}
                     <a class="navbar-item" href="{% url 'parsing:index' %}">Home</a>
-                    <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>
+                    <a class="navbar-item" href="{% url 'parsing:city_list' %}">City</a>
+                    {#                    <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>#}
                 {% endif %}
                 {% if request.user and request.user|hasGroup:'Admin' %}
                     <div class="navbar-item has-dropdown is-hoverable">
@@ -764,7 +764,7 @@ window.onload = function () {
 </script>
 
 <script>
-    function showOriginalText(elem){
+    function showOriginalText(elem) {
         let review_block = elem.parentNode.parentNode.parentNode;
         console.log(review_block);
         let review_text = review_block.querySelector('p.review_text');
@@ -775,6 +775,7 @@ window.onload = function () {
         original_text.style.display = original_text.style.display === 'none' || original_text.style.display === '' ? 'inline' : 'none';
         console.log(original_text)
     }
+
     function showMore(elem) {
         let text_block = elem.parentNode;
         console.log(elem)

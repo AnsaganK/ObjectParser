@@ -10,10 +10,6 @@
         <ul>
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
             <li><a href="{% url 'parsing:queries' %}">Places</a></li>
-            <li><a href="{% url 'parsing:places' query.slug %}">{{ query.name.capitalize }}</a></li>
-            <li><a href="{% url 'parsing:query_place_detail' query.slug place.slug %}">{{ place.name }}</a>
-            </li>
-            <li class="is-active"><a href="{% url 'parsing:places' query.slug %}">Write review</a></li>
         </ul>
     </nav>
 {% endblock %}

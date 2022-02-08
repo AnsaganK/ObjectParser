@@ -15,7 +15,8 @@ from mimesis.enums import Gender
 from pytils.translit import slugify
 
 from test2 import app
-from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City
+from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City, \
+    CityService
 from .utils import save_image, uniqueize_text
 
 
@@ -665,7 +666,7 @@ def set_coordinate(data, place):
         place.save()
 
 
-def place_create_driver(cid, query_id):
+def place_create_driver(cid, city_service_id):
     url = CID_URL.format(cid)
     try:
         if IS_LINUX:
@@ -675,7 +676,7 @@ def place_create_driver(cid, query_id):
     except Exception as e:
         time.sleep(1)
         print('Не удалось открыть детальную страницу в боаузере: ', e.__class__.__name__)
-        place_create_driver(cid, query_id)
+        place_create_driver(cid, city_service_id)
         return None
     try:
         try:
@@ -695,9 +696,11 @@ def place_create_driver(cid, query_id):
             rating_user_count = 0
         print(rating_user_count)
         place = get_or_create_place(title, rating, rating_user_count, cid)
-        query = Query.objects.filter(id=query_id).first()
-        create_query_place(place, query)
-        # rating =
+        # query = Query.objects.filter(id=query_id).first()
+        # create_query_place(place, query)
+        city_service = CityService.objects.filter(id=city_service_id).first()
+        place.city_service = city_service
+        place.save()
         data = get_info(driver)
         print(data)
         set_info(data, place)
@@ -742,7 +745,7 @@ def get_value_or_none(data, key, default_value=' - '):
 
 
 # Функция которая парсит объекты на странице
-def parse_places(driver, query_id):
+def parse_places(driver, city_service_id):
     time.sleep(3)
     try:
         places = driver.find_elements_by_class_name('uMdZh')
@@ -756,7 +759,7 @@ def parse_places(driver, query_id):
         cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name(
             'C8TUKc') else None
         print('https://www.google.com/maps?cid=' + cid)
-        place_create_driver(cid, query_id) if cid else None
+        place_create_driver(cid, city_service_id) if cid else None
     return True
 
 
@@ -790,7 +793,7 @@ def get_pagination(driver, page):
 
 
 @shared_task
-def startParsing(query_name, query_id, pages=None):
+def startParsing(query_name, city_service_id, pages=None):
     display = None
     print(CUSTOM_URL.format(query_name))
     if IS_LINUX:
@@ -807,21 +810,21 @@ def startParsing(query_name, query_id, pages=None):
                 # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
                 if page == 1:
                     print(f'СТРАНИЦА {page} начата')
-                    if not parse_places(driver, query_id):
+                    if not parse_places(driver, city_service_id):
                         break
                     print(f'{page} страница готова')
                     print('-----------------------------------')
                 elif get_pagination(driver, page):
                     print(f'СТРАНИЦА {page} начата')
-                    parse = parse_places(driver, query_id)
+                    parse = parse_places(driver, city_service_id)
                     if not parse:
                         print('Возможно список не появился на этой странице')
                         break
                     print(f'{page} страница готова')
                     print('-----------------------------------')
-            query = Query.objects.filter(id=query_id).first()
-            query.status = 'success'
-            query.save()
+            city_service = CityService.objects.filter(id=city_service_id).first()
+            city_service.status = 'success'
+            city_service.save()
             print('Парсинг завершен')
             driver.close()
         else:
@@ -829,13 +832,13 @@ def startParsing(query_name, query_id, pages=None):
             while True:
                 if page == 1:
                     print(f'СТРАНИЦА {page} начата')
-                    if not parse_places(driver, query_id):
+                    if not parse_places(driver, city_service_id):
                         break
                     print(f'{page} страница готова')
                     print('-----------------------------------')
                 elif get_pagination(driver, page):
                     print(f'СТРАНИЦА {page} начата')
-                    parse = parse_places(driver, query_id)
+                    parse = parse_places(driver, city_service_id)
                     if not parse:
                         print('Возможно список не появился на этой странице')
                         break
@@ -844,9 +847,9 @@ def startParsing(query_name, query_id, pages=None):
                 else:
                     break
                 page += 1
-            query = Query.objects.filter(id=query_id).first()
-            query.status = 'success'
-            query.save()
+            city_service = CityService.objects.filter(id=city_service_id).first()
+            city_service.status = 'success'
+            city_service.save()
             print('Парсинг завершен')
             driver.close()
     except Exception as e:
@@ -937,15 +940,15 @@ def uniqueize_reviews_task(reviews, unique_review):
 
 
 @shared_task
-def uniqueize_text_task(query_id, place_id=None):
-    query = Query.objects.filter(id=query_id).first()
+def uniqueize_text_task(city_service_id=None, place_id=None):
+    city_service = CityService.objects.filter(id=city_service_id)
     if place_id:
         place = Place.objects.filter(id=place_id).first()
         reviews = place.reviews.all().order_by('-pk')
-        unique_review = UniqueReview(reviews_count=reviews.count(), query=query, place=place)
+        unique_review = UniqueReview(reviews_count=reviews.count(), place=place)
     else:
-        reviews = Review.objects.filter(place__queries__query=query).order_by('-pk')
-        unique_review = UniqueReview(reviews_count=reviews.count(), query=query)
+        reviews = Review.objects.filter(place__city_service=city_service).order_by('-pk')
+        unique_review = UniqueReview(reviews_count=reviews.count())
     unique_review.save()
     uniqueize_reviews_task(reviews, unique_review)
 

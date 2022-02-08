@@ -7,13 +7,6 @@
 {% block content %}
     {% if queries %}
         <div class="select">
-        <select name="user" id="" onchange="window.location.href = '{{ request.get_path }}?user='+this.value">
-            <option value="">----------</option>
-            {% for user in users %}
-                <option value="{{ user.username }}" {% if selected_user == user %}
-                        selected {% endif %}>{{ user.username }}</option>
-            {% endfor %}
-        </select>
         </div>
         <h4 class="block_title">Query group</h4>
         <table class="table caption-top">

@@ -1,0 +1,95 @@
+{% extends 'parsing/base.html' %}
+{% load static %}
+{% block title %}
+    {{ city_service.city.name }} - {{ city_service.service.name }}
+{% endblock %}
+
+{% block style %}
+    <script>document.getElementsByTagName("html")[0].className += " js";</script>
+    <link rel="stylesheet" href="{% static 'parsing/faq/css/style.css' %}">
+    <style>
+        .cd-faq__trigger {
+            color: inherit;
+        }
+    </style>
+    {% if query.faq and query.faq.questions %}
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+          {% for question in query.faq.questions.all|slice:"3" %}
+              {
+                "@type": "Question",
+                "name": "{{ question.question }}",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "{{ question.answer }}"
+                }
+              }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+          ]
+        }
+        </script>
+    {% endif %}
+
+    <style>
+        .place_img {
+            width: 300px !important;
+            min-width: 300px !important;
+            height: 200px !important;
+            max-height: 100%;
+            margin-right: 20px;
+            border-radius: 5px
+        }
+    </style>
+    <style>
+        @media (max-width: 630px) {
+            .place {
+                flex-direction: column !important;
+            }
+
+            .place_img {
+                margin-bottom: 10px;
+                width: 100% !important;
+                min-width: auto !important;
+                height: auto !important;
+            }
+
+            .top_place_number {
+                display: none;
+            }
+
+
+        }
+    </style>
+{% endblock %}
+
+
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li><a href="{% url 'parsing:city_list' %}">City</a></li>
+            <li><a href="{{ city_service.city.get_absolute_url }}">{{ city_service.city.name }}</a></li>
+            <li class="is-active"><a href="#">{{ city_service.service.name }}</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <div style="position: absolute; right: 0px;">
+            <a href="{% url 'parsing:start_custom_parser' city_service.city.slug city_service.service.slug %}"
+               class="button is-success">START</a>
+{#            <a href="#" class="button is-success">START</a>#}
+        </div>
+        <div class="columns is-centered is-multiline">
+            {% for place in places %}
+                {% include 'parsing/include/place/preview_card.html' with place=place %}
+            {% empty %}
+                <span class="has-text-grey">Places not found</span>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

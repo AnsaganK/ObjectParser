@@ -6,9 +6,12 @@ urlpatterns = [
     path('query/', views.queries, name='queries'),
     path('query/tags/<int:pk>', views.tag_queries, name="tag_queries"),
 
-    path('query/add', views.query_add, name="query_add"),
+    # path('query/add', views.query_add, name="query_add"),
     path('query/my', views.query_list, name="query_list"),
     path('query/all', views.query_all, name="query_all"),
+    path('city/service/all', views.city_service_list, name="city_service_list"),
+
+
     path('query/file/<int:pk>', views.query_file_generate, name="query_file"),
     path('query/delete/<int:pk>', views.query_delete, name="query_delete"),
     path('query/<slug:slug>', views.query_detail, name="query_detail"),
@@ -24,15 +27,18 @@ urlpatterns = [
     path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
     path('query/<slug:slug>/reviews/uniqueize', views.query_reviews_uniqueize, name='query_reviews_uniqueize'),
 
-    path('query/<slug:query_slug>/places/<slug:place_slug>/reviews/uniqueize', views.place_reviews_uniqueize,
+    path('place/<int:pk>/reviews/uniqueize', views.place_reviews_uniqueize,
          name="place_reviews_uniqueize"),
-    path('query/<slug:query_slug>/places/<slug:place_slug>/generate/description', views.place_generate_description,
+    path('place/<slug:place_slug>/generate/description', views.place_generate_description,
          name="place_generate_description"),
-    path('query/<slug:query_slug>/places/<slug:place_slug>/edit', views.place_edit, name="place_edit"),
-    path('query/<slug:query_slug>/places/<slug:place_slug>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
+    path('place/<int:pk>/edit', views.place_edit, name="place_edit"),
+    path('place/<int:pk>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
+
+    path('consultants/<slug:service_slug>/<slug:place_slug>', views.city_service_place_detail, name='city_service_place_detail'),
+
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
-    path('query/<slug:query_slug>/places/<slug:place_slug>/review/create', views.review_create, name="review_create"),
+    path('place/<slug:place_slug>/review/create', views.review_create, name="review_create"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
 
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
@@ -50,6 +56,7 @@ urlpatterns = [
     path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
     path('<slug:slug>', views.city_detail, name='city_detail'),
     path('<slug:city_slug>/<slug:service_slug>', views.city_service_detail, name='city_service_detail'),
+    path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
     path('service/', views.service_list, name='service_list'),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),

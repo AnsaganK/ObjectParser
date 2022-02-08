@@ -1,5 +1,5 @@
 {% extends 'parsing/base.html' %}
-
+{% load parsing_tags %}
 {% block title %}
     Cities
 {% endblock %}
@@ -59,19 +59,21 @@
 {% endblock %}
 
 {% block content %}
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="text" class="input" style="width: 430px" name="name">
-        <button type="submit" class="button is-success text-center">
-            create
-        </button>
-        <a href="{% url 'parsing:city_autocreate' %}" type="submit" class="button is-warning text-center">
-            autocreate
-        </a>
-        <a href="{% url 'parsing:city_img_autocreate' %}" type="submit" class="button is-warning text-center">
-            autocreate img
-        </a>
-    </form>
+    {% if request.user|hasGroup:"Redactor" %}
+        <form action="" method="post">
+            {% csrf_token %}
+            <input type="text" class="input" style="width: 430px" name="name">
+            <button type="submit" class="button is-success text-center">
+                create
+            </button>
+            <a href="{% url 'parsing:city_autocreate' %}" type="submit" class="button is-warning text-center">
+                autocreate
+            </a>
+            <a href="{% url 'parsing:city_img_autocreate' %}" type="submit" class="button is-warning text-center">
+                autocreate img
+            </a>
+        </form>
+    {% endif %}
     <div class="columns is-multiline mt-3">
         {% for city in cities %}
             <div class="column is-4">

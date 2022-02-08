@@ -1,9 +1,8 @@
 <h4 class="block_title">
     {% if review %}
-        Change review to <a href="#" class="link">{{ review.place.name }}</a>
+        Change review to <a href="{{ review.place.get_absolute_url }}" class="link">{{ review.place.name }}</a>
     {% else %}
-        Write review to <a href="#" class="link">{{ place.name }}</a>
-
+        Write review to <a href="{{ place.get_absolute_url }}" class="link">{{ place.name }}</a>
     {% endif %}
 </h4>
 <div class="columns is-centered mt-4">
