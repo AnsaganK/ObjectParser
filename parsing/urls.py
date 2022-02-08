@@ -58,6 +58,7 @@ urlpatterns = [
     path('<slug:city_slug>/<slug:service_slug>', views.city_service_detail, name='city_service_detail'),
     path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
     path('service/', views.service_list, name='service_list'),
+    path('city/service/<int:pk>', views.city_service_access, name='city_service_access'),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
 

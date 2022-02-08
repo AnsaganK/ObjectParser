@@ -41,8 +41,11 @@ admin.site.register(FAQQuestion)
 admin.site.register(UniqueReview)
 admin.site.register(City)
 admin.site.register(Service)
-admin.site.register(CityService)
 
+@admin.register(CityService)
+class CityServiceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'search_text', 'status']
+    list_filter = ['status']
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):

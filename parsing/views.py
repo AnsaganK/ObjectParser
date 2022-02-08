@@ -63,14 +63,14 @@ def start_custom_parser(request, city_slug, service_slug):
                     query_page = 1
             else:
                 query_page = None
-            city_service.search_text = search_text
-            city_service.page = query_page
-            city_service.status = 'wait'
-            city_service.save()
             try:
                 if CityService.objects.filter(status='wait').exists():
                     messages.warning(request, 'Please wait, there are tasks in the queue')
                 else:
+                    city_service.search_text = search_text
+                    city_service.page = query_page
+                    city_service.status = 'wait'
+                    city_service.save()
                     messages.success(request, 'Parsing started')
                     startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)
             except Exception as e:
@@ -873,6 +873,9 @@ def city_list(request):
 def city_detail(request, slug):
     city = get_object_or_404(City, slug=slug)
     city_services = CityService.objects.filter(city=city)
+    if not has_group(request.user, 'Redactor'):
+        city_services = city_services.filter(access=True)
+
     return render(request, 'parsing/city/detail.html', {
         'city': city,
         'city_services': city_services
@@ -896,8 +899,6 @@ def service_list(request):
 
 def city_service_detail(request, city_slug, service_slug):
     city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
-    places = Place.objects.filter(city_service=city_service)
-
     places = get_sorted_places(city_service)
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
@@ -909,6 +910,15 @@ def city_service_detail(request, city_slug, service_slug):
         'places_letter': places_and_letters['places_letter'],
         'letters': places_and_letters['letters']
     })
+
+
+@login_required()
+def city_service_access(request, pk):
+    city_service = CityService.objects.filter(pk=pk).first()
+    if city_service:
+        city_service.access = not city_service.access
+        city_service.save()
+    return redirect(city_service.city.get_absolute_url())
 
 
 def city_service_place_detail(request, service_slug, place_slug):

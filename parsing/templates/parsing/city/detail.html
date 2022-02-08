@@ -1,5 +1,5 @@
 {% extends 'parsing/base.html' %}
-{% load static %}
+{% load static parsing_tags %}
 
 {% block title %}
     {{ city.name }}
@@ -59,7 +59,7 @@
             <span class="city_name">{{ city.name }}</span>
             {% if city.cloud_img %}
                 <img src="{{ city.cloud_img.get_default_img }}"
-                     style="height: 300px !important; border-radius: 15px; width: 100%" alt="{{ city.name }}">
+                     style="height: auto !important; border-radius: 15px; width: 100%" alt="{{ city.name }}">
             {% else %}
                 <span style="height: 300px !important; border-radius: 15px; width: 100%; font-size: 40px; display: flex;
                  justify-content: center;align-items: center; border: 1px solid gray; background: #6194e9;
@@ -75,9 +75,21 @@
             <div class="services">
                 {% for city_service in city_services %}
                     <div class="service">
-                        <a href="{{ city_service.get_absolute_url }}" class="link"
-                           style="font-size: 14px">{{ city_service.service.name }} <span
-                                class="has-text-dark">({{ city_service.places.count }})</span></a>
+                        <a href="{{ city_service.get_absolute_url }}" class="link" style="font-size: 14px">
+                            {{ city_service.service.name }}
+                            <span class="has-text-dark">
+                                ({{ city_service.places.count }})
+                            </span>
+                            {% if request.user|hasGroup:'Redactor' %}
+                                <a href="{% url 'parsing:city_service_access' city_service.pk %}" class="ml-1">
+                                    {% if not city_service.access %}
+                                        <i class="fa fa-folder has-text-danger"></i>
+                                    {% else %}
+                                        <i class="fa fa-folder-open has-text-warning"></i>
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        </a>
                     </div>
                 {% empty %}
                     <span class="has-text-gray">
