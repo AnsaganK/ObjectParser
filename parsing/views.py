@@ -897,6 +897,15 @@ def service_list(request):
     })
 
 
+def service_detail(request, slug):
+    service = get_object_or_404(Service, slug=slug)
+    cities = City.objects.filter(city_service__service=service, city_service__access=True)
+    return render(request, 'parsing/service/detail.html', {
+        'service': service,
+        'cities': cities
+    })
+
+
 def city_service_detail(request, city_slug, service_slug):
     city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
     places = get_sorted_places(city_service)

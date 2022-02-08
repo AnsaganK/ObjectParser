@@ -1,0 +1,15 @@
+{% extends 'parsing/base.html' %}
+
+{% block title %}
+    {{ service.name }}
+{% endblock %}
+
+{% block content %}
+    <h1 style="font-size: 21px"><span style="font-style: normal !important; font-weight: 400;">Cities with this service: </span>{{ service.name }} </h1>
+    <hr>
+    <div class="columns is-multiline">
+        {% for city in cities %}
+            {% include 'parsing/include/city/preview_card.html' with city=city %}
+        {% endfor %}
+    </div>
+{% endblock %}

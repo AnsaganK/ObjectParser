@@ -161,10 +161,13 @@ class City(models.Model):
 
 class Service(models.Model):
     name = models.CharField(max_length=500)
-    slug = models.SlugField(max_length=500)
+    slug = models.SlugField(max_length=500, unique=True)
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('parsing:service_detail', args=[self.slug])
 
     class Meta:
         verbose_name = 'Service'

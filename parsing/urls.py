@@ -11,7 +11,6 @@ urlpatterns = [
     path('query/all', views.query_all, name="query_all"),
     path('city/service/all', views.city_service_list, name="city_service_list"),
 
-
     path('query/file/<int:pk>', views.query_file_generate, name="query_file"),
     path('query/delete/<int:pk>', views.query_delete, name="query_delete"),
     path('query/<slug:slug>', views.query_detail, name="query_detail"),
@@ -33,9 +32,10 @@ urlpatterns = [
          name="place_generate_description"),
     path('place/<int:pk>/edit', views.place_edit, name="place_edit"),
     path('place/<int:pk>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
-    path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
+    # path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
 
-    path('consultants/<slug:service_slug>/<slug:place_slug>', views.city_service_place_detail, name='city_service_place_detail'),
+    path('consultants/<slug:service_slug>/<slug:place_slug>', views.city_service_place_detail,
+         name='city_service_place_detail'),
 
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
     path('place/<slug:place_slug>/review/create', views.review_create, name="review_create"),
@@ -51,13 +51,17 @@ urlpatterns = [
     path('reviews/<int:pk>/uniqueize', views.review_uniqueize, name="review_uniqueize"),
     path('registration/', views.registration, name="registration"),
 
+    path('service/', views.service_list, name='service_list'),
+    path('service/<slug:slug>', views.service_detail, name='service_detail'),
+
     path('city', views.city_list, name='city_list'),
     path('city/autocreate', views.city_autocreate, name='city_autocreate'),
     path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
+
     path('<slug:slug>', views.city_detail, name='city_detail'),
     path('<slug:city_slug>/<slug:service_slug>', views.city_service_detail, name='city_service_detail'),
     path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
-    path('service/', views.service_list, name='service_list'),
+
     path('city/service/<int:pk>', views.city_service_access, name='city_service_access'),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),

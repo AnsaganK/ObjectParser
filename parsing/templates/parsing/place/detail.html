@@ -101,7 +101,7 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
-            <li><a href="">{{ place.city_service.service.name }}</a></li>
+            <li><a href="{{ place.city_service.service.get_absolute_url }}">{{ place.city_service.service.name }}</a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
             <li class="is-active"><a href="#" aria-current="page">{{ place.name }}</a></li>
         </ul>
