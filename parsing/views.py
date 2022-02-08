@@ -68,7 +68,10 @@ def start_custom_parser(request, city_slug, service_slug):
             city_service.status = 'wait'
             city_service.save()
             try:
-                startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)
+                if city_service.objects.filter(status='wait').exists():
+                    messages.warning(request, 'Please wait, there are tasks in the queue')
+                else:
+                    startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)
             except Exception as e:
                 print(e.__class__.__name__)
                 city_service.status = 'error'
@@ -799,14 +802,16 @@ def city_service_create(city=None, service=None):
         services = Service.objects.all()
         if services:
             for service in services:
-                city_service = CityService(city=city, service=service)
-                cities_and_services.append(city_service)
+                if not CityService.objects.filter(city=city, service=service).exists():
+                    city_service = CityService(city=city, service=service)
+                    cities_and_services.append(city_service)
     elif service:
         cities = City.objects.all()
         if cities:
             for city in cities:
-                city_service = CityService(city=city, service=service)
-                cities_and_services.append(city_service)
+                if not CityService.objects.filter(city=city, service=service).exists():
+                    city_service = CityService(city=city, service=service)
+                    cities_and_services.append(city_service)
     CityService.objects.bulk_create(cities_and_services)
 
 

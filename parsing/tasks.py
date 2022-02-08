@@ -804,6 +804,8 @@ def startParsing(query_name, city_service_id, pages=None):
         # print(driver.get_cookies())
     else:
         driver = startFireFox(url=CUSTOM_URL.format(query_name))
+
+    city_service = CityService.objects.filter(id=city_service_id).first()
     try:
         if pages:
             for page in range(1, pages + 1):
@@ -822,7 +824,6 @@ def startParsing(query_name, city_service_id, pages=None):
                         break
                     print(f'{page} страница готова')
                     print('-----------------------------------')
-            city_service = CityService.objects.filter(id=city_service_id).first()
             city_service.status = 'success'
             city_service.save()
             print('Парсинг завершен')
@@ -847,12 +848,12 @@ def startParsing(query_name, city_service_id, pages=None):
                 else:
                     break
                 page += 1
-            city_service = CityService.objects.filter(id=city_service_id).first()
             city_service.status = 'success'
             city_service.save()
             print('Парсинг завершен')
             driver.close()
     except Exception as e:
+        city_service.status = 'error'
         print(e.__class__.__name__)
         if display:
             display.stop()
