@@ -35,9 +35,9 @@
     <div class="columns is-multiline mt-3">
         {% for service in services %}
             <div class="column is-3">
-                <div class="card p-3 has-text-warning service_card" style="color: #ffb020 !important;">
+                <a href="{{ service.get_absolute_url }}" class="card p-3 has-text-warning service_card" style="color: #ffb020 !important;">
                     {{ service.name }}
-                </div>
+                </a>
             </div>
         {% empty %}
             <span class="has-text-grey">Services not found</span>
