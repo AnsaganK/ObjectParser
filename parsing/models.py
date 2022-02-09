@@ -471,7 +471,7 @@ class FAQQuestion(models.Model):
     class Meta:
         verbose_name = 'FAQ question'
         verbose_name_plural = 'FAQ questions'
-        ordering = ['-pk']
+        ordering = ['pk']
 
 
 class FAQ(models.Model):

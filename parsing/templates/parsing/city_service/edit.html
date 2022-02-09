@@ -20,34 +20,34 @@
     <script src="{% static 'parsing/ckeditor/build/ckeditor.js' %}"></script>
 {% endblock %}
 
+{% block breadcrumb %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'parsing:index' %}">Home</a></li>
+            <li><a href="{{ city_service.get_absolute_url }}">{{ city_service.search_text }}</a></li>
+            <li class="is-active"><a href="">Edit</a></li>
+        </ul>
+    </nav>
+{% endblock %}
 
 {% block content %}
-    <h4 class="centered_link">{{ query.name }}</h4>
+    <h4 class="centered_link">{{ city_service.search_text }}</h4>
     <form action="" method="post" class="custom_form" style="max-width: 900px">
         {% csrf_token %}
-        <div style="display: flex; justify-content: center; align-items: center; flex-direction: row">
-            <input type="checkbox" {% if query.access %} checked {% endif %} name="access" id="access_input">
-            <label for="access_input" class="button" id="access_status"></label>
-        </div>
         <div class="field">
             <label for="page_content" class="label">
                 Content
             </label>
             <div class="control">
-                <textarea type="text" class="textarea" name="content" id="page_content">{% if query.content %}
-                    {{ query.content }}{% else %}{% endif %}</textarea>
+                <textarea type="text" class="textarea" name="content" id="page_content">
+                    {{ city_service.content|default:'' }}</textarea>
             </div>
         </div>
-
-        {#        <label class="checkbox">#}
-        {#            <input class="checkbox" type="checkbox" name="detail">#}
-        {#            Детальный поиск#}
-        {#        </label>#}
         <div class="tag_items">
             {% for tag in tags %}
                 <div class="tag_item">
                     <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tags" value="{{ tag.id }}"
-                           {% if tag in query.tags.all %}checked{% endif %}>
+                           {% if tag in city_service.tags.all %}checked{% endif %}>
                     <label for="tag_{{ tag.id }}" class="button is-success is-outlined"
                            style="margin: 3px">{{ tag.name }}</label>
                 </div>

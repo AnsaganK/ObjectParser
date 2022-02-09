@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from parsing.models import Review, Place, Tag, Query, ReviewType, Profile, City, Service
+from parsing.models import Review, Place, Tag, Query, ReviewType, Profile, City, Service, CityService
 
 
 class QueryForm(forms.Form):
@@ -58,6 +58,12 @@ class QueryContentForm(forms.ModelForm):
     class Meta:
         model = Query
         fields = ['content', 'tags', 'access']
+
+
+class CityServiceContentForm(forms.ModelForm):
+    class Meta:
+        model = CityService
+        fields = ['content', 'tags']
 
 
 class ProfileForm(forms.ModelForm):

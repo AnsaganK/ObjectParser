@@ -8,9 +8,8 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
-            <li><a href="{% url 'parsing:queries' %}">Places</a></li>
-            <li><a href="{% url 'parsing:places' query.slug %}">{{ query.name.capitalize }}</a></li>
-            <li class="is-active"><a href="{% url 'parsing:places' query.slug %}">FAQ</a></li>
+            <li><a href="{{ city_service.get_absolute_url }}">{{ city_service.search_text }}</a></li>
+            <li class="is-active"><a href="">FAQ</a></li>
         </ul>
     </nav>
 {% endblock %}
@@ -19,6 +18,6 @@
     <h1>
         FAQ
     </h1>
-    <span class="has-text-grey">{{ query.name }}</span>
-    {% include 'parsing/include/faq/form.html' with questions=query.faq.questions.all %}
+    <span class="has-text-grey">{{ city_service.search_text }}</span>
+    {% include 'parsing/include/faq/form.html' with questions=city_service.faq.questions.all %}
 {% endblock %}

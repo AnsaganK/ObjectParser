@@ -18,13 +18,7 @@ urlpatterns = [
     path('query/<slug:slug>/places', views.places, name='places'),
     path('query/<slug:slug>/places/copy', views.places_copy, name='places_copy'),
     path('query/<slug:slug>/places/copy/code', views.places_copy_code, name='places_copy_code'),
-    path('query/<slug:slug>/edit/access', views.query_edit_access, name='query_edit_access'),
-    path('query/<slug:slug>/edit/faq', views.query_edit_faq, name='query_edit_faq'),
-    path('query/<slug:slug>/generate/description', views.query_places_generate_description,
-         name='query_places_generate_description'),
-    path('query/<slug:slug>/edit', views.query_edit, name='query_edit'),
-    path('query/<slug:slug>/rating', views.query_rating_edit, name='query_rating_edit'),
-    path('query/<slug:slug>/reviews/uniqueize', views.query_reviews_uniqueize, name='query_reviews_uniqueize'),
+    # path('query/<slug:slug>/edit/access', views.query_edit_access, name='query_edit_access'),
 
     path('place/<int:pk>/reviews/uniqueize', views.place_reviews_uniqueize,
          name="place_reviews_uniqueize"),
@@ -54,7 +48,7 @@ urlpatterns = [
     path('service/', views.service_list, name='service_list'),
     path('service/<slug:slug>', views.service_detail, name='service_detail'),
 
-    path('city', views.city_list, name='city_list'),
+    path('city/', views.city_list, name='city_list'),
     path('city/autocreate', views.city_autocreate, name='city_autocreate'),
     path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
 
@@ -63,6 +57,14 @@ urlpatterns = [
     path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
 
     path('city/service/<int:pk>', views.city_service_access, name='city_service_access'),
+    path('city/service/<int:pk>/edit', views.city_service_edit, name='city_service_edit'),
+    path('city/service/<int:pk>/edit/faq', views.city_service_edit_faq, name='city_service_edit_faq'),
+    path('city/service/<int:pk>/rating', views.city_service_rating_edit, name='city_service_rating_edit'),
+    path('city/service/<int:pk>/reviews/uniqueize', views.city_service_reviews_uniqueize,
+         name='city_service_reviews_uniqueize'),
+
+    path('city/service/<int:pk>/generate/description', views.city_service_places_generate_description,
+         name='city_service_places_generate_description'),
 
     path('admin_dashboard/', views.admin_dashboard, name="admin_dashboard"),
 

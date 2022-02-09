@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
-    QueryContentForm, ReviewTypeForm, CityForm, ServiceForm
+    QueryContentForm, ReviewTypeForm, CityForm, ServiceForm, CityServiceContentForm
 from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview, City, \
     Service, CityService
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
@@ -141,15 +141,12 @@ def update_place_position(place_id, position):
 
 
 @login_required()
-def query_rating_edit(request, slug):
-    query = get_object_or_404(Query, slug=slug)
-    # query.sorted = False
-    # query.save()
-    # places = get_sorted_places(query).update(position=None)
-    places = get_sorted_places(query)
+def city_service_rating_edit(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
+    places = get_sorted_places(city_service)
     if request.method == 'POST':
-        query.sorted = True
-        query.save()
+        city_service.sorted = True
+        city_service.save()
         places.update(position=None)
         data = json.loads(request.body.decode('utf-8'))['data']
         for i in data:
@@ -158,7 +155,7 @@ def query_rating_edit(request, slug):
             update_place_position(place_id, position)
         messages.success(request, 'Success')
         return JsonResponse({'message': 'succcess'})
-    return render(request, 'parsing/query/edit_rating.html', {'query': query, 'places': places})
+    return render(request, 'parsing/city_service/edit_rating.html', {'city_service': city_service, 'places': places})
 
 
 @login_required()
@@ -217,18 +214,18 @@ def query_detail(request, slug):
 
 
 @login_required()
-def query_edit(request, slug):
-    query = get_object_or_404(Query, slug=slug)
+def city_service_edit(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
     if request.method == 'POST':
-        form = QueryContentForm(request.POST, instance=query)
+        form = CityServiceContentForm(request.POST, instance=city_service)
         if form.is_valid():
-            query = form.save()
+            city_service = form.save()
             messages.success(request, 'Description changed')
         else:
             show_form_errors(request, form.errors)
-        return redirect(reverse('parsing:places', args=[query.slug]))
+        return redirect(city_service.get_absolute_url())
     tags = Tag.objects.all()
-    return render(request, 'parsing/query/edit.html', {'query': query, 'tags': tags})
+    return render(request, 'parsing/city_service/edit.html', {'city_service': city_service, 'tags': tags})
 
 
 @login_required()
@@ -239,14 +236,14 @@ def query_edit_access(request, slug):
     return redirect(reverse('parsing:queries'))
 
 
-def get_faq_questions(query_or_place):
-    faq = query_or_place.faq
+def get_faq_questions(city_service_or_place):
+    faq = city_service_or_place.faq
     if not faq:
         faq = FAQ()
         faq.save()
-        query_or_place.faq = faq
-        query_or_place.save()
-    questions = query_or_place.faq.questions.all()
+        city_service_or_place.faq = faq
+        city_service_or_place.save()
+    questions = city_service_or_place.faq.questions.all()
     return questions
 
 
@@ -261,16 +258,16 @@ def save_questions(query_or_place, questions_and_answers):
 
 
 @login_required()
-def query_edit_faq(request, slug):
-    query = get_object_or_404(Query, slug=slug)
+def city_service_edit_faq(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
     if request.method == 'POST':
         post = dict(request.POST)
         questions_and_answers = dict(zip(post['questions'], post['answers']))
-        questions = get_faq_questions(query)
-        save_questions(query, questions_and_answers)
+        questions = get_faq_questions(city_service)
+        save_questions(city_service, questions_and_answers)
         messages.success(request, 'FAQ updated')
-        return redirect(reverse('parsing:places', args=[query.slug]))
-    return render(request, 'parsing/query/edit_faq.html', {'query': query})
+        return redirect(city_service.get_absolute_url())
+    return render(request, 'parsing/city_service/edit_faq.html', {'city_service': city_service})
 
 
 @login_required()
@@ -577,12 +574,12 @@ def place_generate_description(request, place_slug):
 
 
 @login_required()
-def query_places_generate_description(request, slug):
-    query = get_object_or_404(Query, slug=slug)
-    places = Place.objects.filter(queries__query=query)
+def city_service_places_generate_description(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
+    places = Place.objects.filter(city_service=city_service)
     for place in places:
         place_set_description(place)
-    return redirect(reverse('parsing:places', args=[slug]))
+    return redirect(city_service.get_absolute_url())
 
 
 @login_required()
@@ -700,11 +697,11 @@ def place_reviews_uniqueize(request, pk):
 
 
 @login_required()
-def query_reviews_uniqueize(request, slug):
-    query = get_object_or_404(Query, slug=slug)
-    # uniqueize_text_task.delay(city_service_id=query.id)
+def city_service_reviews_uniqueize(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
+    uniqueize_text_task.delay(city_service_id=city_service.id)
     messages.success(request, 'Reviews uniqueize started')
-    return redirect(reverse('parsing:places', args=[slug]))
+    return redirect(city_service.get_absolute_url())
 
 
 @login_required()
