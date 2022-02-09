@@ -16,8 +16,8 @@ urlpatterns = [
     path('query/<slug:slug>', views.query_detail, name="query_detail"),
 
     path('query/<slug:slug>/places', views.places, name='places'),
-    path('query/<slug:slug>/places/copy', views.places_copy, name='places_copy'),
-    path('query/<slug:slug>/places/copy/code', views.places_copy_code, name='places_copy_code'),
+    path('city/service/<int:pk>/places/copy', views.places_copy, name='places_copy'),
+    path('city/service/<int:pk>/places/copy/code', views.places_copy_code, name='places_copy_code'),
     # path('query/<slug:slug>/edit/access', views.query_edit_access, name='query_edit_access'),
 
     path('place/<int:pk>/reviews/uniqueize', views.place_reviews_uniqueize,

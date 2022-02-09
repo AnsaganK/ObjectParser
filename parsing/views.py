@@ -436,31 +436,33 @@ def places(request, slug):
 
 
 @login_required()
-def places_copy_code(request, slug):
-    query = get_object_or_404(Query, slug=slug)
-    places = get_sorted_places(query)
+def places_copy_code(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
+    places = get_sorted_places(city_service)
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
-    return render(request, 'parsing/query/places_copy_code.html', {'query': query,
-                                                                   'top_places': top_places,
-                                                                   'places': places,
-                                                                   'places_letter': places_and_letters['places_letter'],
-                                                                   'letters': places_and_letters['letters']})
+    return render(request, 'parsing/city_service/places_copy_code.html', {'city_service': city_service,
+                                                                          'top_places': top_places,
+                                                                          'places': places,
+                                                                          'places_letter': places_and_letters[
+                                                                              'places_letter'],
+                                                                          'letters': places_and_letters['letters']})
 
 
 @login_required()
-def places_copy(request, slug):
-    query = Query.objects.filter(slug=slug).first()
-    if not query:
+def places_copy(request, pk):
+    city_service = CityService.objects.filter(pk=pk).first()
+    if not city_service:
         return redirect('parsing:index')
-    places = get_sorted_places(query)
+    places = get_sorted_places(city_service)
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
-    return render(request, 'parsing/query/places_copy.html', {'query': query,
-                                                              'top_places': top_places,
-                                                              'places': places,
-                                                              'places_letter': places_and_letters['places_letter'],
-                                                              'letters': places_and_letters['letters']})
+    return render(request, 'parsing/city_service/places_copy.html', {'city_service': city_service,
+                                                                     'top_places': top_places,
+                                                                     'places': places,
+                                                                     'places_letter': places_and_letters[
+                                                                         'places_letter'],
+                                                                     'letters': places_and_letters['letters']})
 
 
 # @login_required()

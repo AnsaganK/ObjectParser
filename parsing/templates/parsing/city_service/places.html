@@ -113,8 +113,8 @@
         {% endif %}
         {{ city_service.search_text|default:'' }}
         <div class="queries_copy_button">
-            <a href=""><i class="fa fa-link"></i></a>
-            <a href=""><i class="fa fa-copy"></i></a>
+            <a href="{% url 'parsing:places_copy' city_service.pk %}"><i class="fa fa-link"></i></a>
+            <a href="{% url 'parsing:places_copy_code' city_service.pk %}"><i class="fa fa-copy"></i></a>
             {#            <span><i class="fa fa-copy query_clone_icon" data-query-slug="{{ query.slug }}"></i></span>#}
         </div>
     </h1>
