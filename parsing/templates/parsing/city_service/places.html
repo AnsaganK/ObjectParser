@@ -99,8 +99,16 @@
                    style="width: fit-content"><i class="fa fa-folder"></i></a>
                 <a href="{% url 'parsing:city_service_rating_edit' city_service.pk %}"
                    title="Change rating"
-                   class="button is-outlined"
+                   class="button is-outlined mr-1"
                    style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
+                <a href="{% url 'parsing:start_custom_parser' city_service.city.slug city_service.service.slug %}"
+                   class="button is-success">
+                    {% if city_service.places_count %}
+                        RESTART
+                    {% else %}
+                        START
+                    {% endif %}
+                </a>
             </div>
         {% endif %}
         {{ city_service.search_text|default:'' }}
@@ -127,13 +135,6 @@
         </div>
     </div>
     <div>
-        {% if request.user|hasGroup:'Redactor' %}
-            <div style="position: absolute; right: 0px;">
-                <a href="{% url 'parsing:start_custom_parser' city_service.city.slug city_service.service.slug %}"
-                   class="button is-success">START</a>
-                {#            <a href="#" class="button is-success">START</a>#}
-            </div>
-        {% endif %}
         <div class="columns is-centered is-multiline">
             {% for place in top_places %}
                 {% include 'parsing/include/place/preview_card.html' with place=place %}
@@ -142,24 +143,26 @@
             {% endfor %}
         </div>
     </div>
-    <hr>
-    <h4 class="block_title">All places</h4>
-    <div class="columns is-multiline">
-        {% for letter in letters %}
-            <div class="column is-3">
-                <hr>
-                <span style="color: cornflowerblue">{{ letter }}</span>
-                {% for place in places_letter|getValue:letter|getValue:'places' %}
-                    <p><a href="{{ place.get_absolute_url }}"
-                          class="hover_link">{{ place.name }}</a></p>
-                {% endfor %}
-            </div>
-        {% endfor %}
-    </div>
-    <hr>
-    <div style="color: grey">
-        <p>Total {{ places.count }} places</p>
-    </div>
+    {% if letters %}
+        <hr>
+        <h4 class="block_title">All places</h4>
+        <div class="columns is-multiline">
+            {% for letter in letters %}
+                <div class="column is-3">
+                    <hr>
+                    <span style="color: cornflowerblue">{{ letter }}</span>
+                    {% for place in places_letter|getValue:letter|getValue:'places' %}
+                        <p><a href="{{ place.get_absolute_url }}"
+                              class="hover_link">{{ place.name }}</a></p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <hr>
+        <div style="color: grey">
+            <p>Total {{ places.count }} places</p>
+        </div>
+    {% endif %}
     {% if city_service.faq %}
         {% include 'parsing/include/faq/block.html' with questions=city_service.faq.questions %}
     {% endif %}
