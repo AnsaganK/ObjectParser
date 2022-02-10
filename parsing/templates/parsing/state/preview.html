@@ -192,7 +192,12 @@
             showCity(city);
         });
         city.addEventListener('mouseout', function () {
-            showCityName(city, i);
+            let city_id = city.id;
+            let city_name = document.getElementById('city_name');
+            city_name.innerText = city_id.replace('_', ' ');
+            let city_text = document.getElementById('cities_list').children[i].children[0].children[0];
+            city_text.classList.remove('text_over')
+
             if (city.tagName === 'path') {
                 city.style.fill = second_color;
             } else {
