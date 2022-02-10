@@ -265,7 +265,7 @@
 
     let cities_list = document.getElementById('cities_list');
     for (let i in cities) {
-        let city = `<li class="city"><a onmouseover="showCityMap('${i - 1}')" onmouseout="showCityMap('${i - 1}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
+        let city = `<li class="city"><a onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
         cities_list.innerHTML = cities_list.innerHTML + city
     }
 
