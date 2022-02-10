@@ -1,4 +1,5 @@
 import json
+import pickle
 from email.headerregistry import Group
 from datetime import datetime
 from django.contrib import messages
@@ -20,7 +21,7 @@ from constants import SERVER_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
     QueryContentForm, ReviewTypeForm, CityForm, ServiceForm, CityServiceContentForm
 from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview, City, \
-    Service, CityService
+    Service, CityService, State
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
@@ -30,12 +31,55 @@ from parsing.utils import show_form_errors, has_group, get_paginator, sumextract
 
 
 def index(request):
+    # with open('parsing/states.pickle', 'rb') as f:
+    #     data = pickle.load(f)
+    #     for i in data:
+    #         state = State.objects.get_or_create(name=i, svg=data[i]['svg'])
+    #         state[0].save()
+
     user = request.user
     if user.is_authenticated:
         queries = Query.objects.filter(user=user)
         places = Place.objects.filter(queries__query__user=user)
         return render(request, 'parsing/index.html', {'user': user, 'queries': queries, 'places': places})
     return render(request, 'parsing/index.html')
+
+
+def states_list(request):
+    states = State.objects.all()
+    return render(request, 'parsing/state/list.html', {
+        'states': states
+    })
+
+
+def state_detail(request, pk):
+    state = get_object_or_404(State, pk=pk)
+    return render(request, 'parsing/state/detail.html', {
+        'state': state
+    })
+
+
+def state_preview(request, pk):
+    state = get_object_or_404(State, pk=pk)
+    data = request.GET
+    print(data)
+    print(dict(data))
+    max_width = data['max-width']
+    viewbox = str(data.get('viewbox'))
+    map_color = '#'+data['map-color']
+    map_hover_color = '#'+data['map-hover-color']
+    map_border_color = '#'+data['map-border-color']
+    text_color = '#'+data['text-color']
+    state = get_object_or_404(State, pk=pk)
+    return render(request, 'parsing/state/preview.html', {
+        'state': state,
+        'max_width': max_width,
+        'viewbox': viewbox,
+        'map_color': map_color,
+        'map_hover_color': map_hover_color,
+        'map_border_color': map_border_color,
+        'text_color': text_color,
+    })
 
 
 @login_required()

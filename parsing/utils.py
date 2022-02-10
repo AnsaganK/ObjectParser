@@ -5,6 +5,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from constants import CLOUDFLARE_AUTH_EMAIL, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_AUTH_KEY
 from parsing.models import CloudImage
 from parsing.templatetags.parsing_tags import GROUPS
+from bs4 import BeautifulSoup as BS
 
 
 def show_form_errors(request, errors):
@@ -108,6 +109,7 @@ def query(payload):
             return response.json()
     except:
         return None
+
 
 def uniqueize_text(text):
     sentences = text.split('.')

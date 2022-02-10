@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Count, Sum
 from django.db.models.functions import Round, Length
+from django.template.defaultfilters import safe
 from django.urls import reverse
-
+from bs4 import BeautifulSoup as BS
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.shortcuts import reverse, redirect
@@ -256,6 +257,7 @@ class Place(models.Model):
         if self.city_service:
             return reverse('parsing:city_service_place_detail', args=[self.city_service.service.slug, self.slug])
         return '/'
+
     @property
     def city(self):
         return self.city_service.city if self.city_service else ''
@@ -506,6 +508,40 @@ class Profile(models.Model):
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
         ordering = ['-pk']
+
+
+class State(models.Model):
+    name = models.CharField(max_length=500)
+    svg = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('parsing:state_detail', args=[self.id])
+
+    class Meta:
+        verbose_name = 'State'
+        verbose_name_plural = 'States'
+        ordering = ['name']
+
+    def usa(self):
+        states = State.objects.all()
+        usa = ''
+        for state in states:
+            usa += state.get_svg()
+        return safe(usa)
+
+    def get_svg(self):
+        soup = BS(self.svg, 'lxml')
+        viewbox = soup.find('svg').get('viewbox')
+        svg = ''
+        for j in soup.find('svg').findChildren(recursive=False)[1].findChildren(recursive=False)[1:]:
+            svg += str(j)
+        return {
+            'svg': safe(svg),
+            'viewbox': viewbox
+        }
 
 
 @receiver(post_save, sender=User)

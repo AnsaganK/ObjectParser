@@ -5,7 +5,9 @@ urlpatterns = [
     path('', views.index, name="index"),
     path('query/', views.queries, name='queries'),
     path('query/tags/<int:pk>', views.tag_queries, name="tag_queries"),
-
+    path('states', views.states_list, name='states_list'),
+    path('states/<int:pk>', views.state_detail, name='state_detail'),
+    path('states/<int:pk>/preview', views.state_preview, name='state_preview'),
     # path('query/add', views.query_add, name="query_add"),
     path('query/my', views.query_list, name="query_list"),
     path('query/all', views.query_all, name="query_all"),
