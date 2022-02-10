@@ -233,7 +233,18 @@
         });
         city.addEventListener('mouseout', function () {
             showCityName(city, i);
-            showCity(city);
+
+            if (city.tagName === 'path') {
+                city.style.fill = second_color;
+            } else {
+                let paths = city.children;
+                for (let i = 0; i < paths.length; i++) {
+                    let path = paths[i];
+                    path.style.fill = second_color;
+                }
+            }
+
+
         });
         city.addEventListener('click', function () {
             clickedCity(city);
@@ -250,10 +261,8 @@
 
     let cities_list = document.getElementById('cities_list');
     for (let i in cities) {
-        if (cities[i]) {
-            let city = `<li class="city"><a onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
-            cities_list.innerHTML = cities_list.innerHTML + city
-        }
+        let city = `<li class="city"><a onmouseover="showCityMap('${i-1}')" onmouseout="showCityMap('${i-1}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
+        cities_list.innerHTML = cities_list.innerHTML + city
     }
 
 

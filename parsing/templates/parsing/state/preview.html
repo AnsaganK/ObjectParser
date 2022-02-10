@@ -132,8 +132,8 @@
     </ul>
 </div>
 <script>
-    let first_color_site = "{{ map_hover_color }}";
-    let second_color_site = '{{ map_color }}';
+    let first_color = "{{ map_hover_color }}";
+    let second_color = '{{ map_color }}';
 
     function rgb2hex(rgb) {
         if (rgb[0] === '#') {
@@ -148,11 +148,11 @@
     }
 
     function get_first_color() {
-        return first_color_site
+        return first_color
     }
 
     function get_second_color() {
-        return second_color_site
+        return second_color
     }
 
     function changeColor(elem, first_color, second_color) {
@@ -193,7 +193,15 @@
         });
         city.addEventListener('mouseout', function () {
             showCityName(city, i);
-            showCity(city);
+            if (city.tagName === 'path') {
+                city.style.fill = second_color;
+            } else {
+                let paths = city.children;
+                for (let i = 0; i < paths.length; i++) {
+                    let path = paths[i];
+                    path.style.fill = second_color;
+                }
+            }
         });
         city.addEventListener('click', function () {
             clickedCity(city);
@@ -223,10 +231,9 @@
 <script>
     let cities_list = document.getElementById('cities_list');
     for (let i in cities) {
-        if (cities[i]) {
-            let city = `<li class="city"><a onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
-            cities_list.innerHTML = cities_list.innerHTML + city
-        }
+        let city = `<li class="city"><a onmouseover="showCityMap('${i - 1}')" onmouseout="showCityMap('${i - 1}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
+        cities_list.innerHTML = cities_list.innerHTML + city
+
     }
 
     let body = document.getElementsByTagName('body')[0];
