@@ -31,11 +31,11 @@ from parsing.utils import show_form_errors, has_group, get_paginator, sumextract
 
 
 def index(request):
-    with open('parsing/states.pickle', 'rb') as f:
-        data = pickle.load(f)
-        for i in data:
-            state = State.objects.get_or_create(name=i, svg=data[i]['svg'])
-            state[0].save()
+    # with open('parsing/states.pickle', 'rb') as f:
+    #     data = pickle.load(f)
+    #     for i in data:
+    #         state = State.objects.get_or_create(name=i, svg=data[i]['svg'])
+    #         state[0].save()
 
     user = request.user
     if user.is_authenticated:
