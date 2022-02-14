@@ -14,7 +14,6 @@ from mimesis import Person
 from mimesis.enums import Gender
 from pytils.translit import slugify
 
-from test2 import app
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City, \
     CityService
 from .utils import save_image, uniqueize_text
@@ -929,7 +928,7 @@ def uniqueize_query_reviews_task(query):
     for place in places:
         uniqueize_place_reviews_task(place)
 
-
+@shared_task
 def uniqueize_reviews_task(reviews, unique_review):
     for review in reviews:
         review.text = uniqueize_text(review.text)

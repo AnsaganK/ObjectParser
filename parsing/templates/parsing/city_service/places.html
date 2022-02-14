@@ -42,6 +42,21 @@
             margin-right: 20px;
             border-radius: 5px
         }
+
+        .admin_button_label {
+            display: none;
+            position: absolute;
+            font-weight: 400;
+            font-size: 12px;
+            border: 1px solid #48c78e;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+
+        .admin_button:hover + .admin_button_label {
+            display: block;
+        }
     </style>
     <style>
         @media (max-width: 630px) {
@@ -81,26 +96,47 @@
     <h1 class="block_title" style="font-size: 22px !important; margin-bottom: 40px">
         {% if request.user|hasGroup:'Admin' %}
             <div class="queries_admin_button">
-                <a href="{% url 'parsing:city_service_edit' city_service.pk %}"
-                   title="Edit"
-                   class="button is-success is-light is-outlined centered mr-1"
-                   style="width: fit-content"><i class="fa fa-edit"></i></a>
-                <a href="{% url 'parsing:city_service_edit_faq' city_service.pk %}"
-                   title="FAQ"
-                   class="button is-warning is-light is-outlined centered mr-1"
-                   style="width: fit-content"><i class="fa fa-question"></i></a>
-                <a href="{% url 'parsing:city_service_reviews_uniqueize' city_service.pk %}"
-                   title="Uniqueize reviews"
-                   class="button is-info is-light is-outlined centered mr-1"
-                   style="width: fit-content"><i class="fa fa-comment-alt"></i></a>
-                <a href="{% url 'parsing:city_service_places_generate_description' city_service.pk %}"
-                   title="Generate Description"
-                   class="button is-primary is-light is-outlined centered mr-1"
-                   style="width: fit-content"><i class="fa fa-folder"></i></a>
-                <a href="{% url 'parsing:city_service_rating_edit' city_service.pk %}"
-                   title="Change rating"
-                   class="button is-outlined mr-1"
-                   style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
+                <div>
+                    <a href="{% url 'parsing:city_service_edit' city_service.pk %}"
+                       class="button is-success is-light is-outlined centered mr-1 admin_button"
+                       style="width: fit-content"><i class="fa fa-edit"></i></a>
+                    <span class="admin_button_label">EDIT</span>
+                </div>
+                <div>
+                    <a href="{% url 'parsing:city_service_edit_faq' city_service.pk %}"
+                       class="button is-warning is-light is-outlined centered mr-1 admin_button"
+                       style="width: fit-content"><i class="fa fa-question"></i></a>
+                    <span class="admin_button_label">FAQ</span>
+
+                </div>
+                <div>
+                    <a href="{% url 'parsing:city_service_reviews_uniqueize' city_service.pk %}"
+                       class="button is-info is-light is-outlined centered mr-1 admin_button"
+                       style="width: fit-content"><i class="fa fa-comment-alt"></i></a>
+                    <span class="admin_button_label">Uniqueize reviews</span>
+
+                </div>
+                <div>
+                    <a href="{% url 'parsing:city_service_preview_reviews_uniqueize' city_service.pk %}"
+                       class="button is-danger is-light is-outlined centered mr-1 admin_button"
+                       style="width: fit-content"><i class="fa fa-comment-alt"></i></a>
+                    <span class="admin_button_label">Uniqueize preview reviews</span>
+
+                </div>
+                <div>
+                    <a href="{% url 'parsing:city_service_places_generate_description' city_service.pk %}"
+                       class="button is-primary is-light is-outlined centered mr-1 admin_button"
+                       style="width: fit-content"><i class="fa fa-folder"></i></a>
+                    <span class="admin_button_label">Generate Description</span>
+
+                </div>
+                <div>
+                    <a href="{% url 'parsing:city_service_rating_edit' city_service.pk %}"
+                       class="button is-outlined mr-1 admin_button"
+                       style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
+                    <span class="admin_button_label">Change rating</span>
+
+                </div>
                 <a href="{% url 'parsing:start_custom_parser' city_service.city.slug city_service.service.slug %}"
                    class="button is-success">
                     {% if city_service.places_count %}

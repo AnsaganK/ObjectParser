@@ -159,6 +159,10 @@
         elem.style.fill = rgb2hex(elem.style.fill) === first_color ? second_color : first_color;
     }
 
+    function clickedCity(city) {
+        document.location.href = `/${city.id.toLowerCase().replaceAll('_', '-')}/`
+    }
+
     function showCity(city) {
         if (city.tagName === 'path') {
             changeColor(city, get_first_color(), get_second_color());
@@ -174,7 +178,7 @@
     function showCityName(city, number) {
         let city_id = city.id;
         let city_name = document.getElementById('city_name');
-        city_name.innerText = city_id.replace('_', ' ');
+        city_name.innerText = city_id.replaceAll('_', ' ');
         let city_text = document.getElementById('cities_list').children[number].children[0].children[0];
         city_text.classList.toggle('text_over')
     }
@@ -194,7 +198,7 @@
         city.addEventListener('mouseout', function () {
             let city_id = city.id;
             let city_name = document.getElementById('city_name');
-            city_name.innerText = city_id.replace('_', ' ');
+            city_name.innerText = city_id.replaceAll('_', ' ');
             let city_text = document.getElementById('cities_list').children[i].children[0].children[0];
             city_text.classList.remove('text_over')
 
@@ -236,7 +240,7 @@
 <script>
     let cities_list = document.getElementById('cities_list');
     for (let i in cities) {
-        let city = `<li class="city"><a onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
+        let city = `<li class="city"><a href="/${cities[i].replaceAll('_', '-').toLowerCase()}/" onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replaceAll('_', ' ')}</span></a></li>`
         cities_list.innerHTML = cities_list.innerHTML + city
 
     }
@@ -248,7 +252,7 @@
     for (let i = 0; i < copy_body_children.length - 2; i++) {
         text += copy_body_children[i].outerHTML
     }
-    text.replace(' ', '');
+    text.replaceAll(' ', '');
 
     let textarea = document.getElementById('copy_textarea')
     textarea.value = text;

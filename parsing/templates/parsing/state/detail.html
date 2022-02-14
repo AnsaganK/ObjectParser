@@ -196,7 +196,7 @@
     }
 
     function clickedCity(city) {
-        let city_name = city.id;
+        document.location.href = `/${city.id.toLowerCase().replaceAll('_', '-')}/`
     }
 
     function showCity(city) {
@@ -214,7 +214,7 @@
     function showCityName(city, number) {
         let city_id = city.id;
         let city_name = document.getElementById('city_name');
-        city_name.innerText = city_id.replace('_', ' ');
+        city_name.innerText = city_id.replaceAll('_', ' ');
         let city_text = document.getElementById('cities_list').children[number].children[0].children[0];
         city_text.classList.toggle('text_over')
     }
@@ -234,7 +234,7 @@
         city.addEventListener('mouseout', function () {
             let city_id = city.id;
             let city_name = document.getElementById('city_name');
-            city_name.innerText = city_id.replace('_', ' ');
+            city_name.innerText = city_id.replaceAll('_', ' ');
             let city_text = document.getElementById('cities_list').children[i].children[0].children[0];
             city_text.classList.remove('text_over')
 
@@ -265,7 +265,7 @@
 
     let cities_list = document.getElementById('cities_list');
     for (let i in cities) {
-        let city = `<li class="city"><a onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replace('_', ' ')}</span></a></li>`
+        let city = `<li class="city"><a href="/${cities[i].replaceAll('_', '-').toLowerCase()}" onmouseover="showCityMap('${i}')" onmouseout="showCityMap('${i}')"><span>${cities[i].replaceAll('_', ' ')}</span></a></li>`
         cities_list.innerHTML = cities_list.innerHTML + city
     }
 
@@ -328,7 +328,7 @@
         let map_hover_color = document.getElementById('map_hover_color').value.slice(1);
         let map_border_color = document.getElementById('map_border_color').value.slice(1);
 
-        let viewbox = `${document.getElementById('svg_viewbox').value.replace(' ', ',')}`;
+        let viewbox = `${document.getElementById('svg_viewbox').value.replaceAll(' ', ',')}`;
         document.location.href = `${document.location.href}/preview?max-width=${max_width}&text-color=${text_color}&map-color=${map_color}&map-border-color=${map_border_color}&map-hover-color=${map_hover_color}&viewbox=${viewbox}`
     }
 

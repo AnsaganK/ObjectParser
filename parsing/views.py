@@ -26,7 +26,7 @@ from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerial
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, uniqueize_query_reviews_task, \
-    uniqueize_text_task, cities_img_parser
+    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task
 from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
@@ -66,10 +66,10 @@ def state_preview(request, pk):
     print(dict(data))
     max_width = data['max-width']
     viewbox = str(data.get('viewbox'))
-    map_color = '#'+data['map-color']
-    map_hover_color = '#'+data['map-hover-color']
-    map_border_color = '#'+data['map-border-color']
-    text_color = '#'+data['text-color']
+    map_color = '#' + data['map-color']
+    map_hover_color = '#' + data['map-hover-color']
+    map_border_color = '#' + data['map-border-color']
+    text_color = '#' + data['text-color']
     state = get_object_or_404(State, pk=pk)
     return render(request, 'parsing/state/preview.html', {
         'state': state,
@@ -751,6 +751,21 @@ def city_service_reviews_uniqueize(request, pk):
 
 
 @login_required()
+def city_service_preview_reviews_uniqueize(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
+    places = get_sorted_places(city_service)[:20]
+    reviews = []
+    for place in places:
+        reviews.append(place.get_more_text) if place.get_more_text else None
+    if reviews:
+        unique_review = UniqueReview.objects.create(reviews_count=len(reviews), city_service=city_service)
+        unique_review.save()
+        uniqueize_reviews_task.delay(reviews, unique_review)
+        messages.success(request, 'Reviews uniqueize')
+    return redirect(city_service.get_absolute_url())
+
+
+@login_required()
 def unique_reviews_list(request):
     unique_reviews = UniqueReview.objects.all().order_by('-pk')
     unique_reviews = get_paginator(request, unique_reviews)
@@ -878,9 +893,12 @@ def city_autocreate(request):
               'Russell', 'Salem', 'Scott', 'Shenandoah', 'Smyth', 'Southampton', 'Spotsylvania', 'Stafford', 'Staunton',
               'Suffolk', 'Surry', 'Sussex', 'Tazewell', 'Virginia_Beach', 'Warren', 'Washington', 'Waynesboro',
               'Westmoreland', 'Williamsburg', 'Winchester', 'Wise', 'Wythe', 'York']
+    # for city in City.objects.all():
+    #     city.slug = city.slug.lower()
+    #     city.save()
     for map_name in cities:
         name = map_name.replace('_', ' ')
-        slug = map_name.replace('_', '-')
+        slug = map_name.replace('_', '-').lower()
         city = City.objects.get_or_create(name=name, slug=slug, map_name=map_name)
         if city[1]:
             city[0].save()

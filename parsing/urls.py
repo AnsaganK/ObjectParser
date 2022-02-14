@@ -30,7 +30,7 @@ urlpatterns = [
     path('place/<int:pk>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     # path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
 
-    path('consultants/<slug:service_slug>/<slug:place_slug>', views.city_service_place_detail,
+    path('service/<slug:service_slug>/<slug:place_slug>', views.city_service_place_detail,
          name='city_service_place_detail'),
 
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
@@ -64,7 +64,8 @@ urlpatterns = [
     path('city/service/<int:pk>/rating', views.city_service_rating_edit, name='city_service_rating_edit'),
     path('city/service/<int:pk>/reviews/uniqueize', views.city_service_reviews_uniqueize,
          name='city_service_reviews_uniqueize'),
-
+    path('city/service/<int:pk>/reviews/preview/uniqueize', views.city_service_preview_reviews_uniqueize,
+         name='city_service_preview_reviews_uniqueize'),
     path('city/service/<int:pk>/generate/description', views.city_service_places_generate_description,
          name='city_service_places_generate_description'),
 
