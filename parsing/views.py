@@ -174,7 +174,7 @@ def get_sorted_places(city_service):
     if city_service.sorted:
         places = places.order_by('position')
     else:
-        places = places.order_by('-rating', '-rating_user_count')
+        places = places.order_by('-rating_user_count')
     return places
 
 
@@ -607,6 +607,8 @@ def place_set_description(place):
     for review in reviews:
         text += review.text
     description = sumextract(text, 5)
+    description = description.replace('. ', '.').replace('.', '. ')
+    description = description.replace(', ', ',').replace(',', ', ')
     place.description = place.name + ' - ' + description
     place.save()
 

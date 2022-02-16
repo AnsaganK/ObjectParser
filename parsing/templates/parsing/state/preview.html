@@ -221,7 +221,7 @@
     function showCityMap(city_number) {
         let city = state_cities[city_number];
         let city_name = document.getElementById('city_name');
-        city_name.innerText = city.id;
+        city_name.innerText = city.id.replaceAll('_', ' ');
         showCity(city);
     }
 </script>
