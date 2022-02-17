@@ -26,7 +26,7 @@ from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerial
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, uniqueize_query_reviews_task, \
-    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task
+    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task, preview_uniqueize_reviews_task
 from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
@@ -756,13 +756,14 @@ def city_service_reviews_uniqueize(request, pk):
 def city_service_preview_reviews_uniqueize(request, pk):
     city_service = get_object_or_404(CityService, pk=pk)
     places = get_sorted_places(city_service)[:20]
-    reviews = []
+    review_ids = []
     for place in places:
-        reviews.append(place.get_more_text) if place.get_more_text else None
-    if reviews:
-        unique_review = UniqueReview.objects.create(reviews_count=len(reviews), city_service=city_service)
+        review_ids.append(place.get_more_text.id) if place.get_more_text else None
+    if review_ids:
+        print(review_ids)
+        unique_review = UniqueReview.objects.create(reviews_count=len(review_ids), city_service=city_service)
         unique_review.save()
-        uniqueize_reviews_task.delay(reviews, unique_review)
+        preview_uniqueize_reviews_task.delay(review_ids, unique_review.id)
         messages.success(request, 'Reviews uniqueize')
     return redirect(city_service.get_absolute_url())
 
@@ -933,6 +934,24 @@ def city_list(request):
     })
 
 
+def get_nearest_cities(city, nearest=5):
+    latitude = city.latitude
+    longitude = city.longitude
+    nearest_city = {}
+    for c in City.objects.all():
+        if c != city and (c.latitude and c.longitude):
+            distance = ((float(c.latitude) - float(latitude)) ** 2 + (
+                    float(c.longitude) - float(longitude)) ** 2) ** 0.5
+            nearest_city.update({distance: c})
+    nearest_city_list = []
+    for i in sorted(nearest_city):
+        print(i, nearest_city[i])
+        nearest_city_list.append(nearest_city[i])
+        if len(nearest_city_list) > nearest:
+            break
+    return nearest_city_list
+
+
 def city_detail(request, slug):
     city = get_object_or_404(City, slug=slug)
     city_services = CityService.objects.filter(city=city)
@@ -941,7 +960,8 @@ def city_detail(request, slug):
 
     return render(request, 'parsing/city/detail.html', {
         'city': city,
-        'city_services': city_services
+        'city_services': city_services,
+        'nearest_cities': get_nearest_cities(city)
     })
 
 

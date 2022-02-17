@@ -143,6 +143,8 @@ class City(models.Model):
     name = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500)
     map_name = models.CharField(max_length=500)
+    latitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
     description = models.TextField(null=True, blank=True, default='')
 

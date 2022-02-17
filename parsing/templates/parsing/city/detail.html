@@ -95,6 +95,12 @@
                 {% endfor %}
 
             </div>
+            <h3>Nearest cities</h3>
+            <ol>
+                {% for city in nearest_cities %}
+                    <li><a href="{{ city.get_absolute_url }}">{{ city.name }}</a></li>
+                {% endfor %}
+            </ol>
         </div>
     </div>
 {% endblock %}

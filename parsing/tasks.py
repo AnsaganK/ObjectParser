@@ -928,6 +928,14 @@ def uniqueize_query_reviews_task(query):
     for place in places:
         uniqueize_place_reviews_task(place)
 
+
+@shared_task()
+def preview_uniqueize_reviews_task(review_ids, unique_review_id):
+    reviews = Review.objects.filter(id__in=review_ids)
+    unique_review = UniqueReview.objects.get(id=unique_review_id)
+    uniqueize_reviews_task(reviews, unique_review)
+
+
 @shared_task
 def uniqueize_reviews_task(reviews, unique_review):
     for review in reviews:
@@ -989,16 +997,30 @@ def get_city_data(link):
     url = base_url + link
     soup = get_soup(get_site(url))
 
+    # get_img
     infobox = soup.find(class_='infobox')
     img = infobox.find('img')
     img_link = img['src']
 
+    # get_description
     body = soup.find("div", {"id": "mw-content-text"}).find(class_='mw-parser-output')
     description = body.find_all('p')[1]
 
+    # get_coordinate
+    try:
+        latitude = float(soup.find(class_='latitude').text.split('′')[0].replace('°', '.'))
+        longitude = float(soup.find(class_='longitude').text.split('′')[0].replace('°', '.'))
+    except:
+        latitude = None
+        longitude = None
+        print(link)
     return {
         'img_link': img_link,
-        'description': description.text
+        'description': description.text,
+        'coordinate': {
+            'latitude': latitude,
+            'longitude': longitude
+        }
     }
 
 
@@ -1011,15 +1033,26 @@ def cities_img_parser():
         data += get_table_data(table)
     for city in data:
         city_object = City.objects.filter(name=city['name']).first()
-        if city_object and (not city_object.cloud_img or not city_object.description):
+        if city_object and (not city_object.cloud_img or not city_object.description or
+                            (not city_object.latitude or city_object.longitude)):
             city_data = get_city_data(city['link'])
             description = city_data.get('description')
             img_link = 'https:' + city_data.get('img_link')
+            latitude = city_data['coordinate']['latitude']
+            longitude = city_data['coordinate']['longitude']
+            if latitude and longitude:
+                coordinate = {
+                    'latitude': latitude,
+                    'longitude': longitude
+                }
+            else:
+                coordinate = None
             city_item = {
                 'name': city['name'],
                 'link': city['link'],
                 'img_link': img_link,
-                'description': description
+                'description': description,
+                'coordinate': coordinate
             }
             set_city_data(city_item)
 
@@ -1037,4 +1070,8 @@ def set_city_data(city_item):
         if not city.description:
             city.description = city_item['description']
             print('Description')
+        if (not city.longitude or not city.latitude) and city_item['coordinate']:
+            city.longitude = city_item['coordinate']['longitude']
+            city.latitude = city_item['coordinate']['latitude']
+            print('Coordinate')
         city.save()
