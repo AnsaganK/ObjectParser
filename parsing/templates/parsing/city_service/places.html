@@ -12,13 +12,13 @@
             color: inherit;
         }
     </style>
-    {% if query.faq and query.faq.questions %}
+    {% if city_service.faq and city_service.faq.questions %}
         <script type="application/ld+json">
         {
           "@context": "https://schema.org",
           "@type": "FAQPage",
           "mainEntity": [
-          {% for question in query.faq.questions.all|slice:"3" %}
+          {% for question in city_service.faq.questions.all|slice:"3" %}
               {
                 "@type": "Question",
                 "name": "{{ question.question }}",

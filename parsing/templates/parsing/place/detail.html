@@ -1,6 +1,7 @@
 {% extends 'parsing/base.html' %}
 {% load parsing_tags static %}
 {% block title %}
+    Reviews |
     {% if place.title %}
         {{ place.title }}
     {% else %}
@@ -93,7 +94,7 @@
 
 {% block meta %}
     {% if place.meta %}
-        {{ place.meta|safe }}
+        <meta content="{{ place.meta|default:place.description }}" name="description">
     {% endif %}
 {% endblock %}
 
@@ -101,7 +102,9 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
-            <li><a href="{{ place.city_service.service.get_absolute_url }}">{{ place.city_service.service.name }}</a></li>
+            <li><a href="{% url 'parsing:city_list' %}">City</a></li>
+            <li><a href="{{ place.city_service.city.get_absolute_url }}">{{ place.city_service.city.name }}</a></li>
+            <li><a href="{{ place.city_service.get_absolute_url }}">{{ place.city_service.service.name }}</a></li>
             {#    <li class="breadcrumb-item"><a href="{{ place.query.get_absolute_url }}">{{ place.query.name }}</a></li>#}
             <li class="is-active"><a href="#" aria-current="page">{{ place.name }}</a></li>
         </ul>

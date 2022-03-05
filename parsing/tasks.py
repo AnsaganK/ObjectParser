@@ -1,5 +1,6 @@
 import base64
 import csv
+import json
 import os
 import io
 from io import BytesIO
@@ -15,8 +16,8 @@ from mimesis.enums import Gender
 from pytils.translit import slugify
 
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City, \
-    CityService
-from .utils import save_image, uniqueize_text
+    CityService, WordAiCookie
+from .utils import save_image, uniqueize_text, deEmojify
 
 
 @shared_task
@@ -89,10 +90,10 @@ def startFireFox(url=URL):
 
 def startChrome(url=URL, path=None):
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-software-rasterizer")
+    # chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--no-sandbox")
+    # chrome_options.add_argument("--disable-gpu")
+    # chrome_options.add_argument("--disable-software-rasterizer")
     if path:
         driver = webdriver.Chrome(executable_path=path, options=chrome_options)
     else:
@@ -416,8 +417,8 @@ class GetReviews:
         return self.review_list
 
 
-def set_review_parts(rating, review):
-    for review_type in ReviewType.objects.all():
+def set_review_parts(rating, review, review_types=[]):
+    for review_type in review_types:
         review_part = ReviewPart.objects.update_or_create(review=review, review_type=review_type)[0]
         review_part.rating = rating
         review_part.save()
@@ -517,7 +518,8 @@ def set_reviews(review_list, place):
                                            place=place)
             review.save()
             try:
-                set_review_parts(rating=review.rating, review=review)
+                set_review_parts(rating=review.rating, review=review,
+                                 review_types=place.city_service.review_types.all())
             except Exception as e:
                 print('Ошибка при назначении кусков отзыва', e)
     except Exception as e:
@@ -914,19 +916,112 @@ def generate_file(file_name, places):
 
 
 #
+#               WordAI
+#
+
+
+WORDAI_URL = 'https://wai.wordai.com'
+REWRITE_URL = 'https://wai.wordai.com/rewrite'
+EMAIL = 'gtmus505@gmail.com'
+PASSWORD = 'EA5ipChxbdPwA2$'
+DEFAULT_COOKIES = [
+    {'domain': '.wordai.com', 'expiry': 1709497294, 'httpOnly': False, 'name': '_ga_J6KTZN2VVY', 'path': '/',
+     'secure': False, 'value': 'GS1.1.1646425289.1.1.1646425294.0'},
+    {'domain': '.wordai.com', 'expiry': 1804105293, 'httpOnly': False, 'name': 'km_ni', 'path': '/',
+     'secure': False, 'value': 'gtmus505%40gmail.com'},
+    {'domain': '.wordai.com', 'expiry': 1804105293, 'httpOnly': False, 'name': 'km_lv', 'path': '/',
+     'secure': False, 'value': '1646425294'},
+    {'domain': '.wordai.com', 'httpOnly': False, 'name': 'kvcd', 'path': '/', 'secure': False,
+     'value': '1646425293936'},
+    {'domain': 'wai.wordai.com', 'httpOnly': True, 'name': '_wordai_rails_session', 'path': '/', 'secure': False,
+     'value': 'bO4n61%2FlS3fXRCsg8B7zF3HCXYxzyJbkWknSFU47V9n9qiLftHGPBVYfUwHBz2K97c%2FHW2E%2FpDenclPL1C21SbHBQfP6PJ1TzyJvppRNBlKqn4eJ5JQvYqpdPnVh7vrpbJ4MJnOyT25vOc%2Fr9lJuFrXa%2FoLB6Ft8TaoAjfaQIlKYLZmRvwe8C7cJ8F6CAJlwgcyqB2IZwafx5VqS8eLsNeC96YETwQnHgWp5hO7Y1KxkMElY56Tf2ROfhcTiGlMdTdtE2yGA1qTAAmlK3WkKk198T60iDcuxhlqPj06StHGx4beNZz0SW84J5Mu9Av6OS57FTg1iSn7egvlGE12FO44kBsui9TEl28B35Dg07FvVXoegeSNXiGHJYoJqOoNvlOZ6aTItnO3PFMV3a1LdNXxZ9P70--WIgi7vqXhl2ow94y--e4o9Q7x4Z0qo2Bosz006Vw%3D%3D'},
+    {'domain': '.wordai.com', 'expiry': 1646427093, 'httpOnly': False, 'name': 'km_vs', 'path': '/',
+     'secure': False, 'value': '1'},
+    {'domain': '.wordai.com', 'expiry': 1804105290, 'httpOnly': False, 'name': 'km_ai', 'path': '/',
+     'secure': False, 'value': 'Uk6BujRMj82wPhvS3miITW4BhCw%3D'},
+    {'domain': '.wordai.com', 'expiry': 1709497294, 'httpOnly': False, 'name': '_ga', 'path': '/',
+     'secure': False, 'value': 'GA1.1.774710283.1646425290'}]
+
+
+def login(driver: webdriver.Chrome):
+    form = driver.find_element('id', 'new_user')
+    username_input = form.find_element('id', 'user_email')
+    password_input = form.find_element('id', 'user_password')
+    username_input.send_keys(EMAIL)
+    password_input.send_keys(PASSWORD)
+    password_input.submit()
+
+
+def save_cookies(cookies):
+    word_ai_cookie = WordAiCookie.objects.create(cookies=json.dumps(cookies))
+    word_ai_cookie.save()
+
+
+def set_cookies(driver) -> webdriver.Chrome:
+    word_ai_cookie = WordAiCookie.objects.last()
+    COOKIES = json.loads(word_ai_cookie.cookies) if word_ai_cookie else None
+    if COOKIES:
+        for cookie in COOKIES:
+            driver.add_cookie(cookie)
+        driver.get(WORDAI_URL + '/rewrite')
+        driver.get(WORDAI_URL + '/rewrite')
+    return driver
+
+
+@shared_task()
+def word_ai(reviews, unique_review=None):
+    driver = startChrome(url=WORDAI_URL)
+    driver = set_cookies(driver)
+    if driver.current_url != REWRITE_URL:
+        login(driver)
+        cookies = driver.get_cookies()
+        save_cookies(cookies)
+        driver.get(WORDAI_URL + '/rewrite')
+    for review in reviews:
+        try:
+            rewrite_input_block = driver.find_element('id', 'input_editor_wrapper')
+            input_block = rewrite_input_block.find_element('class name', 'fr-element')
+            input_block.click()
+            input_block.send_keys(deEmojify(review.text))
+
+            button = driver.find_element('id', 'rephrase_submit')
+            button.click()
+
+            try:
+                wait = WebDriverWait(driver, 30)
+                wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'enable-highlight')))
+            except Exception as e:
+                print(e.__class__.__name__)
+
+            rewrite_output_block = driver.find_element('id', 'output_editor_wrapper')
+            output_block = rewrite_output_block.find_element('class name', 'fr-element')
+            output_text = output_block.text
+
+            review.text = output_text
+            review.save()
+
+            if unique_review:
+                unique_review.reviews_checked += 1
+                unique_review.save()
+            print(output_text)
+            driver.get(driver.current_url)
+        except:
+            continue
+    driver.close()
+
+
+#
 #                                           Uniqueize reviews
 #
 def uniqueize_place_reviews_task(place):
     reviews = place.reviews.all()
-    for review in reviews:
-        review.text = uniqueize_text(review.text)
-        review.save()
+    word_ai(reviews)
 
 
-def uniqueize_query_reviews_task(query):
-    places = Place.objects.filter(queries__query=query)
-    for place in places:
-        uniqueize_place_reviews_task(place)
+@shared_task()
+def uniqueize_review(review_id):
+    review = Review.objects.filter(id=review_id).first()
+    word_ai([review])
 
 
 @shared_task()
@@ -938,11 +1033,7 @@ def preview_uniqueize_reviews_task(review_ids, unique_review_id):
 
 @shared_task
 def uniqueize_reviews_task(reviews, unique_review):
-    for review in reviews:
-        review.text = uniqueize_text(review.text)
-        review.save()
-        unique_review.reviews_checked += 1
-        unique_review.save()
+    word_ai(reviews, unique_review)
     unique_review.date_end = datetime.now()
     unique_review.save()
 

@@ -25,8 +25,8 @@ from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FA
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
-from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, uniqueize_query_reviews_task, \
-    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task, preview_uniqueize_reviews_task
+from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, \
+    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task, preview_uniqueize_reviews_task, uniqueize_review
 from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, uniqueize_text
 
 
@@ -97,7 +97,10 @@ def start_custom_parser(request, city_slug, service_slug):
             cd = form.cleaned_data
             search_text = cd['name']
             not_all = cd['not_all']
-
+            post = dict(request.POST)
+            review_types = post.get('review_types')
+            review_types = ReviewType.objects.filter(id__in=review_types) if review_types else None
+            # return redirect(city_service.get_absolute_url())
             if not_all:
                 query_page = cd['page']
                 try:
@@ -114,6 +117,8 @@ def start_custom_parser(request, city_slug, service_slug):
                     city_service.page = query_page
                     city_service.status = 'wait'
                     city_service.date_parsing = datetime.now()
+                    city_service.review_types.all().delete()
+                    city_service.review_types.add(*review_types) if review_types else None
                     city_service.save()
                     messages.success(request, 'Parsing started')
                     startParsing.delay(query_name=search_text, city_service_id=city_service.id, pages=query_page)
@@ -122,8 +127,10 @@ def start_custom_parser(request, city_slug, service_slug):
                 city_service.status = 'error'
                 city_service.save()
         return redirect(city_service.get_absolute_url())
+    review_types = ReviewType.objects.all()
     return render(request, 'parsing/city_service/start_parser.html', {
-        'city_service': city_service
+        'city_service': city_service,
+        'review_types': review_types
     })
 
 
@@ -174,6 +181,7 @@ def get_sorted_places(city_service):
     if city_service.sorted:
         places = places.order_by('position')
     else:
+
         places = places.order_by('-rating_user_count')
     return places
 
@@ -269,7 +277,12 @@ def city_service_edit(request, pk):
             show_form_errors(request, form.errors)
         return redirect(city_service.get_absolute_url())
     tags = Tag.objects.all()
-    return render(request, 'parsing/city_service/edit.html', {'city_service': city_service, 'tags': tags})
+    review_types = ReviewType.objects.all()
+    return render(request, 'parsing/city_service/edit.html', {
+        'city_service': city_service,
+        'tags': tags,
+        'review_types': review_types
+    })
 
 
 @login_required()
@@ -280,19 +293,19 @@ def query_edit_access(request, slug):
     return redirect(reverse('parsing:queries'))
 
 
-def get_faq_questions(city_service_or_place):
-    faq = city_service_or_place.faq
+def get_faq_questions(obj):
+    faq = obj.faq
     if not faq:
         faq = FAQ()
         faq.save()
-        city_service_or_place.faq = faq
-        city_service_or_place.save()
-    questions = city_service_or_place.faq.questions.all()
+        obj.faq = faq
+        obj.save()
+    questions = obj.faq.questions.all()
     return questions
 
 
-def save_questions(query_or_place, questions_and_answers):
-    faq = query_or_place.faq
+def save_questions(obj, questions_and_answers):
+    faq = obj.faq
     faq.questions.all().delete()
     for q in questions_and_answers:
         question = FAQQuestion(question=q, answer=questions_and_answers[q])
@@ -301,14 +314,18 @@ def save_questions(query_or_place, questions_and_answers):
     faq.save()
 
 
+def set_faq(post, obj):
+    data = dict(post)
+    questions_and_answers = dict(zip(data['questions'], data['answers']))
+    get_faq_questions(obj)
+    save_questions(obj, questions_and_answers)
+
+
 @login_required()
 def city_service_edit_faq(request, pk):
     city_service = get_object_or_404(CityService, pk=pk)
     if request.method == 'POST':
-        post = dict(request.POST)
-        questions_and_answers = dict(zip(post['questions'], post['answers']))
-        questions = get_faq_questions(city_service)
-        save_questions(city_service, questions_and_answers)
+        set_faq(request.POST, city_service)
         messages.success(request, 'FAQ updated')
         return redirect(city_service.get_absolute_url())
     return render(request, 'parsing/city_service/edit_faq.html', {'city_service': city_service})
@@ -566,7 +583,7 @@ def place_detail(request, slug):
 def review_create(request, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
     user = request.user
-    review_types = ReviewType.objects.all()
+    review_types = ReviewType.objects.filter(city_services=place.city_service)
     if Review.objects.filter(user=request.user).filter(place=place).first():
         messages.error(request, 'You cannot leave more than one review.')
         return redirect(place.get_absolute_url())
@@ -634,10 +651,7 @@ def city_service_places_generate_description(request, pk):
 def place_edit_faq(request, pk):
     place = get_object_or_404(Place, pk=pk)
     if request.method == 'POST':
-        post = dict(request.POST)
-        questions_and_answers = dict(zip(post['questions'], post['answers']))
-        questions = get_faq_questions(place)
-        save_questions(place, questions_and_answers)
+        set_faq(request.POST, place)
         messages.success(request, 'FAQ updated')
         return redirect(place.get_absolute_url())
     return render(request, 'parsing/place/edit_faq.html', {'place': place})
@@ -731,8 +745,7 @@ def review_edit(request, pk):
 @login_required()
 def review_uniqueize(request, pk):
     review = get_object_or_404(Review, pk=pk)
-    review.text = uniqueize_text(review.text)
-    review.save()
+    uniqueize_review.delay(review.id)
     return redirect(reverse('parsing:review_edit', args=[review.id]))
 
 
@@ -989,6 +1002,17 @@ def service_detail(request, slug):
     })
 
 
+def service_edit_faq(request, slug):
+    service = get_object_or_404(Service, slug=slug)
+    if request.method == 'POST':
+        set_faq(request.POST, service)
+        messages.success(request, 'FAQ updated')
+        return redirect(service.get_absolute_url())
+    return render(request, 'parsing/service/edit_faq.html', {
+        'service': service
+    })
+
+
 def city_service_detail(request, city_slug, service_slug):
     city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
     places = get_sorted_places(city_service)
@@ -1013,13 +1037,16 @@ def city_service_access(request, pk):
     return redirect(city_service.city.get_absolute_url())
 
 
-def city_service_place_detail(request, service_slug, place_slug):
+def city_service_place_detail(request, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
     if place.is_redirect and not has_group(request.user, 'Redactor'):
         return redirect(place.redirect)
     reviews = get_place_reviews(request, place)
-    return render(request, 'parsing/place/detail.html',
-                  {'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
+    return render(request, 'parsing/place/detail.html', {
+        'place': place,
+        'reviews': reviews['reviews'],
+        'my_review': reviews['my_review']
+    })
 
 #
 # class QueryAdd(APIView):

@@ -111,21 +111,26 @@ def query(payload):
         return None
 
 
+def deEmojify(inputString):
+    return inputString.encode('ascii', 'ignore').decode('ascii')
+
+
 def uniqueize_text(text):
-    sentences = text.split('.')
-    sentences = [i for i in sentences if len(i) > 2]
-    unique_sentences = ''
-    output = query({
-        "inputs": sentences,
-        "parameters": {
-            'truncation': 'only_first'
-        }
-    })
-    if output:
-        try:
-            for i in output:
-                unique_sentences += str(i['generated_text']) + ' '
-            return unique_sentences
-        except:
-            return text
-    return text
+    pass
+    # sentences = text.split('.')
+    # sentences = [i for i in sentences if len(i) > 2]
+    # unique_sentences = ''
+    # output = query({
+    #     "inputs": sentences,
+    #     "parameters": {
+    #         'truncation': 'only_first'
+    #     }
+    # })
+    # if output:
+    #     try:
+    #         for i in output:
+    #             unique_sentences += str(i['generated_text']) + ' '
+    #         return unique_sentences
+    #     except:
+    #         return text
+    # return text

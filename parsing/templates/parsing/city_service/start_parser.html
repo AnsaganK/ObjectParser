@@ -16,8 +16,20 @@
                 Search text
             </label>
             <div class="control">
-                <input type="text" required class="input" name="name" value="{{ city_service.service.name }} in {{ city_service.city.name }}">
+                <input type="text" required class="input" name="name"
+                       value="{{ city_service.service.name }} in {{ city_service.city.name }}">
             </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Review types
+            </label>
+            {% for review_type in review_types %}
+                <input type="checkbox" name="review_types" value={{ review_type.id }} style="display: none"
+                class="review_type_tag" id="review_type_{{ review_type.id }}">
+                <label for="review_type_{{ review_type.id }}" class="tag"
+                       style="cursor: pointer">{{ review_type.name }}</label>
+            {% endfor %}
         </div>
         <label class="switch" style="margin: auto; display: block">
             <input type="checkbox" id="page_checkbox" name="not_all">

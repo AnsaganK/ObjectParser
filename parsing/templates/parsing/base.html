@@ -13,6 +13,7 @@
     {% block meta %}
 
     {% endblock %}
+    <link rel="stylesheet" href="{% static 'parsing/faq/css/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <link rel="stylesheet" href="{% static 'parsing/css/bulma/bulma-switch.min.css' %}">
     <link rel="stylesheet" href="{% static 'parsing/css/style.css' %}">
@@ -110,6 +111,11 @@
             box-sizing: border-box;
             border-top: 1px solid #008dfe;
             box-shadow: 0px 0px 5px 1px #b0b0b0;
+        }
+
+        .review_type_tag:checked + label {
+            background-color: #48c78e;
+            color: white;
         }
 
         .button_add {

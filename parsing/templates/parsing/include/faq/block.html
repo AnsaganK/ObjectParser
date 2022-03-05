@@ -12,9 +12,9 @@
             <ul id="basics" class="cd-faq__group">
                 <li class="cd-faq__title"><h2>FAQ</h2></li>
                 {% for question in questions.all %}
-                    <li class="cd-faq__item">
-                        <a class="cd-faq__trigger" href="#0"><span>{{ question.question }}</span></a>
-                        <div class="cd-faq__content">
+                    <li class="cd-faq__item cd-faq__item-visible">
+                        <a class="cd-faq__trigger" href="#0"><h3 style="font-size: 20px; font-weight: 400">{{ question.question }}</h3></a>
+                        <div class="cd-faq__content cd-faq__content--visible">
                             <div class="text-component">
                                 <p>{{ question.answer }}</p>
                             </div>

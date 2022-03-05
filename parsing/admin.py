@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart, CloudImage, FAQ, \
-    FAQQuestion, UniqueReview, City, Service, CityService, State
+    FAQQuestion, UniqueReview, City, Service, CityService, State, WordAiCookie
 
 
 @admin.register(Query)
@@ -42,11 +42,14 @@ admin.site.register(UniqueReview)
 admin.site.register(City)
 admin.site.register(Service)
 admin.site.register(State)
+admin.site.register(WordAiCookie)
+
 
 @admin.register(CityService)
 class CityServiceAdmin(admin.ModelAdmin):
     list_display = ['id', 'search_text', 'status']
     list_filter = ['status']
+
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):

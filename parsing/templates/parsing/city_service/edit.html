@@ -1,5 +1,5 @@
 {% extends 'parsing/base.html' %}
-{% load static %}
+{% load static parsing_tags %}
 {% block title %}
     Edit
 {% endblock %}
@@ -43,16 +43,49 @@
                     {{ city_service.content|default:'' }}</textarea>
             </div>
         </div>
-        <div class="tag_items">
-            {% for tag in tags %}
-                <div class="tag_item">
-                    <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tags" value="{{ tag.id }}"
-                           {% if tag in city_service.tags.all %}checked{% endif %}>
-                    <label for="tag_{{ tag.id }}" class="button is-success is-outlined"
-                           style="margin: 3px">{{ tag.name }}</label>
-                </div>
+        <div class="field">
+            <label for="" class="label">
+                Review types
+            </label>
+            {% for review_type in review_types %}
+                <input type="checkbox" name="review_types"
+                       {% if review_type in city_service.review_types.all %}checked{% endif %}
+                       value={{ review_type.id }} style="display: none"
+                class="review_type_tag" id="review_type_{{ review_type.id }}">
+                <label for="review_type_{{ review_type.id }}" class="tag"
+                       style="cursor: pointer">{{ review_type.name }}</label>
             {% endfor %}
         </div>
+        <div class="field">
+            <label for="" class="label">
+                Tags
+            </label>
+            <div class="tag_items">
+                {% for tag in tags %}
+                    <div class="tag_item">
+                        <input type="checkbox" id="tag_{{ tag.id }}" style="display: none" name="tags"
+                               value="{{ tag.id }}"
+                               {% if tag in city_service.tags.all %}checked{% endif %}>
+                        <label for="tag_{{ tag.id }}" class="button is-success is-outlined"
+                               style="margin: 3px">{{ tag.name }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Rating
+            </label>
+            <div class="rating-area" style="width: 215px;margin: 0px !important;">
+                {% for number in '54321'|make_list %}
+                    <input type="radio" id="rating_{{ number }}"
+                           name="rating" value="{{ number }}"
+                           {% if city_service.rating == number|add:'0' %}checked{% endif %}>
+                    <label for="rating_{{ number }}" title="Rating «{{ number }}»"></label>
+                {% endfor %}
+            </div>
+        </div>
+        <hr>
         <button type="submit" class="button is-info centered">Edit</button>
     </form>
 {% endblock %}

@@ -30,7 +30,7 @@ urlpatterns = [
     path('place/<int:pk>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     # path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
 
-    path('service/<slug:service_slug>/<slug:place_slug>', views.city_service_place_detail,
+    path('reviews/<slug:place_slug>', views.city_service_place_detail,
          name='city_service_place_detail'),
 
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
@@ -40,15 +40,16 @@ urlpatterns = [
     path('cabinet/<str:username>', views.public_cabinet, name="public_cabinet"),
     path('cabinet/<str:username>/reviews/', views.user_reviews, name="user_reviews"),
     path('profile/', views.profile, name="profile"),
-    path('reviews/progress', views.unique_reviews_list, name="unique_reviews_list"),
-    path('reviews/all', views.all_reviews, name="all_reviews"),
-    path('reviews/my', views.my_reviews, name="my_reviews"),
-    path('reviews/<int:pk>/edit', views.review_edit, name="review_edit"),
-    path('reviews/<int:pk>/uniqueize', views.review_uniqueize, name="review_uniqueize"),
+    path('review/progress', views.unique_reviews_list, name="unique_reviews_list"),
+    path('review/all', views.all_reviews, name="all_reviews"),
+    path('review/my', views.my_reviews, name="my_reviews"),
+    path('review/<int:pk>/edit', views.review_edit, name="review_edit"),
+    path('review/<int:pk>/uniqueize', views.review_uniqueize, name="review_uniqueize"),
     path('registration/', views.registration, name="registration"),
 
     path('service/', views.service_list, name='service_list'),
     path('service/<slug:slug>', views.service_detail, name='service_detail'),
+    path('service/<slug:slug>/edit/faq', views.service_edit_faq, name='service_edit_faq'),
 
     path('city/', views.city_list, name='city_list'),
     path('city/autocreate', views.city_autocreate, name='city_autocreate'),

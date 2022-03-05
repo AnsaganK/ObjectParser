@@ -1,6 +1,7 @@
 import re
 
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Count, Sum
 from django.db.models.functions import Round, Length
@@ -145,8 +146,9 @@ class City(models.Model):
     map_name = models.CharField(max_length=500)
     latitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     longitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-
+    zip_code = models.CharField(max_length=100, null=True, blank=True)
     description = models.TextField(null=True, blank=True, default='')
+    cities = models.ManyToManyField('self', null=True, blank=True, related_name='parent')
 
     cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
 
@@ -165,6 +167,8 @@ class City(models.Model):
 class Service(models.Model):
     name = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500, unique=True)
+
+    faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='service')
 
     def __str__(self):
         return self.name
@@ -200,6 +204,16 @@ class CityService(models.Model):
     search_text = models.TextField(null=True, blank=True)
     link = models.TextField(null=True, blank=True)
     access = models.BooleanField(default=False)
+    rating_choices = (
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5)
+    )
+    rating = models.IntegerField(choices=rating_choices, default=5)
+
+    review_types = models.ManyToManyField('ReviewType', null=True, blank=True, related_name='city_services')
 
     def __str__(self):
         return f'{self.city.name} - {self.service.name}'
@@ -228,7 +242,7 @@ class Place(models.Model):
     phone_number = models.CharField(max_length=500, null=True, blank=True)
     site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    meta = models.TextField(null=True, blank=True, default='<meta>')
+    meta = models.TextField(null=True, blank=True)
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
     position = models.IntegerField(default=None, null=True, blank=True, db_index=True,
@@ -257,7 +271,7 @@ class Place(models.Model):
 
     def get_absolute_url(self):
         if self.city_service:
-            return reverse('parsing:city_service_place_detail', args=[self.city_service.service.slug, self.slug])
+            return reverse('parsing:city_service_place_detail', args=[self.slug])
         return '/'
 
     @property
@@ -544,6 +558,18 @@ class State(models.Model):
             'svg': safe(svg),
             'viewbox': viewbox
         }
+
+
+class WordAiCookie(models.Model):
+    cookies = models.TextField(null=True, blank=True)
+    date_create = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        verbose_name = 'Куки WordAi'
+        verbose_name_plural = 'Куки WordAi'
 
 
 @receiver(post_save, sender=User)

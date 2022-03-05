@@ -63,7 +63,7 @@ class QueryContentForm(forms.ModelForm):
 class CityServiceContentForm(forms.ModelForm):
     class Meta:
         model = CityService
-        fields = ['content', 'tags']
+        fields = ['content', 'review_types', 'tags', 'rating']
 
 
 class ProfileForm(forms.ModelForm):

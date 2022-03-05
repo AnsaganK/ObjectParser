@@ -3,7 +3,8 @@
     {% if place.is_redirect and request.user|hasGroup:'Redactor' %}
         <article class="message is-warning">
             <div class="message-body">
-                This page has a <a href="{{ place.redirect }}" class="link">redirect</a>, it is visible only to the site administrator
+                This page has a <a href="{{ place.redirect }}" class="link">redirect</a>, it is visible only to the site
+                administrator
             </div>
         </article>
     {% endif %}
@@ -124,11 +125,11 @@
                     </div>
                 </div>
             </article>
-            <article>
-                {% if place.faq %}
-                    {% include 'parsing/include/faq/block.html' with questions=place.faq.questions %}
-                {% endif %}
-            </article>
         </div>
     </div>
+    <article>
+        {% if place.faq %}
+            {% include 'parsing/include/faq/block.html' with questions=place.faq.questions %}
+        {% endif %}
+    </article>
 </div>
