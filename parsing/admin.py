@@ -39,10 +39,14 @@ admin.site.register(CloudImage)
 admin.site.register(FAQ)
 admin.site.register(FAQQuestion)
 admin.site.register(UniqueReview)
-admin.site.register(City)
 admin.site.register(Service)
 admin.site.register(State)
 admin.site.register(WordAiCookie)
+
+@admin.register(City)
+class CityServiceAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'get_cities']
+    list_filter = ['is_county']
 
 
 @admin.register(CityService)

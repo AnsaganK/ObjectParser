@@ -14,10 +14,11 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic import DetailView
 from pytils.translit import slugify
 from rest_framework import status, generics
+from rest_framework.decorators import api_view
 from rest_framework.generics import ListAPIView, RetrieveAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from constants import SERVER_NAME
+from constants import SERVER_NAME, STATE_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
     QueryContentForm, ReviewTypeForm, CityForm, ServiceForm, CityServiceContentForm
 from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview, City, \
@@ -50,6 +51,10 @@ def states_list(request):
     return render(request, 'parsing/state/list.html', {
         'states': states
     })
+
+
+def get_cities():
+    return City.objects.order_by('-population')
 
 
 def state_detail(request, pk):
@@ -130,7 +135,8 @@ def start_custom_parser(request, city_slug, service_slug):
     review_types = ReviewType.objects.all()
     return render(request, 'parsing/city_service/start_parser.html', {
         'city_service': city_service,
-        'review_types': review_types
+        'review_types': review_types,
+        'state': STATE_NAME
     })
 
 
@@ -749,6 +755,33 @@ def review_uniqueize(request, pk):
     return redirect(reverse('parsing:review_edit', args=[review.id]))
 
 
+@api_view(['GET'])
+def review_api_detail(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    return Response({'review': {
+        'text': review.text,
+        'original_text': review.original_text,
+        'id': review.id
+    }})
+
+
+@api_view(['POST'])
+def review_api_update(request, pk):
+    review = get_object_or_404(Review, pk=pk)
+    data = request.data
+    print(data)
+    try:
+        # review.text = data['text']
+        # review.save()
+        pass
+    except KeyError:
+        pass
+    return Response({'review': {
+        'id': review.id,
+        'text': review.text
+    }})
+
+
 @login_required()
 def place_reviews_uniqueize(request, pk):
     place = get_object_or_404(Place, pk=pk)
@@ -881,7 +914,7 @@ def city_service_create(city=None, service=None):
                     city_service = CityService(city=city, service=service)
                     cities_and_services.append(city_service)
     elif service:
-        cities = City.objects.all()
+        cities = get_cities()
         if cities:
             for city in cities:
                 if not CityService.objects.filter(city=city, service=service).exists():
@@ -892,35 +925,84 @@ def city_service_create(city=None, service=None):
 
 @login_required()
 def city_autocreate(request):
-    cities = ['Accomack', 'Albemarle', 'Alexandria', 'Alleghany', 'Amelia', 'Amherst', 'Appomattox', 'Arlington',
-              'Augusta', 'Bath', 'Bedford', 'Bedford', 'Bland', 'Botetourt', 'Bristol', 'Brunswick', 'Buchanan',
-              'Buckingham', 'Buena_Vista', 'Campbell', 'Caroline', 'Carroll', 'Charles', 'Charlotte', 'Charlottesville',
-              'Chesapeake', 'Chesterfield', 'Clarke', 'Colonial_Heights', 'Covington', 'Craig', 'Culpeper',
-              'Cumberland', 'Danville', 'Dickenson', 'Dinwiddie', 'Emporia', 'Essex', 'Fairfax', 'Fairfax',
-              'Falls_Church', 'Fauquier', 'Floyd', 'Fluvanna', 'Franklin', 'Franklin', 'Frederick', 'Fredericksburg',
-              'Galax', 'Giles', 'Gloucester', 'Goochland', 'Grayson', 'Greene', 'Greensville', 'Halifax', 'Hampton',
-              'Hanover', 'Harrisonburg', 'Henrico', 'Henry', 'Highland', 'Hopewell', 'Isle_of_Wight', 'James',
-              'King_George', 'King_William', 'King_and_Queen', 'Lancaster', 'Lee', 'Lexington', 'Loudoun', 'Louisa',
-              'Lunenburg', 'Lynchburg', 'Madison', 'Manassas', 'Manassas_Park', 'Martinsville', 'Mathews',
-              'Mecklenburg', 'Middlesex', 'Montgomery', 'Nelson', 'New_Kent', 'Newport_News', 'Norfolk', 'Northampton',
-              'Northumberland', 'Norton', 'Nottoway', 'Orange', 'Page', 'Patrick', 'Petersburg', 'Pittsylvania',
-              'Poquoson', 'Portsmouth', 'Powhatan', 'Prince_Edward', 'Prince_George', 'Prince_William', 'Pulaski',
-              'Radford', 'Rappahannock', 'Richmond', 'Richmond', 'Roanoke', 'Roanoke', 'Rockbridge', 'Rockingham',
-              'Russell', 'Salem', 'Scott', 'Shenandoah', 'Smyth', 'Southampton', 'Spotsylvania', 'Stafford', 'Staunton',
-              'Suffolk', 'Surry', 'Sussex', 'Tazewell', 'Virginia_Beach', 'Warren', 'Washington', 'Waynesboro',
-              'Westmoreland', 'Williamsburg', 'Winchester', 'Wise', 'Wythe', 'York']
-    # for city in City.objects.all():
-    #     city.slug = city.slug.lower()
-    #     city.save()
-    for map_name in cities:
-        name = map_name.replace('_', ' ')
-        slug = map_name.replace('_', '-').lower()
-        city = City.objects.get_or_create(name=name, slug=slug, map_name=map_name)
-        if city[1]:
-            city[0].save()
-            city_service_create(city=city[0])
-        else:
-            print(f'City repeated: {name}')
+    cities = [{'name': 'Virginia Beach', 'population': 450980}, {'name': 'Norfolk', 'population': 245428},
+              {'name': 'Chesapeake', 'population': 233371}, {'name': 'Richmond', 'population': 217853},
+              {'name': 'Newport News', 'population': 182965}, {'name': 'Alexandria', 'population': 150575},
+              {'name': 'Hampton', 'population': 136879}, {'name': 'Roanoke', 'population': 99428},
+              {'name': 'Portsmouth', 'population': 96004}, {'name': 'Suffolk', 'population': 86806},
+              {'name': 'Lynchburg', 'population': 79047}, {'name': 'Harrisonburg', 'population': 52478},
+              {'name': 'Leesburg', 'population': 49496}, {'name': 'Charlottesville', 'population': 45593},
+              {'name': 'Blacksburg', 'population': 43985}, {'name': 'Danville', 'population': 42444},
+              {'name': 'Manassas', 'population': 42081}, {'name': 'Petersburg', 'population': 32701},
+              {'name': 'Fredericksburg', 'population': 28350}, {'name': 'Winchester', 'population': 27543},
+              {'name': 'Salem', 'population': 25483}, {'name': 'Herndon', 'population': 24554},
+              {'name': 'Staunton', 'population': 24538}, {'name': 'Fairfax', 'population': 24483},
+              {'name': 'Hopewell', 'population': 22196}, {'name': 'Christiansburg', 'population': 21805},
+              {'name': 'Waynesboro', 'population': 21366}, {'name': 'Colonial Heights', 'population': 17731},
+              {'name': 'Radford', 'population': 17646}, {'name': 'Culpeper', 'population': 17411},
+              {'name': 'Bristol', 'population': 17184}, {'name': 'Vienna', 'population': 16459},
+              {'name': 'Manassas Park', 'population': 15174}, {'name': 'Front Royal', 'population': 15038},
+              {'name': 'Williamsburg', 'population': 14691}, {'name': 'Martinsville', 'population': 13711},
+              {'name': 'Falls Church', 'population': 13601}, {'name': 'Poquoson', 'population': 12048},
+              {'name': 'Warrenton', 'population': 9907}, {'name': 'Purcellville', 'population': 8929},
+              {'name': 'Pulaski', 'population': 8909}, {'name': 'Franklin', 'population': 8526},
+              {'name': 'Smithfield', 'population': 8287}, {'name': 'Farmville', 'population': 8229},
+              {'name': 'Vinton', 'population': 8180}, {'name': 'Abingdon', 'population': 8146},
+              {'name': 'Wytheville', 'population': 8133}, {'name': 'South Boston', 'population': 7986},
+              {'name': 'Ashland', 'population': 7328}, {'name': 'Lexington', 'population': 7311},
+              {'name': 'Galax', 'population': 7014}, {'name': 'Buena Vista', 'population': 6603},
+              {'name': 'Strasburg', 'population': 6559}, {'name': 'Bedford', 'population': 6466},
+              {'name': 'Bridgewater', 'population': 5951}, {'name': 'Marion', 'population': 5875},
+              {'name': 'Covington', 'population': 5802}, {'name': 'Richlands', 'population': 5583},
+              {'name': 'Emporia', 'population': 5462}, {'name': 'Big Stone Gap', 'population': 5457},
+              {'name': 'Bluefield', 'population': 5302}, {'name': 'Woodstock', 'population': 5226},
+              {'name': 'Dumfries', 'population': 5192}, {'name': 'Orange', 'population': 4902},
+              {'name': 'Luray', 'population': 4850}, {'name': 'Rocky Mount', 'population': 4798},
+              {'name': 'South Hill', 'population': 4541}, {'name': 'Tazewell', 'population': 4479},
+              {'name': 'Berryville', 'population': 4297}, {'name': 'Norton', 'population': 4031},
+              {'name': 'Broadway', 'population': 3780}, {'name': 'Clifton Forge', 'population': 3775},
+              {'name': 'Blackstone', 'population': 3553}, {'name': 'Colonial Beach', 'population': 3541},
+              {'name': 'Altavista', 'population': 3460}, {'name': 'Lebanon', 'population': 3356},
+              {'name': 'West Point', 'population': 3333}, {'name': 'Wise', 'population': 3144},
+              {'name': 'Chincoteague', 'population': 2913}, {'name': 'Elkton', 'population': 2790},
+              {'name': 'Grottoes', 'population': 2738}, {'name': 'Pearisburg', 'population': 2699},
+              {'name': 'Dublin', 'population': 2686}, {'name': 'Hillsville', 'population': 2680},
+              {'name': 'Windsor', 'population': 2654}, {'name': 'Timberville', 'population': 2586},
+              {'name': 'Tappahannock', 'population': 2380}, {'name': 'Shenandoah', 'population': 2352},
+              {'name': 'Chase City', 'population': 2304}, {'name': 'Crewe', 'population': 2282},
+              {'name': 'Amherst', 'population': 2206}, {'name': 'New Market', 'population': 2199},
+              {'name': 'Waverly', 'population': 2081}, {'name': 'Saltville', 'population': 2042},
+              {'name': 'Mount Jackson', 'population': 2036}, {'name': 'Coeburn', 'population': 2015},
+              {'name': 'Gate City', 'population': 1976}, {'name': 'Haymarket', 'population': 1973},
+              {'name': 'Narrows', 'population': 1964}, {'name': 'Stephens Sity', 'population': 1921},
+              {'name': 'Lovettsville', 'population': 1869}, {'name': 'Pennington Gap', 'population': 1823},
+              {'name': 'Chilhowie', 'population': 1749}, {'name': 'Appomattox', 'population': 1744},
+              {'name': 'Victoria', 'population': 1696}, {'name': 'Appalachia', 'population': 1684},
+              {'name': 'Stanley', 'population': 1663}, {'name': 'Louisa', 'population': 1610},
+              {'name': 'Dayton', 'population': 1578}, {'name': 'Gordonsville', 'population': 1560},
+              {'name': 'Warsaw', 'population': 1501}, {'name': 'Rural Retreat', 'population': 1485},
+              {'name': 'Chatham', 'population': 1476}, {'name': 'Glade Spring', 'population': 1458},
+              {'name': 'Stuart', 'population': 1455}, {'name': 'Kilmarnock', 'population': 1446},
+              {'name': 'Exmore', 'population': 1445}, {'name': 'Honaker', 'population': 1399},
+              {'name': 'Clintwood', 'population': 1343}, {'name': 'Middletown', 'population': 1319},
+              {'name': 'Hurt', 'population': 1281}, {'name': 'Weber City', 'population': 1275},
+              {'name': 'Onancock', 'population': 1262}, {'name': 'Halifax', 'population': 1252},
+              {'name': 'Courtland', 'population': 1247}, {'name': 'Gretna', 'population': 1245},
+              {'name': 'Kenbridge', 'population': 1241}, {'name': 'Buchanan', 'population': 1171},
+              {'name': 'Bowling Green', 'population': 1152}, {'name': 'Clarksville', 'population': 1117},
+              {'name': 'Brookneal', 'population': 1115}, {'name': 'Glasgow', 'population': 1113},
+              {'name': 'Cedar Bluff', 'population': 1090}, {'name': 'Pembroke', 'population': 1087},
+              {'name': 'Lawrenceville', 'population': 1081}, {'name': 'Edinburg', 'population': 1065},
+              {'name': 'Occoquan', 'population': 1013}]
+    City.objects.all().delete()
+    for city in cities:
+        city = City.objects.create(name=city.get('name'),
+                                   slug=slugify(city.get('name')),
+                                   population=city.get('population'))
+        city.save()
+        print(city)
+
+        city_service_create(city=city)
     return redirect(reverse('parsing:city_list'))
 
 
@@ -932,7 +1014,7 @@ def city_img_autocreate(request):
 
 
 def city_list(request):
-    cities = City.objects.all()
+    cities = get_cities()
     if request.method == 'POST' and has_group(request.user, 'Redactor'):
         form = CityForm(request.POST)
         if form.is_valid():
@@ -951,7 +1033,9 @@ def get_nearest_cities(city, nearest=5):
     latitude = city.latitude
     longitude = city.longitude
     nearest_city = {}
-    for c in City.objects.all():
+    if not latitude or not longitude:
+        return []
+    for c in get_cities():
         if c != city and (c.latitude and c.longitude):
             distance = ((float(c.latitude) - float(latitude)) ** 2 + (
                     float(c.longitude) - float(longitude)) ** 2) ** 0.5
@@ -967,6 +1051,9 @@ def get_nearest_cities(city, nearest=5):
 
 def city_detail(request, slug):
     city = get_object_or_404(City, slug=slug)
+    if city.is_county and city.cities.count():
+        city = city.cities.all().order_by('population').first()
+
     city_services = CityService.objects.filter(city=city)
     if not has_group(request.user, 'Redactor'):
         city_services = city_services.filter(access=True)
@@ -995,7 +1082,7 @@ def service_list(request):
 
 def service_detail(request, slug):
     service = get_object_or_404(Service, slug=slug)
-    cities = City.objects.filter(city_service__service=service, city_service__access=True)
+    cities = City.objects.filter(city_service__service=service, city_service__access=True, is_county=False)
     return render(request, 'parsing/service/detail.html', {
         'service': service,
         'cities': cities

@@ -970,7 +970,7 @@ def set_cookies(driver) -> webdriver.Chrome:
 
 @shared_task()
 def word_ai(reviews, unique_review=None):
-    driver = startChrome(url=WORDAI_URL)
+    driver = startChrome(url=WORDAI_URL, path=CHROME_PATH)
     driver = set_cookies(driver)
     if driver.current_url != REWRITE_URL:
         login(driver)

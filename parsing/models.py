@@ -144,16 +144,25 @@ class City(models.Model):
     name = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500)
     map_name = models.CharField(max_length=500)
+
     latitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     longitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    zip_code = models.CharField(max_length=100, null=True, blank=True)
+
+    zip_codes = ArrayField(base_field=models.CharField(max_length=10), null=True, blank=True)
     description = models.TextField(null=True, blank=True, default='')
+    population = models.IntegerField(default=0)
+
+    is_county = models.BooleanField(default=False)
     cities = models.ManyToManyField('self', null=True, blank=True, related_name='parent')
 
     cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
 
     def __str__(self):
         return self.name
+
+    @property
+    def get_cities(self):
+        return self.cities.all()
 
     def get_absolute_url(self):
         return reverse('parsing:city_detail', args=[self.slug])
@@ -167,7 +176,7 @@ class City(models.Model):
 class Service(models.Model):
     name = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500, unique=True)
-
+    description = models.TextField(null=True, blank=True, default='')
     faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='service')
 
     def __str__(self):
