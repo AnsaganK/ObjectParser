@@ -17,7 +17,7 @@ from pytils.translit import slugify
 
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City, \
     CityService, WordAiCookie
-from .utils import save_image, uniqueize_text, deEmojify
+from .utils import save_image, deEmojify
 
 
 @shared_task
@@ -353,10 +353,18 @@ class GetReviews:
 
     def get_review_rating(self, review):
         try:
-            rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText')
-            rating = rating.split('/')
-            available_rating = int(rating[-1])
-            checked_rating = int(rating[0])
+            print(1)
+            rating = review.find_element_by_class_name('ODSEW-ShBeI-H1e3jb')
+            print(rating)
+            available_rating = len(rating.find_elements_by_class_name('hCCjke'))
+            print('Available: ', available_rating)
+            checked_rating = len(rating.find_elements_by_class_name('vzX5Ic'))
+            print('Checked: ', checked_rating)
+
+            # rating = review.find_element_by_class_name('ODSEW-ShBeI-RGxYjb-wcwwM').get_attribute('innerText').split('/')
+            # available_rating = int(rating[-1])
+            # checked_rating = int(rating[0])
+
             if available_rating > 5:
                 rating_coefficent = available_rating / 5
                 checked_rating /= rating_coefficent
@@ -630,18 +638,24 @@ def get_coordinate(driver):
     try:
         time.sleep(1)
         print(1)
+        # Это надо удалить
+        # driver.execute_script('''
+        #         let share_buttons = document.getElementsByClassName('etWJQ etWJQ-text csAe4e-y1XlWb-QBLLGd vqxL8-haDnnc');
+        #         let share_button = share_buttons[share_buttons.length-1];
+        #         share_button.children[0].click();
+        # ''')
         driver.execute_script('''
-                let share_buttons = document.getElementsByClassName('etWJQ etWJQ-text csAe4e-y1XlWb-QBLLGd vqxL8-haDnnc');
+                let share_buttons = document.getElementsByClassName('etWJQ jym1ob kdfrQc');
                 let share_button = share_buttons[share_buttons.length-1];
                 share_button.children[0].click();
         ''')
         print(2)
         time.sleep(1)
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 's4ghve-AznF2e-ZMv3u-AznF2e-uqeOfd')))
+        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 's4ghve-AznF2e-ZMv3u-AznF2e')))
         driver.execute_script(
             '''
-                let card_button = document.getElementsByClassName('s4ghve-AznF2e-ZMv3u-AznF2e NIyLF-haAclf s4ghve-AznF2e-ZMv3u-AznF2e-uqeOfd')[0];
+                let card_button = document.getElementsByClassName('s4ghve-AznF2e-ZMv3u-AznF2e NIyLF-haAclf YTfrze')[0];
                 card_button.click();
             '''
         )

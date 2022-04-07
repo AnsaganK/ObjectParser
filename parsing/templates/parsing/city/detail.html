@@ -51,6 +51,16 @@
 {% endblock %}
 
 {% block content %}
+    {% if request.user|hasGroup:'Admin' %}
+        <div class="place_admin_buttons">
+            <a href="{% url 'parsing:city_edit' city.slug %}"
+               title="Edit"
+               class="button is-warning is-light is-outlined centered mr-1"
+               style="width: fit-content"><i class="fa fa-edit"></i></a>
+
+        </div>
+    {% endif %}
+
     <div class="columns">
         <div class="column is-3">
             <span class="city_name">{{ city.name }}</span>
@@ -68,8 +78,11 @@
         <div class="column is-9">
             <h3>Description</h3>
             <div>
-                {{ city.description }}
+                <p>{{ city.description }}</p>
                 <p><b>Population: {{ city.population }}</b></p>
+                <p><b>Coordinate: {{ city.latitude }}, {{ city.longitude }}</b></p>
+                <p><b>Zip codes: {% for zip_code in city.zip_codes %} {{ zip_code }} {% if not forloop.last %},
+                {% endif %} {% endfor %}</b></p>
             </div>
             <h3>Services</h3>
             <div class="services">

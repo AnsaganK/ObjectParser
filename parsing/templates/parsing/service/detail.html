@@ -39,11 +39,15 @@
 {% block content %}
     {% if request.user|hasGroup:'Admin' %}
         <div class="place_admin_buttons">
+            <a href="{% url 'parsing:service_edit' service.slug %}"
+               title="Edit"
+               class="button is-warning is-light is-outlined centered mr-1"
+               style="width: fit-content"><i class="fa fa-edit"></i></a>
+
             <a href="{% url 'parsing:service_edit_faq' service.slug %}"
                title="FAQ"
                class="button is-warning is-light is-outlined centered mr-1"
                style="width: fit-content"><i class="fa fa-question"></i></a>
-
         </div>
     {% endif %}
     <h1 style="font-size: 21px; margin-top: 11px;"><span

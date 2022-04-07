@@ -135,7 +135,13 @@
                        class="button is-outlined mr-1 admin_button"
                        style="display: block; width: fit-content "><i class='fa fa-star'></i></a>
                     <span class="admin_button_label">Change rating</span>
-
+                </div>
+                <div>
+                    <a href="{% url 'parsing:city_service_access' city_service.pk %}"
+                       class="button is-outlined mr-1 admin_button"
+                       style="display: block; width: fit-content "><i class='fa
+                       {% if city_service.access %}fa-lock-open{% else %}fa-lock{% endif %}'></i></a>
+                    <span class="admin_button_label">Access</span>
                 </div>
                 <a href="{% url 'parsing:start_custom_parser' city_service.city.slug city_service.service.slug %}"
                    class="button is-success">

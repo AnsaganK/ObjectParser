@@ -1,6 +1,7 @@
 import requests
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db import models
 
 from constants import CLOUDFLARE_AUTH_EMAIL, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_AUTH_KEY
 from parsing.models import CloudImage
@@ -11,6 +12,14 @@ from bs4 import BeautifulSoup as BS
 def show_form_errors(request, errors):
     for error in errors:
         messages.error(request, f'{error} {errors[error]}')
+
+
+def unique_error_or_save(request, slug: str, obj, model):
+    if model.objects.exclude(id=obj.id).filter(slug=slug).exists():
+        messages.error(request, 'There is already a object with this slug')
+    else:
+        obj.slug = slug
+        obj.save()
 
 
 def get_paginator(request, queryset, count=12):
@@ -113,24 +122,3 @@ def query(payload):
 
 def deEmojify(inputString):
     return inputString.encode('ascii', 'ignore').decode('ascii')
-
-
-def uniqueize_text(text):
-    pass
-    # sentences = text.split('.')
-    # sentences = [i for i in sentences if len(i) > 2]
-    # unique_sentences = ''
-    # output = query({
-    #     "inputs": sentences,
-    #     "parameters": {
-    #         'truncation': 'only_first'
-    #     }
-    # })
-    # if output:
-    #     try:
-    #         for i in output:
-    #             unique_sentences += str(i['generated_text']) + ' '
-    #         return unique_sentences
-    #     except:
-    #         return text
-    # return text

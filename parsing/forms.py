@@ -78,6 +78,12 @@ class CityForm(forms.ModelForm):
         fields = ['name']
 
 
+class CityEditForm(forms.ModelForm):
+    class Meta:
+        model = City
+        fields = ['name', 'description']
+
+
 class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service

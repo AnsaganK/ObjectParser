@@ -51,6 +51,7 @@ urlpatterns = [
 
     path('service/', views.service_list, name='service_list'),
     path('service/<slug:slug>', views.service_detail, name='service_detail'),
+    path('service/<slug:slug>/edit', views.service_edit, name='service_edit'),
     path('service/<slug:slug>/edit/faq', views.service_edit_faq, name='service_edit_faq'),
 
     path('city/', views.city_list, name='city_list'),
@@ -58,6 +59,7 @@ urlpatterns = [
     path('city/autocreate/img', views.city_img_autocreate, name='city_img_autocreate'),
 
     path('<slug:slug>', views.city_detail, name='city_detail'),
+    path('<slug:slug>/edit', views.city_edit, name='city_edit'),
     path('<slug:city_slug>/<slug:service_slug>', views.city_service_detail, name='city_service_detail'),
     path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
 

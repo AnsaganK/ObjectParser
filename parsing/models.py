@@ -3,7 +3,7 @@ import re
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, F
 from django.db.models.functions import Round, Length
 from django.template.defaultfilters import safe
 from django.urls import reverse
@@ -143,6 +143,7 @@ class QueryPlace(models.Model):
 class City(models.Model):
     name = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500)
+    aliases = ArrayField(base_field=models.CharField(max_length=512), null=True, blank=True)
     map_name = models.CharField(max_length=500)
 
     latitude = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -231,8 +232,16 @@ class CityService(models.Model):
         return reverse('parsing:city_service_detail', args=[self.city.slug, self.service.slug])
 
     @property
+    def get_title(self):
+        return f'{self.service.name} in {self.city.name}'
+
+    @property
     def places_count(self):
         return Place.objects.filter(city_service__id=self.id).count()
+
+    @property
+    def exact_count(self):
+        return Place.objects.filter(city_service=self.id, address__icontains=F('city_service__city__name')).count()
 
     class Meta:
         verbose_name = 'City and Service'

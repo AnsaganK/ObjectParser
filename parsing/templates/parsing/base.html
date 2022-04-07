@@ -672,11 +672,11 @@ window.onload = function () {
                 {% if request.user.is_authenticated %}
                     <a class="navbar-item" href="/">Home</a>
                     <a class="navbar-item" href="{% url 'parsing:city_list' %}">City</a>
+                    <a class="navbar-item" href="{% url 'parsing:service_list' %}">Service</a>
 
                     {#                    <a class="navbar-item" href="{% url 'parsing:queries' %}">Places</a>#}
                     {% if request.user|hasGroup:'SuperAdmin' %}
                         <a class="navbar-item" href="{% url 'parsing:city_service_list' %}">All queries</a>
-                        <a class="navbar-item" href="{% url 'parsing:service_list' %}">Service</a>
                     {% endif %}
                     <a class="navbar-item" href="{% url 'parsing:my_reviews' %}">My reviews</a>
                     {% if request.user|hasGroup:'Redactor' %}

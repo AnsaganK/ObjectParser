@@ -39,7 +39,7 @@
                     </td>
                     <td>{{ city_service.city.name }}</td>
                     <td>{{ city_service.service.name }}</td>
-                    <td>{% if city_service.page %}{{ city_service.page }}{% else %}All{% endif %} ({{ city_service.places_count }} places)</td>
+                    <td>{% if city_service.page %}{{ city_service.page }}{% else %}All{% endif %} ({{ city_service.exact_count }}/{{ city_service.places_count }} places)</td>
                     <td>{{ city_service.date_parsing|default:' - ' }}</td>
                 </tr>
             {% endfor %}
