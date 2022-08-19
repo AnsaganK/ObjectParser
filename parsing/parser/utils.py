@@ -33,7 +33,7 @@ def get_soup(html):
 
 
 def _show_error(message: str, e: Exception):
-    print(Fore.LIGHTCYAN_EX + f"Ошибка в << {message} >>: " + e.__class__.__name__)
+    print(Fore.LIGHTCYAN_EX + f"Ошибка в << {message} >>: " + e.__class__.__name__, e)
 
 
 def error_catching(message: str, value=None):
