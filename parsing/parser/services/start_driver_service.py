@@ -3,10 +3,12 @@ from enum import Enum
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from constants import CHROME_PATH
+
 
 class AvailableDrivers(Enum):
     # CHROME_PATH = 'drivers/chromedriver.exe'
-    CHROME_PATH = '/usr/local/bin/chromedriver'
+    CHROME_PATH = CHROME_PATH
     FIREFOX_PATH = 'drivers/geckodriver.exe'
 
 PROXY = ''
