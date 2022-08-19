@@ -123,7 +123,6 @@ def _get_cids_from_page_places(driver: webdriver) -> list[int]:
 def create_places(cids: list[str], city: str, service: str):
     """ Массовое создание Place по их CID """
     print(cids)
-    cids = cids[:3]
     for index, cid in enumerate(cids):
         cids[index] = {'cid': cid, 'city': city, 'service': service}
         _get_place(cids[index])
