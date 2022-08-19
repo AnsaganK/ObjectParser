@@ -7,6 +7,7 @@ from typing import Optional
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from constants import IS_VPS_SERVER
 from .services.image_service import get_base_photo, GetPhotos
 from .services.info_service import get_info
 from .services.map_coordinates_service import get_coordinate
@@ -39,7 +40,11 @@ def strToInt(string):
 @error_catching('Начало парсинга')
 def start_parsing(search_text: str, city: str, service: str, pages: Optional[int] = None):
     """ Начало парсинга: первая страница поисковой выдачи """
-
+    display = None
+    if IS_VPS_SERVER:
+        from pyvirtualdisplay import Display
+        display = Display(visible=False, size=(800, 600))
+        display.start()
     driver = start_chrome(url=SEARCH_URL.format(search_text))
     # city_service = _get_city_service(city_service_id)
     page = 1
@@ -51,6 +56,8 @@ def start_parsing(search_text: str, city: str, service: str, pages: Optional[int
         create_places(place_cids, city, service)
         page += 1
     # _change_city_service_status(city_service, StatusChoices.SUCCESS)
+    if display:
+        display.stop()
     driver.close()
 
 
