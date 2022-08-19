@@ -22,7 +22,7 @@ def start_chrome(url: str) -> webdriver:
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-gpu")
-    # chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--disable-software-rasterizer")
     driver = webdriver.Chrome(executable_path=AvailableDrivers.CHROME_PATH.value, options=chrome_options)
     driver.get(url)
     return driver
