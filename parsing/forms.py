@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from parsing.models import Review, Place, Tag, Query, ReviewType, Profile, City, Service, CityService
+from parsing.models import Review, Place, Tag, Query, ReviewType, Profile, City, Service, CityService, CityServiceFile
 
 
 class QueryForm(forms.Form):
@@ -63,7 +63,7 @@ class QueryContentForm(forms.ModelForm):
 class CityServiceContentForm(forms.ModelForm):
     class Meta:
         model = CityService
-        fields = ['content', 'review_types', 'tags', 'rating']
+        fields = ['content', 'review_types', 'tags', 'status', 'rating']
 
 
 class ProfileForm(forms.ModelForm):
@@ -88,3 +88,15 @@ class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
         fields = ['name']
+
+
+class ServiceEditForm(forms.ModelForm):
+    class Meta:
+        model = Service
+        fields = ['name', 'description']
+
+
+class CityServiceFileForm(forms.ModelForm):
+    class Meta:
+        model = CityServiceFile
+        fields = ['file']

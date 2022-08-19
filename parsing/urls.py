@@ -27,6 +27,7 @@ urlpatterns = [
     path('place/<slug:place_slug>/generate/description', views.place_generate_description,
          name="place_generate_description"),
     path('place/<int:pk>/edit', views.place_edit, name="place_edit"),
+    path('place/<int:pk>/edit/archive', views.place_edit_archive, name="place_edit_archive"),
     path('place/<int:pk>/edit/faq', views.place_edit_faq, name="place_edit_faq"),
     # path('query/<slug:query_slug>/places/<slug:place_slug>', views.query_place_detail, name="query_place_detail"),
 
@@ -50,6 +51,7 @@ urlpatterns = [
     path('registration/', views.registration, name="registration"),
 
     path('service/', views.service_list, name='service_list'),
+    path('service/autocreate', views.service_autocreate, name='service_autocreate'),
     path('service/<slug:slug>', views.service_detail, name='service_detail'),
     path('service/<slug:slug>/edit', views.service_edit, name='service_edit'),
     path('service/<slug:slug>/edit/faq', views.service_edit_faq, name='service_edit_faq'),
@@ -64,6 +66,8 @@ urlpatterns = [
     path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
 
     path('city/service/<int:pk>', views.city_service_access, name='city_service_access'),
+    path('city/service/<int:pk>/file', views.city_service_file, name='city_service_file'),
+    path('city/service/<int:pk>/file/apply', views.city_service_file_apply, name='city_service_file_apply'),
     path('city/service/<int:pk>/edit', views.city_service_edit, name='city_service_edit'),
     path('city/service/<int:pk>/edit/faq', views.city_service_edit_faq, name='city_service_edit_faq'),
     path('city/service/<int:pk>/rating', views.city_service_rating_edit, name='city_service_rating_edit'),

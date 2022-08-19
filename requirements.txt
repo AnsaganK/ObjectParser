@@ -6,7 +6,6 @@ djangorestframework-simplejwt==4.8.0
 flower==1.0.0
 gevent==21.8.0
 googlemaps==4.5.3
-psycopg2==2.9.1
 pycparser==2.20
 PyJWT==2.1.0
 redis==3.5.3
@@ -17,5 +16,4 @@ mimesis==5.1.0
 nltk==3.6.7
 networkx==2.6.3
 numpy==1.22.1
-scipy==1.7.3
 

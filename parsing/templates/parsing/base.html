@@ -545,6 +545,14 @@
             .rating_stars {
                 display: none !important;
             }
+
+            .review_text {
+                font-size: 14px;
+            }
+
+            .place_preview_card_info {
+                font-size: 14px;
+            }
         }
 
         @media screen and (max-width: 1024px) {
@@ -606,6 +614,30 @@
         }
 
         .review_text {
+            display: block;
+        }
+
+        .place_img {
+            width: 300px !important;
+            min-width: 300px !important;
+            height: 200px !important;
+            max-height: 100%;
+            margin-right: 20px;
+            border-radius: 5px
+        }
+
+        .admin_button_label {
+            display: none;
+            position: absolute;
+            font-weight: 400;
+            font-size: 12px;
+            border: 1px solid #48c78e;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+
+        .admin_button:hover + .admin_button_label {
             display: block;
         }
     </style>
@@ -738,7 +770,6 @@ window.onload = function () {
 </div>
 
 <div class="wrapper">
-
     {% if messages %}
         <div class="messages">
             {% for message in messages %}

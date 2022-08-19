@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Query, Place, Profile, QueryPlace, Review, Tag, ReviewType, ReviewPart, CloudImage, FAQ, \
-    FAQQuestion, UniqueReview, City, Service, CityService, State, WordAiCookie
+    FAQQuestion, UniqueReview, City, Service, CityService, State, WordAiCookie, CityServiceFile
 
 
 @admin.register(Query)
@@ -14,6 +14,7 @@ class QueryAdmin(admin.ModelAdmin):
 class PlaceAdmin(admin.ModelAdmin):
     list_display = ['id', 'cid', 'name']
     list_display_links = ['id']
+    exclude = ['city_service']
     # list_filter = ['query']
 
 
@@ -43,8 +44,9 @@ admin.site.register(Service)
 admin.site.register(State)
 admin.site.register(WordAiCookie)
 
+
 @admin.register(City)
-class CityServiceAdmin(admin.ModelAdmin):
+class CityAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'get_cities']
     list_filter = ['is_county']
 
@@ -53,6 +55,12 @@ class CityServiceAdmin(admin.ModelAdmin):
 class CityServiceAdmin(admin.ModelAdmin):
     list_display = ['id', 'search_text', 'status']
     list_filter = ['status']
+    list_editable = ['status']
+
+
+@admin.register(CityServiceFile)
+class CityServiceFileAdmin(admin.ModelAdmin):
+    exclude = ['city_service']
 
 
 @admin.register(Review)

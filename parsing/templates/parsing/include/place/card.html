@@ -1,4 +1,4 @@
-{% load parsing_tags %}
+{% load static parsing_tags %}
 <div class="" id="detail_data" style="padding-bottom: 50px">
     {% if place.is_redirect and request.user|hasGroup:'Redactor' %}
         <article class="message is-warning">
@@ -11,6 +11,12 @@
 
     {% if request.user|hasGroup:'Admin' %}
         <div class="place_admin_buttons">
+            <a href="{% url 'parsing:place_edit_archive' place.pk %}"
+               title="Edit"
+               class="button {% if place.archive %}is-danger{% else %}is-success{% endif %} is-light is-outlined centered mr-1"
+               style="width: fit-content">
+                {% if place.archive %}<i class="fa fa-lock"></i>{% else %}<i class="fa fa-lock-open"></i>{% endif %}
+            </a>
             <a href="{% url 'parsing:place_edit' place.pk %}"
                title="Edit"
                class="button is-success is-light is-outlined centered mr-1"
@@ -30,7 +36,7 @@
         <div class="box place_card_info column is-one-third-desktop is-full-mobile is-full-tablet is-narrow"
              style="padding: 0px; margin-right: 10px; height: fit-content; background-color: #FAFAFA">
             <h1 class="place_img_name has-text-centered mt-2">{{ place.name }}</h1>
-            <img src="{{ place.cloud_img.get_default_img }}" alt="" class="place_base_img">
+            <img src="{% if place.get_cloud_img and place.get_cloud_img.get_default_img %}{{ place.get_cloud_img.get_default_img }}{% else %}{% static 'parsing/img/not_found_place.png' %}{% endif %}" alt="" class="place_base_img" rel="nofollow">
             <div class="place-info" style="padding: 10px">
                 <p><i class="fa fa-building has-text-success"></i> <span>{{ place.name }}</span></p>
                 <hr>
@@ -55,7 +61,7 @@
                         style="color: #9c9c9c">{{ place.rating_user_count }}</span>)</span></p>
             </div>
             <div class="maps">
-                {% if place.coordinate_html %} {{ place.coordinate_html|safe }}{% endif %}
+                <!--noindex-->{{ place.coordinate_html|default:''|safe }}<!--/noindex-->
             </div>
         </div>
         <div class="column place_card_description is-two-thirds-desktop is-full-mobile is-full-tablet">
@@ -80,7 +86,8 @@
                                         <div class="slider__item box m-2">
                                             <img src="{{ photo.cloud_img.get_thumbnail_img }}" alt="" class=""
                                                  style="height: 100%;margin: 3px;width: 100%; border-radius: 10px;"
-                                                 onclick="showModalImg('{{ photo.cloud_img.get_thumbnail_img }}')">
+                                                 onclick="showModalImg('{{ photo.cloud_img.get_thumbnail_img }}')"
+                                                 rel="nofollow">
                                         </div>
                                     {% endfor %}
                                 </div>

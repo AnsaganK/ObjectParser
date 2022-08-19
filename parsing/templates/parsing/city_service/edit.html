@@ -24,7 +24,9 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
         <ul>
             <li><a href="{% url 'parsing:index' %}">Home</a></li>
-            <li><a href="{{ city_service.get_absolute_url }}">{{ city_service.search_text }}</a></li>
+            <li><a href="{% url 'parsing:city_list' %}">City</a></li>
+            <li><a href="{{ city_service.city.get_absolute_url }}">{{ city_service.city.name }}</a></li>
+            <li><a href="{{ city_service.get_absolute_url }}">{{ city_service.service.name }}</a></li>
             <li class="is-active"><a href="">Edit</a></li>
         </ul>
     </nav>
@@ -54,6 +56,10 @@
                 class="review_type_tag" id="review_type_{{ review_type.id }}">
                 <label for="review_type_{{ review_type.id }}" class="tag"
                        style="cursor: pointer">{{ review_type.name }}</label>
+            {% empty %}
+                <span class="text-center">
+                        Not found
+                </span>
             {% endfor %}
         </div>
         <div class="field">
@@ -69,8 +75,24 @@
                         <label for="tag_{{ tag.id }}" class="button is-success is-outlined"
                                style="margin: 3px">{{ tag.name }}</label>
                     </div>
+                {% empty %}
+                    <span class="">
+                        Not found
+                    </span>
                 {% endfor %}
             </div>
+        </div>
+        <div class="field">
+            <label for="" class="label">
+                Status
+            </label>
+            <select name="status" id="">
+                {% for status in statuses %}
+                    <option value="{{ status.0 }}" {% if status.0 == city_service.status %}
+                            selected {% endif %}>{{ status.1 }}</option>
+                {% endfor %}
+
+            </select>
         </div>
         <div class="field">
             <label for="" class="label">

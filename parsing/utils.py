@@ -4,9 +4,10 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import models
 
 from constants import CLOUDFLARE_AUTH_EMAIL, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_AUTH_KEY
-from parsing.models import CloudImage
+from parsing.models import CloudImage, CityService, Service, City
 from parsing.templatetags.parsing_tags import GROUPS
 from bs4 import BeautifulSoup as BS
+
 
 
 def show_form_errors(request, errors):
@@ -59,12 +60,36 @@ def save_image(image):
     r = requests.post(url, files=files, headers=headers)
     if r.status_code == 200:
         response = r.json()
-        print(response['success'])
+        print('CloudFlare save image: ', response['success'])
         if response['success'] == True:
             cloud_image = CloudImage(image_id=response['result']['id'], image_response=response)
             cloud_image.save()
             return cloud_image
     return None
+
+
+def city_service_create(city=None, service=None):
+    cities_and_services = []
+    if city:
+        services = Service.objects.all()
+        if services:
+            for service in services:
+                if not CityService.objects.filter(city=city, service=service).exists():
+                    city_service = CityService(city=city, service=service)
+                    cities_and_services.append(city_service)
+    elif service:
+        cities = City.objects.all()
+        if cities:
+            for city in cities:
+                if not CityService.objects.filter(city=city, service=service).exists():
+                    city_service = CityService(city=city, service=service)
+                    cities_and_services.append(city_service)
+    else:
+        return None
+    try:
+        CityService.objects.bulk_create(cities_and_services)
+    except ValueError:
+        pass
 
 
 # Суммаризация Description

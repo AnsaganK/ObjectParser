@@ -16,14 +16,12 @@ from mimesis.enums import Gender
 from pytils.translit import slugify
 
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City, \
-    CityService, WordAiCookie
+    CityService, WordAiCookie, Service, CityServiceFile
+from .parser.main import start_parsing
 from .utils import save_image, deEmojify
+from .utils import city_service_create
 
-
-@shared_task
-def add_task(x, y):
-    return x + y
-
+from fake_useragent import UserAgent
 
 from pip._vendor import requests
 from selenium import webdriver
@@ -33,7 +31,7 @@ from bs4 import BeautifulSoup as BS
 from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, \
     NoSuchElementException, NoSuchAttributeException
 
-from constants import CHROME_PATH, IS_LINUX
+from constants import CHROME_PATH, IS_LINUX, IS_VPS_SERVER
 from datetime import datetime
 import re
 from selenium.webdriver.chrome.options import Options
@@ -90,16 +88,49 @@ def startFireFox(url=URL):
 
 def startChrome(url=URL, path=None):
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-software-rasterizer")
+    # chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--no-sandbox")
+    # chrome_options.add_argument("--disable-gpu")
+    # chrome_options.add_argument("--disable-software-rasterizer")
     if path:
         driver = webdriver.Chrome(executable_path=path, options=chrome_options)
     else:
         driver = webdriver.Chrome(options=chrome_options)
     driver.get(url)
     return driver
+
+
+def create_place_for_file(data: dict, city_service: CityService):
+    place = get_or_create_place(
+        name=data.get('base_info').get('title'),
+        rating=data.get('base_info').get('rating'),
+        rating_user_count=data.get('base_info').get('rating_user_count'),
+        cid=data.get('cid')
+    )
+    place.city_service = city_service
+    set_info(data.get('full_info'), place)
+    set_coordinate(data.get('coordinate'), place)
+    set_photo_url(data.get('base_photo'), place.id, base=True)
+    set_reviews(data.get('reviews'), place)
+    set_photos(data.get('photos'), place.id)
+
+    return place
+
+
+@shared_task()
+def city_service_file_apply_task(pk):
+    try:
+        city_service_file = CityServiceFile.objects.get(pk=pk)
+        if not city_service_file or not city_service_file.file:
+            return None
+
+        data = json.load(city_service_file.file)
+        places = data.get('places')
+        for p in places:
+            place = create_place_for_file(p, city_service_file.city_service)
+    except Exception as e:
+        print(e)
+        return None
 
 
 def clicked_object(object, count):
@@ -148,9 +179,11 @@ class GetPhotos:
     def click_photo_button(self):
         try:
             wait = WebDriverWait(self.driver, 10)
-            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'a4izxd-tUdTXb-xJzy8c-haAclf-UDotu')))
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'ofKBgf')))
             self.driver.execute_script(
-                'let photo_button = document.getElementsByClassName("a4izxd-tUdTXb-xJzy8c-haAclf-UDotu");photo_button[0].click()')
+                'let photo_buttons = document.getElementsByClassName("ofKBgf"); photo_buttons[0].click()'
+                # 'let photo_button = document.getElementsByClassName("xtu1r-K9a4Re-ibnC6b-haAclf");photo_button[0].children[0].click()'
+            )
         except Exception as e:
             print('Ошибка при нажатии на кнопку ВСЕ ФОТО: ', e.__class__.__name__)
 
@@ -202,13 +235,6 @@ class GetPhotos:
             pass
 
 
-def set_photos(photos_list, place_id):
-    place = Place.objects.filter(id=place_id).first()
-    place.photos.all().delete()
-    for photo_url in photos_list:
-        set_photo_url(photo_url, place_id, base=False)
-
-
 def get_place_information(driver):
     try:
         place_information = is_find_object(driver, 'uxOu9-sTGRBb-UmHwN')
@@ -235,8 +261,10 @@ def get_location_information(driver):
 def get_photo(driver):
     try:
         wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'F8J9Nb-LfntMc-header-HiaYvf-LfntMc')))
-        photo = is_find_object(driver, 'F8J9Nb-LfntMc-header-HiaYvf-LfntMc')
+        photo_class_1 = 'F8J9Nb-LfntMc-header-HiaYvf-LfntMc'
+        photo_class_2 = 'aoRNLd'
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, f'{photo_class_2}')))
+        photo = is_find_object(driver, f'{photo_class_2}')
         button = photo.find_element_by_tag_name('img')
         src = button.get_attribute('src')
         if len(src.split('=')) == 2:
@@ -249,28 +277,6 @@ def get_photo(driver):
     except Exception as e:
         print('Ошибка при получении главного фото: ', e.__class__.__name__)
         return None
-
-
-def set_photo_url(img_url, place_id, base=True):
-    try:
-        print(img_url)
-        place = Place.objects.filter(id=place_id).first()
-        if place and img_url:
-            r = requests.get(img_url, timeout=10)
-            if r.status_code == 200:
-                content = r.content
-                cloud_image = save_image(content)
-                if base:
-                    place.cloud_img = cloud_image
-                    place.save()
-                else:
-                    photo = PlacePhoto(place=place)
-                    photo.cloud_img = cloud_image
-                    photo.save()
-                return 'Фото назначено для {}'.format(place_id)
-        return 'Фото не назначено {}'.format(place_id)
-    except Exception as e:
-        print(f'Ошиька при назначении фото: {img_url}', e.__class__.__name__)
 
 
 def set_photo_content(content, place_id, file_name='no_name'):
@@ -291,7 +297,7 @@ class GetReviews:
     def get_page_review_button(self):
         try:
             wait = WebDriverWait(self.driver, 10)
-            wait.until(EC.element_to_be_clickable((By.CLASS_NAME, 'Yr7JMd-pane-hSRGPd')))
+            wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'Yr7JMd-pane-hSRGPd')))
             review_button = self.driver.find_element_by_class_name('Yr7JMd-pane-hSRGPd')
             clicked_object(review_button, 10)
         except Exception as e:
@@ -299,39 +305,51 @@ class GetReviews:
 
     def get_reviews_objects(self):
         try:
+            review_card_class_1 = 'ODSEW-ShBeI'
+            review_card_class_2 = 'jftiEf'
             wait = WebDriverWait(self.driver, 10)
-            wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ODSEW-ShBeI')))
-            reviews = self.driver.find_elements_by_class_name('ODSEW-ShBeI')
+            wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, f'{review_card_class_2}')))
+            reviews = self.driver.find_elements_by_class_name(f'{review_card_class_2}')
             print(len(reviews))
             time.sleep(1)
             return reviews
         except Exception as e:
             print('-- Ошибка при получении первых отзывов', e.__class__.__name__)
 
-    def scrolled_driver(self, ):
+    def scrolled_driver(self):
         try:
-            self.driver.execute_script(
-                'let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
-                'a.scrollTo(0, a.scrollHeight);')
+            print(1)
+            scroll_block_class_1 = 'DxyBCb'
+            scroll_block_class_2 = 'siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc'
             time.sleep(1)
+            # wait = WebDriverWait(self.driver, 10)
+            # wait.until(EC.presence_of_element_located((By.CLASS_NAME, f'{scroll_block_class_1}')))
+
             self.driver.execute_script(
-                'let a = document.getElementsByClassName("siAUzd-neVct section-scrollbox cYB2Ge-oHo7ed cYB2Ge-ti6hGc")[0];'
-                'a.scrollTo(0, a.scrollHeight);')
+                f'let q_12 = document.getElementsByClassName("{scroll_block_class_1}")[0];'
+                f'q_12.scrollTo(0, q_12.scrollHeight);')
             time.sleep(1)
+            print(2)
+            self.driver.execute_script(
+                f'let q_12 = document.getElementsByClassName("{scroll_block_class_1}")[0];'
+                f'q_12.scrollTo(0, q_12.scrollHeight);')
+            time.sleep(1)
+            print(3)
             reviews = self.get_reviews_objects()
+            print(4)
             print('Всего загружено: ', len(reviews))
             random_number = random.randint(10, 20)
             reviews = reviews[:random_number]
             print(len(reviews))
             return reviews
         except Exception as e:
-            print('--- Ошибка при скролле по отзывам')
+            print('--- Ошибка при скролле по отзывам', e.__class__.__name__)
 
     def review_more_button_click(self, review):
         review_id = review.get_attribute('data-review-id')
         self.driver.execute_script(f'''
                                 let review = document.querySelector("div[data-review-id={review_id}]");
-                                let more = review.getElementsByClassName('ODSEW-KoToPc-ShBeI')[0].click();
+                                let more = review.getElementsByClassName('w8nwRe gXqMYb-hSRGPd')[0].click();
                                 ''')
         print('Review More Button Clicked')
 
@@ -344,8 +362,9 @@ class GetReviews:
             except Exception as e:
                 print('Не нашел кноаку ЕЩЕ: ', e.__class__.__name__)
                 pass
-
-            text = review.find_element_by_class_name('ODSEW-ShBeI-text').get_attribute('innerText')
+            review_text_class_1 = 'ODSEW-ShBeI-text'
+            review_text_class_2 = 'wiI7pd'
+            text = review.find_element_by_class_name(f'{review_text_class_2}').get_attribute('innerText')
         except Exception as e:
             text = ''
             print('Ошибка в отзыве: ', e.__class__.__name__)
@@ -354,7 +373,9 @@ class GetReviews:
     def get_review_rating(self, review):
         try:
             print(1)
-            rating = review.find_element_by_class_name('ODSEW-ShBeI-H1e3jb')
+            rating_class_1 = 'ODSEW-ShBeI-H1e3jb'
+            rating_class_2 = 'kvMYJc'
+            rating = review.find_element_by_class_name(f'{rating_class_2}')
             print(rating)
             available_rating = len(rating.find_elements_by_class_name('hCCjke'))
             print('Available: ', available_rating)
@@ -425,177 +446,6 @@ class GetReviews:
         return self.review_list
 
 
-def set_review_parts(rating, review, review_types=[]):
-    for review_type in review_types:
-        review_part = ReviewPart.objects.update_or_create(review=review, review_type=review_type)[0]
-        review_part.rating = rating
-        review_part.save()
-
-
-class GenerateUser():
-    def __init__(self):
-        pass
-
-    def random_color(self):
-        import random
-        color = "#%06x" % random.randint(0, 0xFFFFFE)
-        return color
-
-    def generate_avatar(self, name_letters):
-        from PIL import Image, ImageFont, ImageDraw
-        width = 320
-        height = 320
-        img = Image.new('RGB', (width, height), color=(self.random_color()))
-        draw_text = ImageDraw.Draw(img)
-        font = ImageFont.truetype('parsing/static/parsing/fonts/Raleway-Regular.ttf', size=120)
-        draw_text.text((width / 2, height / 2), name_letters, anchor='mm', font=font, fill=('#ffffff'))
-        img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='PNG')
-        img_byte_arr = img_byte_arr.getvalue()
-        return img_byte_arr
-
-    def generate_data(self):
-        person = Person('en')
-        gender_choices = [Gender.FEMALE, Gender.MALE]
-        random_gender = random.choice(gender_choices)
-        email = person.email()
-
-        full_name = person.full_name(gender=random_gender)
-        username = full_name.replace(' ', '_')
-        full_name = full_name.split(' ')
-        first_name = full_name[0]
-        last_name = full_name[-1]
-
-        password = User.objects.make_random_password()
-
-        user_data = {
-            'username': username,
-            'first_name': first_name,
-            'last_name': last_name,
-            'email': email,
-            'gender': random_gender.name,
-            'password': password
-        }
-        return user_data
-
-    def get_user(self):
-        user_data = self.generate_data()
-        name_letters = f'{user_data["first_name"][0]}.{user_data["last_name"][0]}'
-        user_img = self.generate_avatar(name_letters)
-        user_data['img'] = user_img
-        return user_data
-
-    def get_or_create_user(self):
-        user_data = self.get_user()
-        user = User.objects.get_or_create(username=user_data['username'])
-        if not user[1]:
-            return user[0]
-        user = user[0]
-        user.email = user_data['email']
-        user.first_name = user_data['first_name']
-        user.last_name = user_data['last_name']
-        user.password = user_data['password']
-        user.save()
-        group = Group.objects.filter(name='User').first()
-        if group:
-            user.groups.add(group)
-        user.profile.gender = user_data['gender']
-        cloud_image = save_image(user_data['img'])
-        user.profile.cloud_img = cloud_image
-        user.save()
-        return user
-
-
-def set_reviews(review_list, place):
-    if len(review_list) == 0:
-        return None
-    try:
-        place.reviews.all().delete()
-        for review in review_list:
-            user = GenerateUser().get_or_create_user()
-            translate_word_1 = '(Translated by Google)'
-            translate_word_2 = '(Original)'
-            if translate_word_1 in review['text'] and translate_word_2 in review['text']:
-                text = review['text'][len(translate_word_1) + 1:review['text'].find(translate_word_2) - 1]
-            else:
-                text = review['text']
-            review = Review.objects.create(user=user,
-                                           rating=review['rating'],
-                                           text=text,
-                                           original_text=text,
-                                           place=place)
-            review.save()
-            try:
-                set_review_parts(rating=review.rating, review=review,
-                                 review_types=place.city_service.review_types.all())
-            except Exception as e:
-                print('Ошибка при назначении кусков отзыва', e)
-    except Exception as e:
-        print('Ошибка при назначении отзывов: ', e.__class__.__name__, e)
-
-
-def get_or_create_place(name, rating, rating_user_count, cid):
-    try:
-        place = Place.objects.filter(cid=cid).first()
-        if place:
-            place.name = name
-            place.rating = rating
-            place.rating_user_count = rating_user_count
-            place.save()
-            return place
-        place = Place.objects.create(name=name,
-                                     rating=rating,
-                                     rating_user_count=rating_user_count,
-                                     cid=cid)
-        place.save()
-        place.slug = slugify(f'{place.name}-{str(place.id)}')
-        place.save()
-        return place
-    except Exception as e:
-        print('Ошибка при создании или взятии palce')
-        print(e.__class__.__name__)
-
-
-def get_info(driver):
-    data = {}
-    data_names = {
-        'https://www.gstatic.com/images/icons/material/system_gm/1x/place_gm_blue_24dp.png': 'address',
-        'https://www.gstatic.com/images/icons/material/system_gm/2x/place_gm_blue_24dp.png': 'address',
-        'https://www.gstatic.com/images/icons/material/system_gm/1x/phone_gm_blue_24dp.png': 'phone_number',
-        'https://www.gstatic.com/images/icons/material/system_gm/2x/phone_gm_blue_24dp.png': 'phone_number',
-        # 'https://www.gstatic.com/images/icons/material/system_gm/1x/schedule_gm_blue_24dp.png': 'timetable',
-        # 'https://www.gstatic.com/images/icons/material/system_gm/2x/schedule_gm_blue_24dp.png': 'timetable',
-        'https://www.google.com/images/cleardot.gif': 'location',
-        'https://www.gstatic.com/images/icons/material/system_gm/1x/public_gm_blue_24dp.png': 'site',
-        'https://www.gstatic.com/images/icons/material/system_gm/2x/public_gm_blue_24dp.png': 'site',
-        'https://maps.gstatic.com/mapfiles/maps_lite/images/1x/ic_plus_code.png': 'plus_code',
-        'https://maps.gstatic.com/mapfiles/maps_lite/images/2x/ic_plus_code.png': 'plus_code',
-        'https://gstatic.com/local/placeinfo/schedule_ic_24dp_blue600.png': 'schedule',
-    }
-    try:
-        timetable = driver.find_element_by_class_name('y0skZc-jyrRxf-Tydcue')
-        timetable = timetable.get_attribute('innerHTML')
-    except Exception as e:
-        timetable = ''
-        print('Ошибка при взятии расписания: ', e.__class__.__name__)
-    data['timetable'] = timetable
-    try:
-        data_objects = driver.find_elements_by_class_name('AeaXub')
-        for i in data_objects:
-            image_src = i.find_element_by_tag_name('img').get_attribute('src')
-            try:
-                image_type = data_names[image_src]
-                print(image_type)
-                data[image_type] = i.get_attribute('innerText')
-                print(i.get_attribute('innerText'))
-            except KeyError:
-                pass
-        return data
-    except Exception as e:
-        print('Ошибка при получении общих данных: ', e.__class__.__name__)
-        return None
-
-
 @shared_task()
 def get_site_description(url, place_id):
     if not url or url == ' - ':
@@ -621,260 +471,21 @@ def get_site_description(url, place_id):
     return url
 
 
-def set_info(data, place):
-    if not data:
-        return None
-    if 'site' in data:
-        place_id = place.id
-        get_site_description.delay(url=data['site'], place_id=place_id)
-    place.address = data['address'] if 'address' in data else None
-    place.phone_number = data['phone_number'] if 'phone_number' in data else None
-    place.site = data['site'] if 'site' in data else None
-    place.timetable = data['timetable'] if 'timetable' in data else None
-    place.save()
-
-
-def get_coordinate(driver):
-    try:
-        time.sleep(1)
-        print(1)
-        # Это надо удалить
-        # driver.execute_script('''
-        #         let share_buttons = document.getElementsByClassName('etWJQ etWJQ-text csAe4e-y1XlWb-QBLLGd vqxL8-haDnnc');
-        #         let share_button = share_buttons[share_buttons.length-1];
-        #         share_button.children[0].click();
-        # ''')
-        driver.execute_script('''
-                let share_buttons = document.getElementsByClassName('etWJQ jym1ob kdfrQc');
-                let share_button = share_buttons[share_buttons.length-1];
-                share_button.children[0].click();
-        ''')
-        print(2)
-        time.sleep(1)
-        wait = WebDriverWait(driver, 10)
-        wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 's4ghve-AznF2e-ZMv3u-AznF2e')))
-        driver.execute_script(
-            '''
-                let card_button = document.getElementsByClassName('s4ghve-AznF2e-ZMv3u-AznF2e NIyLF-haAclf YTfrze')[0];
-                card_button.click();
-            '''
-        )
-        print(3)
-        wait2 = WebDriverWait(driver, 10)
-        wait2.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'GALvsc-e1YmVc-map-YPqjbf')))
-        input_coordinate = driver.find_element_by_class_name('GALvsc-e1YmVc-map-YPqjbf')
-        coordinate = input_coordinate.get_attribute('value')
-        print(4)
-        driver.execute_script('''
-                let coordinate_close_button = document.getElementsByClassName('OFhamd-LgbsSe OFhamd-LgbsSe-white-LkdAo')[0];
-                coordinate_close_button.click();
-        ''')
-        return coordinate
-    except Exception as e:
-        print('Ошибка при взятии', e.__class__.__name__)
-        return None
-
-
-def set_coordinate(data, place):
-    if data:
-        place.coordinate_html = data
-        place.save()
-
-
-def place_create_driver(cid, city_service_id):
-    url = CID_URL.format(cid)
-    try:
-        if IS_LINUX:
-            driver = startChrome(url=url, path=CHROME_PATH)
-        else:
-            driver = startFireFox(url=url)
-    except Exception as e:
-        time.sleep(1)
-        print('Не удалось открыть детальную страницу в боаузере: ', e.__class__.__name__)
-        place_create_driver(cid, city_service_id)
-        return None
-    try:
-        try:
-            title = is_find_object(driver, 'x3AX1-LfntMc-header-title-title').get_attribute('innerText')
-        except:
-            title = 'No Name'
-        try:
-            rating = is_find_object(driver, 'aMPvhf-fI6EEc-KVuj8d').get_attribute('innerText')
-            rating = float(rating.replace(',', '.'))
-        except:
-            rating = 0
-        print(rating)
-        try:
-            rating_user_count = is_find_object(driver, 'Yr7JMd-pane-hSRGPd').get_attribute('innerText')
-            rating_user_count = strToInt(rating_user_count)
-        except:
-            rating_user_count = 0
-        print(rating_user_count)
-        place = get_or_create_place(title, rating, rating_user_count, cid)
-        # query = Query.objects.filter(id=query_id).first()
-        # create_query_place(place, query)
-        city_service = CityService.objects.filter(id=city_service_id).first()
-        place.city_service = city_service
-        place.save()
-        data = get_info(driver)
-        print(data)
-        set_info(data, place)
-
-        print(' --------- Беру координаты ')
-        coordinate = get_coordinate(driver)
-        set_coordinate(coordinate, place)
-
-        print(' --------- Главное фото: ')
-        base_photo = get_photo(driver)
-        set_photo_url(base_photo, place.id, base=True)
-
-        print(' --------- Отзывы: ')
-        reviews = []
-        # reviews = get_this_page_reviews(driver)
-        if rating_user_count > 0:
-            print('Отзывы со страницы отзывов')
-            reviews = GetReviews(driver).get_reviews()
-        print('Отзывы готовы', reviews)
-        set_reviews(reviews, place)
-
-        print(' --------- Фотографии')
-        photos = GetPhotos(driver).get_photos()  # class PlacePhoto
-        set_photos(photos, place.id)
-        print(photos)
-
-        print(title)
-        print('Закрыто')
-        print('----------------')
-
-        driver.close()
-    except Exception as e:
-        print(e.__class__.__name__)
-        print('Ошибка')
-        driver.close()
-
-
 def get_value_or_none(data, key, default_value=' - '):
     if key in data:
         return data[key]
     return default_value
 
 
-# Функция которая парсит объекты на странице
-def parse_places(driver, city_service_id):
-    time.sleep(3)
-    try:
-        places = driver.find_elements_by_class_name('uMdZh')
-    except Exception as e:
-        print(e, e.__class__.__name__)
-        return False
-    print(len(places))
-    if len(places) == 0:
-        return False
-    for place in places:
-        cid = place.find_element_by_class_name('C8TUKc').get_attribute('data-cid') if place.find_element_by_class_name(
-            'C8TUKc') else None
-        print('https://www.google.com/maps?cid=' + cid)
-        place_create_driver(cid, city_service_id) if cid else None
-    return True
-
-
-# Функция для смены страниц
-def get_pagination(driver, page):
-    try:
-        pagination = is_find_object(driver, 'AaVjTc')
-        available_pages = pagination.find_elements_by_tag_name('td')
-        for i in available_pages:
-            if str(page) == i.text and page != 1:
-                i.click()
-                # После клика нужно ждать
-                # чтобы не ставить на долгое зкште(шьп), использовал цикл, который при
-                # изменении текущей страницы на следующую запустить парсинг страницы
-                for j in range(20):
-                    try:
-                        pagination = driver.find_element_by_class_name('AaVjTc')
-                        current_page = pagination.find_element_by_class_name('YyVfkd')
-                        if current_page.text == str(page):
-                            return True
-                    except Exception as e:
-                        print('Ошибка в пагинации1: ', e.__class__.__name__)
-                        # return False
-                    time.sleep(1)
-                time.sleep(1)
-                break
-        return False
-    except Exception as e:
-        print('Ошибка в пагинации2: ', e.__class__.__name__)
-        return False
-
-
 @shared_task
 def startParsing(query_name, city_service_id, pages=None):
-    display = None
-    print(CUSTOM_URL.format(query_name))
-    if IS_LINUX:
-        from pyvirtualdisplay import Display
-        display = Display(visible=False, size=(800, 600))
-        display.start()
-        driver = startChrome(url=CUSTOM_URL.format(query_name), path=CHROME_PATH)
-        # print(driver.get_cookies())
-    else:
-        driver = startFireFox(url=CUSTOM_URL.format(query_name))
-
-    city_service = CityService.objects.filter(id=city_service_id).first()
-    try:
-        if pages:
-            for page in range(1, pages + 1):
-                # Проверяю сколько доступных страниц для клика, и если следующая страница есть в пагинации то происходит клик
-                if page == 1:
-                    print(f'СТРАНИЦА {page} начата')
-                    if not parse_places(driver, city_service_id):
-                        break
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
-                elif get_pagination(driver, page):
-                    print(f'СТРАНИЦА {page} начата')
-                    parse = parse_places(driver, city_service_id)
-                    if not parse:
-                        print('Возможно список не появился на этой странице')
-                        break
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
-            city_service.status = 'success'
-            city_service.save()
-            print('Парсинг завершен')
-            driver.close()
-        else:
-            page = 1
-            while True:
-                if page == 1:
-                    print(f'СТРАНИЦА {page} начата')
-                    if not parse_places(driver, city_service_id):
-                        break
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
-                elif get_pagination(driver, page):
-                    print(f'СТРАНИЦА {page} начата')
-                    parse = parse_places(driver, city_service_id)
-                    if not parse:
-                        print('Возможно список не появился на этой странице')
-                        break
-                    print(f'{page} страница готова')
-                    print('-----------------------------------')
-                else:
-                    break
-                page += 1
-            city_service.status = 'success'
-            city_service.save()
-            print('Парсинг завершен')
-            driver.close()
-    except Exception as e:
-        city_service.status = 'error'
-        print(e.__class__.__name__)
-        if display:
-            display.stop()
-
-        driver.close()
-        print('Критическая ошибка')
+    # from pyvirtualdisplay import Display
+    # display = Display(visible=False, size=(800, 600))
+    # display.start()
+    city_service = CityService.objects.get(id=city_service_id)
+    city = city_service.city.name
+    service = city_service.service.name
+    start_parsing(query_name, city, service, pages)
 
 
 #
@@ -1180,3 +791,266 @@ def set_city_data(city_item):
             city.latitude = city_item['coordinate']['latitude']
             print('Coordinate')
         city.save()
+
+
+@shared_task()
+def service_autocreate_task():
+    if Service.objects.count() > 600:
+        return None
+    service_list = [{'name': 'Above Ground Pool Repair'}, {'name': 'Air Conditioning Installation'},
+                    {'name': 'Air Conditioning Repair'}, {'name': 'Air Duct Cleaning'}, {'name': 'Alarm Companies'},
+                    {'name': 'Ant Exterminators'}, {'name': 'Apartment Cleaners'},
+                    {'name': 'Appliance Repair Companies'}, {'name': 'Architects'},
+                    {'name': 'Asbestos Removal Contractors'}, {'name': 'Asphalt Contractors'},
+                    {'name': 'Asphalt Patching'}, {'name': 'Asphalt Resurfacing Companies'},
+                    {'name': 'Asphalt Sealing'}, {'name': 'Attic Fan Installation'},
+                    {'name': 'Attic Insulation Companies'}, {'name': 'Awning Companies'},
+                    {'name': 'Backyard Design Companies'}, {'name': 'Backyard Landscapers'}, {'name': 'Barn Repair'},
+                    {'name': 'Basement Finishing'}, {'name': 'Basement Leak Repair'}, {'name': 'Basement Remodeling'},
+                    {'name': 'Basement Waterproofing'}, {'name': 'Bathroom Design Companies'},
+                    {'name': 'Bathtub Refinishing'}, {'name': 'Bathtub Repair Companies'},
+                    {'name': 'Bathtub Replacement'}, {'name': 'Bed Bug Control'}, {'name': 'Black Mold Inspection'},
+                    {'name': 'Blacktop Companies'}, {'name': 'Blind Installation'}, {'name': 'Block Wall Companies'},
+                    {'name': 'Blown-In Insulation'}, {'name': 'Boiler Repair'}, {'name': 'Brick Paver Companies'},
+                    {'name': 'Building Contractors'}, {'name': 'Cabinet Installers'}, {'name': 'Cabinet Makers'},
+                    {'name': 'Cabinet Painting'}, {'name': 'Cabinet Repair'}, {'name': 'Carpet Cleaning Companies'},
+                    {'name': 'Carport Installation'}, {'name': 'Ceiling Painters'},
+                    {'name': 'Ceiling Repair Companies'}, {'name': 'Ceiling Tile Installation'},
+                    {'name': 'Cement Companies'}, {'name': 'Central Vacuum Repair'}, {'name': 'Ceramic Tile Repair'},
+                    {'name': 'Chimney Cleaning'}, {'name': 'Chimney Repair'}, {'name': 'Christmas Lights Installers'},
+                    {'name': 'Cleaning Crews'}, {'name': 'Cockroach Control'}, {'name': 'Commercial Door Repair'},
+                    {'name': 'Commercial Electricians'}, {'name': 'Commercial Floor Cleaning'},
+                    {'name': 'Commercial Landscaping'}, {'name': 'Commercial Locksmiths'},
+                    {'name': 'Commercial Pavers'}, {'name': 'Business Roof Repair'}, {'name': 'Commercial Roofing'},
+                    {'name': 'Commercial Snow Removal'}, {'name': 'Commercial Window Companies'},
+                    {'name': 'Commercial Window Tinting'}, {'name': 'Computer Network Installation'},
+                    {'name': 'Computer Network Repair'}, {'name': 'Computer Repair Services'},
+                    {'name': 'Concrete Cutting'}, {'name': 'Concrete Delivery Companies'},
+                    {'name': 'Concrete Demolition'}, {'name': 'Concrete Removal'},
+                    {'name': 'Concrete Driveway Companies'}, {'name': 'Concrete Finishing'},
+                    {'name': 'Concrete Floor Staining'}, {'name': 'Concrete Foundation Companies'},
+                    {'name': 'Concrete Masons'}, {'name': 'Concrete Patio Contractors'}, {'name': 'Stamped Concrete'},
+                    {'name': 'Copper Gutters'}, {'name': 'Corian Countertops'}, {'name': 'Couch Cleaning'},
+                    {'name': 'Couch Repair Services'}, {'name': 'Countertop Installation'},
+                    {'name': 'Countertop Resurfacing Companies'}, {'name': 'Crawl Space Encapsulation'},
+                    {'name': 'Curtain & Drapery Repair'}, {'name': 'Custom Builders'}, {'name': 'Custom Woodworking'},
+                    {'name': 'Deck Companies'}, {'name': 'Deck Cleaning Services'}, {'name': 'Deck Painters'},
+                    {'name': 'Deck Refinishing Services'}, {'name': 'Deck Repair Companies'},
+                    {'name': 'Deck Staining Companies'}, {'name': 'Demolition Services'}, {'name': 'Dishwasher Repair'},
+                    {'name': 'Dock Builders'}, {'name': 'Door Installation'}, {'name': 'Door Refinishing'},
+                    {'name': 'Door Repair'}, {'name': 'Drain Cleaning'}, {'name': 'Drain Contractors'},
+                    {'name': 'Drapery Cleaning'}, {'name': 'Driveway Paving Companies'}, {'name': 'Driveway Repair'},
+                    {'name': 'Driveway Sealing'}, {'name': 'Dryer Repair'}, {'name': 'Dryer Vent Cleaning'},
+                    {'name': 'Dryvit Contractors Near Me'}, {'name': 'Drywall Installers'},
+                    {'name': 'Drywall & Insulation Contractors'}, {'name': 'Drywall Repair'},
+                    {'name': 'Dumpster Rental'}, {'name': 'Earth Moving Companies'}, {'name': 'EIFS Contractors'},
+                    {'name': 'Electric Inspectors'}, {'name': 'Electric Repair'},
+                    {'name': 'Electric Water Heater Repair Companies'}, {'name': 'Electrical Construction'},
+                    {'name': 'Electrical Handymen'}, {'name': 'Electricians'}, {'name': 'Electrolux Appliance Repair'},
+                    {'name': 'Electrolux Washer Repair'}, {'name': '24 Hour Animal Control Services'},
+                    {'name': 'Emergency Appliance Repair Companies'}, {'name': 'Emergency Carpet Cleaners'},
+                    {'name': 'Emergency Cleaning Services'}, {'name': 'Emergency Electricians'},
+                    {'name': 'Emergency Garage Door Repair'}, {'name': 'Emergency Handymen'},
+                    {'name': 'Same Day House Cleaning'}, {'name': 'Emergency Locksmiths'},
+                    {'name': '24 Hour Pest Control Services'}, {'name': 'Emergency Plumbers'},
+                    {'name': 'Emergency Roofing Companies'}, {'name': 'Excavation Contractors'},
+                    {'name': 'Exhaust Fan Installation'}, {'name': 'Exterior Painting'},
+                    {'name': 'Pest Control Services'}, {'name': 'Farmhouse Builders'}, {'name': 'Fence Installers'},
+                    {'name': 'Fence & Gate Repair'}, {'name': 'Fence Repair Companies'}, {'name': 'Feng Shui Experts'},
+                    {'name': 'Fiber Cement Siding'}, {'name': 'Fiberglass Pools'},
+                    {'name': 'Fire Sprinkler Contractors'}, {'name': 'Fireplace Cleaners'},
+                    {'name': 'Fireplace Inspection'}, {'name': 'Fireplace Remodeling'}, {'name': 'Fireplace Repair'},
+                    {'name': 'Flat Roofing Companies'}, {'name': 'Flea Control'}, {'name': 'Floor Painters'},
+                    {'name': 'Flooring Repair'}, {'name': 'Floor Sanding'}, {'name': 'Floor Waxing'},
+                    {'name': 'Floor Installers'}, {'name': 'Foundation Installation'},
+                    {'name': 'Foundation Drain Installation'}, {'name': 'Foundation Repair'},
+                    {'name': 'Fountain Repair'}, {'name': 'House Framing Companies'}, {'name': 'French Drains'},
+                    {'name': 'Refrigerator Repair'}, {'name': 'Entry Door Repair'}, {'name': 'Fumigation Companies'},
+                    {'name': 'Furnace Cleaning'}, {'name': 'Furnace Maintenance'}, {'name': 'Furnace Repair'},
+                    {'name': 'Furnace Tune-Up'}, {'name': 'Furniture Assembly'}, {'name': 'Custom Furniture Builders'},
+                    {'name': 'Furniture Cleaning'}, {'name': 'Furniture Moving'},
+                    {'name': 'Furniture Painting Services'}, {'name': 'Furniture Refinishers'},
+                    {'name': 'Furniture Repair'}, {'name': 'Furniture Upholstery'}, {'name': 'Garage Builders'},
+                    {'name': 'Garage Cleaning Services'}, {'name': 'Garage Door Installers'},
+                    {'name': 'Garage Door Repair'}, {'name': 'Garage Floor Epoxy & Coating'},
+                    {'name': 'Garage Door Opener Repair'}, {'name': 'Garage Remodeling'},
+                    {'name': 'Garbage Disposal Repair'}, {'name': 'Garbage Removal'}, {'name': 'Garden Design'},
+                    {'name': 'Gardening Services'}, {'name': 'Gas Fireplace Repair'},
+                    {'name': 'Gas Fireplace Installation'}, {'name': 'Gas Grill Installers'},
+                    {'name': 'Gas Stove Repair'}, {'name': 'Gate Installers'}, {'name': 'Gate Repair Companies'},
+                    {'name': 'Gazebo Builders'}, {'name': 'GE Appliance Repair'}, {'name': 'GE Dishwasher Repair'},
+                    {'name': 'GE Dryer Repair'}, {'name': 'GE Refrigerator Repair'}, {'name': 'GE Microwave Repair'},
+                    {'name': 'GE Washing Machine Repair'}, {'name': 'General Contractors'},
+                    {'name': 'Generator Installation'}, {'name': 'Home Generator Repair'},
+                    {'name': 'Geothermal Installation'}, {'name': 'Glass Block Companies'},
+                    {'name': 'Glass Contractors'}, {'name': 'Glass Door Installation'}, {'name': 'Glaziers'},
+                    {'name': 'Grading & Hauling Services'}, {'name': 'Granite Countertop Companies'},
+                    {'name': 'Granite Restoration'}, {'name': 'Gravel Driveway Installation'},
+                    {'name': 'Gravel Driveway Repair'}, {'name': 'Greenhouse Companies'}, {'name': 'Groundhog Removal'},
+                    {'name': 'Tile Grout Cleaners'}, {'name': 'Gutter Cleaners'}, {'name': 'Gutter Guard Installation'},
+                    {'name': 'Gutter Guys'}, {'name': 'Gutter Installers'}, {'name': 'Gutter Repair'},
+                    {'name': 'Hail Damage Repair'}, {'name': 'Handymen'}, {'name': 'Heat Pump Companies'},
+                    {'name': 'Heating & Cooling'}, {'name': 'Heating Repair'}, {'name': 'Hedge Trimming'},
+                    {'name': 'Holiday Decorators'}, {'name': 'Home Addition Companies'},
+                    {'name': 'Home Air Quality Testing'}, {'name': 'Home Audio Companies'}, {'name': 'Home Automation'},
+                    {'name': 'Builders'}, {'name': 'Home Energy Auditors'}, {'name': 'Window Glass Repair'},
+                    {'name': 'Home Inspection'}, {'name': 'Home Maintenance'}, {'name': 'Home Organizers'},
+                    {'name': 'Home Remodeling Contractors'}, {'name': 'Home Renovations'},
+                    {'name': 'Home Security Services'}, {'name': 'Home Stagers'}, {'name': 'Home Theater Repair'},
+                    {'name': 'Home Warranties'}, {'name': 'Home Window Tinting'}, {'name': 'Kitchen Hood Cleaning'},
+                    {'name': 'Hot Tub Repair'}, {'name': 'House Appraisers'}, {'name': 'House Cleaning Services'},
+                    {'name': 'House Leveling'}, {'name': 'Housekeeper Agencies'}, {'name': 'Housekeeping Services'},
+                    {'name': 'Dehumidifier & Humidifier Repair'}, {'name': 'Hurricane Shutters'},
+                    {'name': 'HVAC Companies'}, {'name': 'HVAC Repairs'}, {'name': 'HVAC Technicians'},
+                    {'name': 'Ice Maker Repair'}, {'name': 'Inground Pool Companies'},
+                    {'name': 'Inground Pool Repair Companies'}, {'name': 'Above Ground Pool Contractors'},
+                    {'name': 'Aluminum Fence Companies'}, {'name': 'Appliance Installers'},
+                    {'name': 'Baseboard Installation'}, {'name': 'Bathroom Tile Contractors'},
+                    {'name': 'Bathtub Installation'}, {'name': 'Boiler Installation'},
+                    {'name': 'Ceiling Fan Companies'}, {'name': 'Central Vacuum Installation'},
+                    {'name': 'Ceramic Tile Companies'}, {'name': 'Chain Link Fence Companies'},
+                    {'name': 'Chimney Cap Replacement'}, {'name': 'Commercial Carpeting'},
+                    {'name': 'Crown Molding Companies'}, {'name': 'Dog Fence Companies'},
+                    {'name': 'Egress Window Installers'}, {'name': 'Fireplace Builders'},
+                    {'name': 'Furnace Installation'}, {'name': 'Garage Door Opener Services'},
+                    {'name': 'Garbage Disposal Companies'}, {'name': 'Home Speaker Installation'},
+                    {'name': 'Home Theater Companies'}, {'name': 'Hot Tub Companies'},
+                    {'name': 'Humidifier Installation'}, {'name': 'Laminate Countertop Installation'},
+                    {'name': 'Laminate Floor Installation'}, {'name': 'Light Fixture Installation'},
+                    {'name': 'Metal Siding Contractors'}, {'name': 'Microwave Installation'},
+                    {'name': 'Mirror Installation'}, {'name': 'Privacy Fence Companies'}, {'name': 'Putting Greens'},
+                    {'name': 'Quartz Countertop Installers'}, {'name': 'Screen Door Installation'},
+                    {'name': 'Seamless Gutter Companies'}, {'name': 'Security Camera Installation'},
+                    {'name': 'Skylight Companies'}, {'name': 'Solar Panel Installation'},
+                    {'name': 'Sprinkler Services'}, {'name': 'Chair Lift Companies'}, {'name': 'Handrail Installers'},
+                    {'name': 'Storm Door Companies'}, {'name': 'Swing Set Installation'},
+                    {'name': 'Thermostat Installation'}, {'name': 'Tile Floor Installers'},
+                    {'name': 'Vinyl Siding Companies'}, {'name': 'Water Softener Companies'},
+                    {'name': 'Insulation Installers'}, {'name': 'Interior Decorating'}, {'name': 'Interior Design'},
+                    {'name': 'Lighting Design'}, {'name': 'Interior Painters'}, {'name': 'Invisible Fence'},
+                    {'name': 'iPhone Repair'}, {'name': 'Irrigation Pump Repair'}, {'name': 'Jacuzzi Repair'},
+                    {'name': 'Junk Haulers'}, {'name': 'Cabinet Refacing'}, {'name': 'Kitchen Design'},
+                    {'name': 'Kitchen Refacing'}, {'name': 'Kitchen Remodeling'}, {'name': 'Kitchen Renovations'},
+                    {'name': 'Laminate Floor Cleaning Services'}, {'name': 'Laminate Flooring Repair'},
+                    {'name': 'Lamp Repair'}, {'name': 'Land Surveying'}, {'name': 'Landscape Architects'},
+                    {'name': 'Landscape Design'}, {'name': 'Grading Companies'}, {'name': 'Landscapers'},
+                    {'name': 'Lawn Aeration'}, {'name': 'Lawn Care'}, {'name': 'Lawn Dethatching Services'},
+                    {'name': 'Lawn Fertilizer Companies'}, {'name': 'Lawn Cutting Services'},
+                    {'name': 'Lawn Pest Control Services'}, {'name': 'Lawn Repair Services'},
+                    {'name': 'Lawn Seeding Companies'}, {'name': 'Lawn Treatment'}, {'name': 'Lead Removal'},
+                    {'name': 'Lead Testing'}, {'name': 'Leaf Removal Services'}, {'name': 'LED TV Repair'},
+                    {'name': 'LED Light Installation'}, {'name': 'LG Appliance Repair Services'},
+                    {'name': 'LG Refrigerator Repair'}, {'name': 'Local Architects'}, {'name': 'Local Movers'},
+                    {'name': 'Door Lock Repair Services'}, {'name': 'Locksmiths'}, {'name': 'Mailbox Installation'},
+                    {'name': 'Main Drain Camera Companies'}, {'name': 'Marble Restoration & Repair'},
+                    {'name': 'Masonry'}, {'name': 'Mattress Cleaners'}, {'name': 'Maytag Appliance Repair'},
+                    {'name': 'Maytag Dishwasher Repair'}, {'name': 'Maytag Dryer Repair'},
+                    {'name': 'Maytag Refrigerator Repair'}, {'name': 'Maytag Washer Repair'},
+                    {'name': 'Metal Fabricators'}, {'name': 'Metal Roof Installation'}, {'name': 'Metal Roofing'},
+                    {'name': 'Metal Roof Repair'}, {'name': 'Rodent Control'}, {'name': 'Microwave Repair'},
+                    {'name': 'Mirror Repair'}, {'name': 'Mobile Computer Repair'}, {'name': 'Mobile Locksmiths'},
+                    {'name': 'Modern Architects'}, {'name': 'Modular Homes'}, {'name': 'Mold Testing'},
+                    {'name': 'Mold Removal'}, {'name': 'Molly Maid'}, {'name': 'Mosquito Control Companies'},
+                    {'name': 'Move Out Cleaners'}, {'name': 'Moving Services'}, {'name': 'Moving Labor'},
+                    {'name': 'Mulch Delivery Services'}, {'name': 'Mulching Companies'}, {'name': 'Gas Plumbers'},
+                    {'name': 'Nest Installation'}, {'name': 'New Build Homes'}, {'name': 'Odor Removal Services'},
+                    {'name': 'Opossum Control'}, {'name': 'Outdoor Kitchen Builders'}, {'name': 'Outdoor Light Repair'},
+                    {'name': 'Outdoor Landscape Lighting'}, {'name': 'Oven Repair'}, {'name': 'Overhead Door Repair'},
+                    {'name': 'Packing Services'}, {'name': 'Paint Stripping'}, {'name': 'House Painters'},
+                    {'name': 'Paver Install Companies'}, {'name': 'Paving Contractors'}, {'name': 'Pergola Builders'},
+                    {'name': 'Pest Inspection'}, {'name': 'Outdoor Plant Watering'}, {'name': 'Plaster Companies'},
+                    {'name': 'Playground Installation'}, {'name': 'Playground Repair Services'}, {'name': 'Plumbers'},
+                    {'name': 'Handymen Plumbers'}, {'name': 'Plumbing Repairs'}, {'name': 'Pond Companies'},
+                    {'name': 'Pond Services'}, {'name': 'Pool Cleaning'}, {'name': 'Pool Closing Services'},
+                    {'name': 'Pool Deck Companies'}, {'name': 'Pool Designers'}, {'name': 'Pool Heater Services'},
+                    {'name': 'Pool Liner Replace & Install Companies'}, {'name': 'Pool Plaster Repair'},
+                    {'name': 'Pool Pump Repair'}, {'name': 'Pool Remodeling Companies'},
+                    {'name': 'Pool Removal Companies'}, {'name': 'Pool Repair'}, {'name': 'Pool Maintenance'},
+                    {'name': 'Pool Table Assembly'}, {'name': 'Pool Tile Companies'},
+                    {'name': 'Porcelain Bathtub Refinish & Repair'}, {'name': 'Porcelain Tile'},
+                    {'name': 'Porch Contractors'}, {'name': 'Porch Repair'}, {'name': 'Powder Coating Services'},
+                    {'name': 'Pre-Made Cabinets'}, {'name': 'Radon Inspectors'}, {'name': 'Range Hood Companies'},
+                    {'name': 'Recessed Lighting Installers'}, {'name': 'Recliner Repair'},
+                    {'name': 'Cabinet Refinishers'}, {'name': 'Remodel Designers'},
+                    {'name': 'Furniture Removal Services'}, {'name': 'Asphalt Repair Companies'},
+                    {'name': 'Attic Fan Repair'}, {'name': 'Awning Repair'}, {'name': 'Bathroom Tile Repair'},
+                    {'name': 'Boat Dock Repair'}, {'name': 'Carport Repair'}, {'name': 'Ceiling Fan Repair'},
+                    {'name': 'Chain Link Fence Repair'}, {'name': 'Countertop Repair'}, {'name': 'Faucet Repair'},
+                    {'name': 'Flat Roof Repair'}, {'name': 'Freezer Repair Services'},
+                    {'name': 'Garage Door Spring Repair'}, {'name': 'Gas Appliance Repair'},
+                    {'name': 'Gas Water Heater Repair'}, {'name': 'Geothermal Repair'},
+                    {'name': 'Granite Countertop Repair'}, {'name': 'Grout Repair Services'},
+                    {'name': 'Heat Pump Repair'}, {'name': 'Home Audio Equipment Repair'},
+                    {'name': 'Hurricane Shutter Repair'}, {'name': 'Leather Furniture Repair'},
+                    {'name': 'Masonry Repair'}, {'name': 'Patio Repair'}, {'name': 'Patio Furniture Repair'},
+                    {'name': 'Plaster Repair'}, {'name': 'Pool Cover Repair'}, {'name': 'Pool Heater Repair'},
+                    {'name': 'Sewer Line Repair'}, {'name': 'Siding Repair'}, {'name': 'Skylight Repair'},
+                    {'name': 'Sump Pump Repair'}, {'name': 'Tankless Water Heater Repair'},
+                    {'name': 'Thermostat Repair'}, {'name': 'Tile Roof Repair'}, {'name': 'Vertical Blind Repair'},
+                    {'name': 'Vinyl Siding Repair Contractors'}, {'name': 'Wicker Repair'},
+                    {'name': 'Window Shade Repair'}, {'name': 'Window Glass Replacement'},
+                    {'name': 'Window Screen Installation'}, {'name': 'Residential Cleaners'},
+                    {'name': 'Residential Designers'}, {'name': 'Fire Damage Restoration'},
+                    {'name': 'Pool Resurfacing'}, {'name': 'Retaining Wall Companies'},
+                    {'name': 'Retaining Wall Repair'}, {'name': 'Roof Cleaning'}, {'name': 'Roof Inspection'},
+                    {'name': 'Leaky Roof Repair'}, {'name': 'Roof Moss Removal'}, {'name': 'Roof Repair'},
+                    {'name': 'Roof Sealing'}, {'name': 'Roofers'}, {'name': 'Rubber Roofers'}, {'name': 'Rug Cleaning'},
+                    {'name': 'Safe Movers'}, {'name': 'Landscape Rock & Sand Delivery'}, {'name': 'Sandblasting'},
+                    {'name': 'Satellite Dish Companies'}, {'name': 'Satellite Dish Repair'},
+                    {'name': 'Sauna Companies'}, {'name': 'Sauna Repair'}, {'name': 'Screen Porch Builders'},
+                    {'name': 'Seamless Gutter Repair'}, {'name': 'Security Door Installers'},
+                    {'name': 'Safe Installation'}, {'name': 'Septic Maintenance Companies'},
+                    {'name': 'Septic Tank Cleaners'}, {'name': 'Septic Tank Companies'},
+                    {'name': 'Septic System Repair'}, {'name': 'Sewer Cleaning'}, {'name': 'Sewer Companies'},
+                    {'name': 'Shed Builders'}, {'name': 'Shower Door Installers'}, {'name': 'Shower Enclosures'},
+                    {'name': 'Shower Glass Installers'}, {'name': 'Shower Installation'}, {'name': 'Shower Repair'},
+                    {'name': 'Shrub Removal & Trimming'}, {'name': 'Siding Companies'}, {'name': 'Sign Makers'},
+                    {'name': 'Sink Installation'}, {'name': 'Sink Refinishing'}, {'name': 'Sink Repair'},
+                    {'name': 'Skunk Control'}, {'name': 'Slate Roofers'}, {'name': 'Glass Door Repair'},
+                    {'name': 'Sliding Door Installation'}, {'name': 'Small Appliance Repair Services'},
+                    {'name': 'Small Movers'}, {'name': 'Smartphone Repair'}, {'name': 'Snake Control'},
+                    {'name': 'Snow Removal Companies'}, {'name': 'Sod Installation'}, {'name': 'Topsoil Delivery'},
+                    {'name': 'Soil Testing'}, {'name': 'Solar Panel Repair'}, {'name': 'Ultrasonic Cleaning'},
+                    {'name': 'Soundproofing'}, {'name': 'Spider Control'}, {'name': 'Spray Foam Insulation Installers'},
+                    {'name': 'Sprinkler Winterization'}, {'name': 'Lawn Sprinkler Repair'},
+                    {'name': 'Squirrel Removal'}, {'name': 'Fence Staining'}, {'name': 'Stained Glass Repair'},
+                    {'name': 'Stair Builders'}, {'name': 'Stair Installers'}, {'name': 'Stone Flooring Companies'},
+                    {'name': 'Stone Veneer'}, {'name': 'Storm Damage Repair Companies'},
+                    {'name': 'Storm Drain Contractors'}, {'name': 'Storm Shelter Builders'},
+                    {'name': 'Structural Engineers'}, {'name': 'Stucco Repair'}, {'name': 'Stucco Contractors'},
+                    {'name': 'Stump Removal'}, {'name': 'Sump Pump Installation'}, {'name': 'Sump Pump Replacement'},
+                    {'name': 'Surround Sound Installation'}, {'name': 'Surveillance Camera Installation'},
+                    {'name': 'Suspended Ceiling Companies'}, {'name': 'Swamp Cooler Repair'},
+                    {'name': 'Swimming Pool Installation'}, {'name': 'Tablet Repair'},
+                    {'name': 'Tankless Water Heater Companies'}, {'name': 'Tennis Court Contractors'},
+                    {'name': 'Termite Control'}, {'name': 'Termite Tenting'}, {'name': 'Tile Contractors'},
+                    {'name': 'Tile Floor Cleaning'}, {'name': 'Tile Repair Companies'},
+                    {'name': 'Toilet Repair & Installation'}, {'name': 'Trampoline Assembly'},
+                    {'name': 'Trash Bin Rental'}, {'name': 'Trash Haulers'}, {'name': 'Treadmill Repair'},
+                    {'name': 'Tree Cutting Services'}, {'name': 'Tree Debris Removal & Disposal'},
+                    {'name': 'Tree Maintenance'}, {'name': 'Tree Pruning'}, {'name': 'Tree Removal'},
+                    {'name': 'Tree Trimming'}, {'name': 'Treehouse Builders'}, {'name': 'Turf Installation'},
+                    {'name': 'TV Antenna Services'}, {'name': 'TV Repair'}, {'name': 'Upholstery Cleaners'},
+                    {'name': 'Vinyl Fencing Installers'}, {'name': 'Vinyl Flooring Companies'},
+                    {'name': 'Vinyl Floor Repair'}, {'name': 'Vinyl Siding Cleaning'}, {'name': 'Wall Painters'},
+                    {'name': 'Wall Repair Services'}, {'name': 'Wallpaper Installers'}, {'name': 'Wallpaper Removal'},
+                    {'name': 'Washing Machine Repair'}, {'name': 'Waste Removal Companies'}, {'name': 'Water Clean Up'},
+                    {'name': 'Water Heater Installation'}, {'name': 'Water Heater Repair'},
+                    {'name': 'Water Softener Repair Companies'}, {'name': 'Water Softener Specialists'},
+                    {'name': 'Weed Control'}, {'name': 'Well Pump Repair'}, {'name': 'Whirlpool Repair'},
+                    {'name': 'Whirlpool Dryer Repair'}, {'name': 'Whirlpool Refrigerator Repair'},
+                    {'name': 'Whirlpool Oven Repair'}, {'name': 'Whirlpool Washer Repair'},
+                    {'name': 'Wi-Fi Installation'}, {'name': 'Window Washers'}, {'name': 'Window Installation'},
+                    {'name': 'Window & Door Installation'}, {'name': 'Home Window Repair'},
+                    {'name': 'Window Shutter Repair'}, {'name': 'Window Shutter Companies'},
+                    {'name': 'Wood Fence Companies'}, {'name': 'Wood Fence Repair'},
+                    {'name': 'Hardwood Floor Installation'}, {'name': 'Wood Floor Refinishing'},
+                    {'name': 'Hardwood Floor Repair'}, {'name': 'Wood Stove Services'},
+                    {'name': 'Wood Stove Inspection'}, {'name': 'Wood Stripping Services'},
+                    {'name': 'Wrought Iron Fences'}, {'name': 'Wrought Iron Fence Repair'},
+                    {'name': 'Yard Care Services'}, {'name': 'Yard Clean Up Services'}]
+    Service.objects.all().delete()
+    for s in service_list:
+        service = Service.objects.create(name=s.get('name'), slug=slugify(s.get('name')))
+        service.save()
+        city_service_create(service=service)

@@ -1,5 +1,5 @@
 constants.py
 chromedriver.exe
 geckodriver.exe
-venv/
+venv
 media/

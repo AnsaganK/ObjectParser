@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.db import IntegrityError
 from django.db.models import Count, F
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -22,29 +22,72 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from constants import SERVER_NAME, STATE_NAME
 from parsing.forms import UserForm, UserCreateForm, UserDetailForm, QueryForm, ReviewForm, PlaceForm, TagForm, \
-    QueryContentForm, ReviewTypeForm, CityForm, ServiceForm, CityServiceContentForm, CityEditForm
+    QueryContentForm, ReviewTypeForm, CityForm, ServiceForm, CityServiceContentForm, CityEditForm, ServiceEditForm, \
+    CityServiceFileForm
 from parsing.models import Query, Place, Review, Tag, ReviewType, ReviewPart, FAQ, FAQQuestion, UniqueReview, City, \
-    Service, CityService, State
+    Service, CityService, State, CityServiceFile
 from parsing.serializers import QuerySerializer, PlaceSerializer, PlaceMinSerializer, \
     TagSerializer, \
     ReviewSerializer, ReviewTypeSerializer
 from parsing.tasks import startParsing, generate_file, uniqueize_place_reviews_task, \
-    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task, preview_uniqueize_reviews_task, uniqueize_review
-from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, unique_error_or_save
+    uniqueize_text_task, cities_img_parser, uniqueize_reviews_task, preview_uniqueize_reviews_task, uniqueize_review, \
+    service_autocreate_task, city_service_file_apply_task
+from parsing.utils import show_form_errors, has_group, get_paginator, sumextract, unique_error_or_save, \
+    city_service_create
 
 
 def index(request):
-    # with open('parsing/states.pickle', 'rb') as f:
-    #     data = pickle.load(f)
-    #     for i in data:
-    #         state = State.objects.get_or_create(name=i, svg=data[i]['svg'])
-    #         state[0].save()
+    # CityService.objects.update(status='not started')
+    with open('parsing/states.pickle', 'rb') as f:
+        data = pickle.load(f)
+        for i in data:
+            state = State.objects.get_or_create(name=i, svg=data[i]['svg'])
+            state[0].save()
 
     user = request.user
     if user.is_authenticated:
-        queries = Query.objects.filter(user=user)
-        places = Place.objects.filter(queries__query__user=user)
-        return render(request, 'parsing/index.html', {'user': user, 'queries': queries, 'places': places})
+        services_count = Service.objects.count()
+        cities_count = City.objects.count()
+        city_services = CityService.objects
+        all = city_services.count()
+        all = all if all else 1
+        wait = city_services.filter(status='wait').count()
+        error = city_services.filter(status='error').count()
+        opened = city_services.filter(status='success', access=True).count()
+        close = city_services.filter(status='success', access=False).count()
+        not_started = city_services.filter(status='not started').count()
+        statistic = {
+            'all': {
+                'count': all,
+                'percent': 100
+            },
+            'wait': {
+                'count': wait,
+                'percent': round(wait / all * 100, 5),
+            },
+            'error': {
+                'count': error,
+                'percent': round(error / all * 100, 5)
+            },
+            'open': {
+                'count': opened,
+                'percent': round(opened / all * 100, 5),
+            },
+            'close': {
+                'count': close,
+                'percent': round(close / all * 100, 5),
+            },
+            'not_started': {
+                'count': not_started,
+                'percent': round(not_started / all * 100, 5)
+            }
+        }
+        return render(request, 'parsing/index.html', {
+            'user': user,
+            'services_count': services_count,
+            'cities_count': cities_count,
+            'statistic': statistic
+        })
     return render(request, 'parsing/index.html')
 
 
@@ -138,7 +181,7 @@ def start_custom_parser(request, city_slug, service_slug):
     return render(request, 'parsing/city_service/start_parser.html', {
         'city_service': city_service,
         'review_types': review_types,
-        'state': STATE_NAME
+        # 'state': STATE_NAME
     })
 
 
@@ -184,12 +227,12 @@ def start_custom_parser(request, city_slug, service_slug):
 #     return render(request, 'parsing/query/add.html')
 
 
-def get_sorted_places(city_service):
-    places = Place.objects.filter(city_service=city_service, address__icontains=F('city_service__city__name'))
+def get_sorted_places(city_service, archive=False):
+    # places = Place.objects.filter(city_service=city_service, address__icontains=F('city_service__city__name'))
+    places = Place.objects.filter(city_service=city_service, archive=archive)
     if city_service.sorted:
         places = places.order_by('position')
     else:
-
         places = places.order_by('-rating_user_count')
     return places
 
@@ -214,7 +257,7 @@ def city_service_rating_edit(request, pk):
             position = i['index']
             update_place_position(place_id, position)
         messages.success(request, 'Success')
-        return JsonResponse({'message': 'succcess'})
+        return JsonResponse({'message': 'success'})
     return render(request, 'parsing/city_service/edit_rating.html', {'city_service': city_service, 'places': places})
 
 
@@ -249,7 +292,7 @@ def query_list(request):
 
 @login_required()
 def city_service_list(request):
-    city_services = CityService.objects.exclude(places=None)
+    city_services = CityService.objects.exclude(status='not started').order_by('-date_parsing')
     city_services = get_paginator(request, city_services)
     return render(request, 'parsing/city_service/list.html', {
         'city_services': city_services,
@@ -286,10 +329,12 @@ def city_service_edit(request, pk):
         return redirect(city_service.get_absolute_url())
     tags = Tag.objects.all()
     review_types = ReviewType.objects.all()
+    statuses = CityService.StatusChoices.choices
     return render(request, 'parsing/city_service/edit.html', {
         'city_service': city_service,
         'tags': tags,
-        'review_types': review_types
+        'review_types': review_types,
+        'statuses': statuses
     })
 
 
@@ -666,6 +711,18 @@ def place_edit_faq(request, pk):
 
 
 @login_required()
+def place_edit_archive(request, pk):
+    place = get_object_or_404(Place, pk=pk)
+    if has_group(request.user, 'SuperAdmin'):
+        archive = not place.archive
+        place.archive = archive
+        place.save()
+        type = '?type=open' if archive else '?type=archive'
+        return redirect(place.city_service.get_absolute_url() + type)
+    return redirect(place.get_absolute_url())
+
+
+@login_required()
 def place_update(request, pk):
     place = Place.objects.filter(pk=pk).first()
     # selenium_query_detail(place_id=place.place_id)
@@ -806,9 +863,12 @@ def city_service_preview_reviews_uniqueize(request, pk):
     places = get_sorted_places(city_service)[:20]
     review_ids = []
     for place in places:
-        review_ids.append(place.get_more_text.id) if place.get_more_text else None
+        more_text_review = place.get_more_text
+        if more_text_review:
+            more_text_review.base = True
+            more_text_review.save()
+            review_ids.append(more_text_review.id)
     if review_ids:
-        print(review_ids)
         unique_review = UniqueReview.objects.create(reviews_count=len(review_ids), city_service=city_service)
         unique_review.save()
         preview_uniqueize_reviews_task.delay(review_ids, unique_review.id)
@@ -904,30 +964,6 @@ def user_detail(request, pk):
     if user:
         return render(request, 'parsing/user/detail.html', {'user': user, 'groups': groups})
     return redirect('/')
-
-
-def city_service_create(city=None, service=None):
-    cities_and_services = []
-    if city:
-        services = Service.objects.all()
-        if services:
-            for service in services:
-                if not CityService.objects.filter(city=city, service=service).exists():
-                    city_service = CityService(city=city, service=service)
-                    cities_and_services.append(city_service)
-    elif service:
-        cities = get_cities()
-        if cities:
-            for city in cities:
-                if not CityService.objects.filter(city=city, service=service).exists():
-                    city_service = CityService(city=city, service=service)
-                    cities_and_services.append(city_service)
-    else:
-        return None
-    try:
-        CityService.objects.bulk_create(cities_and_services)
-    except ValueError:
-        pass
 
 
 @login_required()
@@ -1319,6 +1355,7 @@ def city_edit(request, slug):
 @login_required()
 def service_list(request):
     services = Service.objects.all()
+    services = get_paginator(request, services, 200)
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         service = form.save(commit=False)
@@ -1330,6 +1367,13 @@ def service_list(request):
     return render(request, 'parsing/service/list.html', {
         'services': services
     })
+
+
+@login_required()
+def service_autocreate(request):
+    service_autocreate_task.delay()
+    messages.success(request, 'Autocreate started')
+    return redirect(reverse('parsing:service_list'))
 
 
 def service_detail(request, slug):
@@ -1344,7 +1388,7 @@ def service_detail(request, slug):
 def service_edit(request, slug):
     service = get_object_or_404(Service, slug=slug)
     if request.method == 'POST':
-        form = ServiceForm(request.POST, instance=service)
+        form = ServiceEditForm(request.POST, instance=service)
         service = form.save(commit=False)
         slug = slugify(service.name)
         unique_error_or_save(request, slug, service, Service)
@@ -1366,8 +1410,18 @@ def service_edit_faq(request, slug):
 
 
 def city_service_detail(request, city_slug, service_slug):
+    if not has_group(request.user, 'SuperAdmin'):
+        raise Http404('Page not found')
+
+    type = request.GET.get('type')
+    type = type if type else 'open'
+    if type == 'archive':
+        archive = True
+    else:
+        archive = False
+
     city_service = CityService.objects.filter(city__slug=city_slug, service__slug=service_slug).first()
-    places = get_sorted_places(city_service)
+    places = get_sorted_places(city_service, archive=archive)
     top_places = places[:20]
     places_and_letters = places_to_sorted_letters(places)
 
@@ -1376,7 +1430,10 @@ def city_service_detail(request, city_slug, service_slug):
         'top_places': top_places,
         'places': places,
         'places_letter': places_and_letters['places_letter'],
-        'letters': places_and_letters['letters']
+        'letters': places_and_letters['letters'],
+        'opened_count': Place.objects.filter(city_service=city_service, archive=False).count(),
+        'archived_count': Place.objects.filter(city_service=city_service, archive=True).count(),
+        'archive': archive
     })
 
 
@@ -1390,7 +1447,37 @@ def city_service_access(request, pk):
     return redirect(city_service.get_absolute_url())
 
 
+@login_required()
+def city_service_file(request, pk):
+    city_service = get_object_or_404(CityService, pk=pk)
+    if request.method == "POST":
+        form = CityServiceFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.save(commit=False)
+            file.city_service = city_service
+            file.save()
+        else:
+            show_form_errors(request, form.errors)
+        return redirect(reverse('parsing:city_service_file', args=[city_service.pk]))
+    files = city_service.files.all()
+    return render(request, 'parsing/city_service/file.html', {
+        'city_service': city_service,
+        'files': files
+    })
+
+
+@login_required()
+def city_service_file_apply(request, pk):
+    city_service_file = get_object_or_404(CityServiceFile, pk=pk)
+    city_service = city_service_file.city_service
+    city_service_file_apply_task.delay(pk)
+    messages.success(request, 'Started place creation')
+    return redirect(reverse('parsing:city_service_file', args=[city_service.pk]))
+
+
 def city_service_place_detail(request, place_slug):
+    if not has_group(request.user, 'SuperAdmin'):
+        raise Http404('Page not found')
     place = get_object_or_404(Place, slug=place_slug)
     if place.is_redirect and not has_group(request.user, 'Redactor'):
         return redirect(place.redirect)

@@ -53,11 +53,20 @@
 {% block content %}
     {% if request.user|hasGroup:'Admin' %}
         <div class="place_admin_buttons">
-            <a href="{% url 'parsing:city_edit' city.slug %}"
-               title="Edit"
-               class="button is-warning is-light is-outlined centered mr-1"
-               style="width: fit-content"><i class="fa fa-edit"></i></a>
-
+            <div>
+                <a href="{% url 'parsing:city_edit' city.slug %}"
+                   title="Edit"
+                   class="admin_button button is-warning is-light is-outlined centered mr-1"
+                   style="width: fit-content"><i class="fa fa-edit"></i></a>
+                <span class="admin_button_label">EDIT</span>
+            </div>
+            <div>
+                <a href=""
+                   title="FAQ"
+                   class="admin_button button is-warning is-light is-outlined centered mr-1"
+                   style="width: fit-content"><i class="fa fa-question"></i></a>
+                <span class="admin_button_label">FAQ</span>
+            </div>
         </div>
     {% endif %}
 

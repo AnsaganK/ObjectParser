@@ -1,5 +1,5 @@
-DB_USER = 'postgres'
-DB_NAME = 'clarion2'
+DB_USER = 'parser_user'
+DB_NAME = 'parser'
 DB_PASSWORD = '12345'
 DB_HOST = '127.0.0.1'
 
@@ -8,8 +8,9 @@ geckodriver_path = '../geckodriver.exe'
 
 SERVER_NAME = 'http://170.130.40.103'
 
-CHROME_PATH = None
-IS_LINUX = False
+CHROME_PATH = "/usr/local/bin/chromedriver"
+IS_LINUX = True
+IS_VPS_SERVER = False
 
 STATE_NAME = 'Virginia'
 CLOUDFLARE_ACCOUNT_ID = 'b76a6d15b70ab0d6a5d4bfdde8ad6a44'

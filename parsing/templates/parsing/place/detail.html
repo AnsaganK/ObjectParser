@@ -1,12 +1,7 @@
 {% extends 'parsing/base.html' %}
 {% load parsing_tags static %}
 {% block title %}
-    Reviews |
-    {% if place.title %}
-        {{ place.title }}
-    {% else %}
-        {{ place.name }}
-    {% endif %}
+    Reviews | {{ place.title|default:place.name }}
 {% endblock %}
 
 {% block style %}
@@ -117,7 +112,7 @@
         <div class="modal-background"></div>
         <div class="modal-content">
             <p class="image is-4by3">
-                <img src="" alt="" id="place_image" style="border-radius: 5px">
+                <img src="" alt="" id="place_image" style="border-radius: 5px" rel="nofollow">
             </p>
         </div>
         <button class="modal-close is-large" aria-label="close" onclick=""></button>

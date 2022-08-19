@@ -8,11 +8,11 @@
     <form action="" method="post">
         {% csrf_token %}
         <div class="field">
-            <label for="" class="label"></label>
+            <label for="" class="label">Name</label>
             <input type="text" class="input" name="name" value="{{ city.name }}">
         </div>
         <div class="field">
-            <label for="" class="label"></label>
+            <label for="" class="label">Aliases</label>
             <input type="text"
                    class="input" name="aliases"
                    value="{% for alias in city.aliases %}{{ alias }}{% if not forloop.last %}, {% endif %}{% endfor %}">

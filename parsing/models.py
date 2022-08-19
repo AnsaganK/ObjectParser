@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models import Count, Sum, F
 from django.db.models.functions import Round, Length
 from django.template.defaultfilters import safe
+from django.templatetags.static import static
 from django.urls import reverse
 from bs4 import BeautifulSoup as BS
 from django.db.models.signals import post_save
@@ -177,6 +178,8 @@ class City(models.Model):
 class Service(models.Model):
     name = models.CharField(max_length=500)
     slug = models.SlugField(max_length=500, unique=True)
+
+    meta = models.TextField(null=True, blank=True, default='')
     description = models.TextField(null=True, blank=True, default='')
     faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='service')
 
@@ -199,17 +202,30 @@ class CityService(models.Model):
     sorted = models.BooleanField(default=False)
     page = models.IntegerField(null=True, blank=True)
     content = models.TextField(null=True, blank=True, verbose_name='Контент')
-    tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='city_service')
+    meta = models.TextField(null=True, blank=True, default='')
     faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='city_service')
+    tags = models.ManyToManyField(Tag, null=True, blank=True, related_name='city_service')
+
     date_create = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     date_parsing = models.DateTimeField(null=True, blank=True)
     status_choices = (
+        ('not started', 'not started'),
         ('wait', 'wait'),
         ('success', 'success'),
         ('warning', 'warning'),
         ('error', 'error'),
     )
-    status = models.CharField(choices=status_choices, default='success', max_length=100, null=True, blank=True)
+
+    class StatusChoices(models.TextChoices):
+        NOT_STARTED = ('not started', 'not started')
+        WAIT = ('wait', 'wait')
+        SUCCESS = ('success', 'success')
+        WARNING = ('warning', 'warning')
+        ERROR = ('error', 'error')
+
+    status = models.CharField(choices=StatusChoices.choices, default=StatusChoices.NOT_STARTED, max_length=100,
+                              null=True,
+                              blank=True)
 
     search_text = models.TextField(null=True, blank=True)
     link = models.TextField(null=True, blank=True)
@@ -241,12 +257,26 @@ class CityService(models.Model):
 
     @property
     def exact_count(self):
-        return Place.objects.filter(city_service=self.id, address__icontains=F('city_service__city__name')).count()
+        return Place.objects.filter(city_service=self.id, archive=False).count()
 
     class Meta:
         verbose_name = 'City and Service'
         verbose_name_plural = 'Cities and Services'
         ordering = ['-pk']
+
+
+class CityServiceFile(models.Model):
+    city_service = models.ForeignKey(CityService, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.city_service.get_title
+
+    class Meta:
+        verbose_name = 'Файл для хабов'
+        verbose_name_plural = 'Файлы для хабов'
 
 
 class Place(models.Model):
@@ -260,7 +290,7 @@ class Place(models.Model):
     phone_number = models.CharField(max_length=500, null=True, blank=True)
     site = models.CharField(max_length=1000, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    meta = models.TextField(null=True, blank=True)
+    meta = models.TextField(null=True, blank=True, default='')
     coordinate_html = models.TextField(null=True, blank=True, verbose_name='Координаты')
 
     position = models.IntegerField(default=None, null=True, blank=True, db_index=True,
@@ -287,6 +317,8 @@ class Place(models.Model):
     city_service = models.ForeignKey(CityService, null=True, blank=True, on_delete=models.CASCADE,
                                      related_name='places')
 
+    archive = models.BooleanField(default=False)
+
     def get_absolute_url(self):
         if self.city_service:
             return reverse('parsing:city_service_place_detail', args=[self.slug])
@@ -299,6 +331,10 @@ class Place(models.Model):
     @property
     def service(self):
         return self.city_service.service if self.city_service else ''
+
+    @property
+    def get_cloud_img(self):
+        return self.cloud_img if self.cloud_img else static('static/parsing/img/not_found_place.png')
 
     @property
     def get_rating(self):
@@ -349,6 +385,9 @@ class Place(models.Model):
 
     @property
     def get_more_text(self):
+        base_review = self.reviews.filter(base=True)
+        if base_review.exists():
+            return base_review.first()
         queries = self.reviews.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by(
             '-text_len')
         if queries:
@@ -412,6 +451,7 @@ class ReviewPart(models.Model):
 class Review(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
+    base = models.BooleanField(default=False)
     text = models.TextField(null=True, blank=True)
     original_text = models.TextField(null=True, blank=True)
     stars_choices = ((i, i) for i in range(1, 6))

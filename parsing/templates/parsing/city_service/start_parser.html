@@ -12,13 +12,12 @@
     <form action="" method="post" class="custom_form">
         {% csrf_token %}
         <div class="field">
-            <label for="" class="label">s
+            <label for="" class="label">
                 Search text
             </label>
             <div class="control">
                 <input type="text" required class="input" name="name"
-                       value="{{ city_service.service.name }} in {{ city_service.city.name }}{% if state %}, {{ state }}
-{% endif %}, USA">
+                       value="{{ city_service.service.name }} in {{ city_service.city.name }}">
             </div>
         </div>
         <div class="field">
