@@ -595,6 +595,11 @@ def set_cookies(driver) -> webdriver.Chrome:
 
 @shared_task()
 def word_ai(reviews, unique_review=None):
+    display = None
+    if IS_VPS_SERVER:
+        from pyvirtualdisplay import Display
+        display = Display(visible=False, size=(800, 600))
+        display.start()
     driver = startChrome(url=WORDAI_URL, path=CHROME_PATH)
     driver = set_cookies(driver)
     if driver.current_url != REWRITE_URL:
@@ -632,6 +637,8 @@ def word_ai(reviews, unique_review=None):
             driver.get(driver.current_url)
         except:
             continue
+    if display:
+        display.stop()
     driver.close()
 
 

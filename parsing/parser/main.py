@@ -55,7 +55,10 @@ def start_parsing(search_text: str, city: str, service: str, pages: Optional[int
         place_cids = _get_places_for_next_page(driver)
         create_places(place_cids, city, service)
         page += 1
-    # _change_city_service_status(city_service, StatusChoices.SUCCESS)
+
+    city_service = CityService.objects.filter(city__name=city, service__name=service).first()
+    _change_city_service_status(city_service, CityService.StatusChoices.SUCCESS.value)
+
     if display:
         display.stop()
     driver.close()
@@ -234,7 +237,8 @@ def _get_base_info_from_place(driver: webdriver) -> dict:
 @error_catching('Изменения статуса хаба')
 def _change_city_service_status(city_service, status):
     """ Изменить текущий статус на УСПЕШНО """
-    pass
+    city_service.status = status
+    city_service.save()
 
 
 @error_catching('Получение объекта хаба')
