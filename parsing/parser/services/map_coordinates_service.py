@@ -49,5 +49,5 @@ def _wait_and_get_for_input_with_coordinates(driver: webdriver) -> webdriver:
 @error_catching('Закрытие формы с копированием кода карт')
 def _close_map_form(driver: webdriver):
     driver.execute_script('''
-                    let coordinate_close_button = document.getElementsByClassName('AmPKde KzWhlc')[0];
+                    let coordinate_close_button = document.getElementsByClassName('AmPKde')[0];
                     coordinate_close_button.click();'''),

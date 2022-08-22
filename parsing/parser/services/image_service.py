@@ -17,7 +17,7 @@ class GetPhotos:
     def get_photos(self):
         self._click_photo_button()
         time.sleep(3)
-        self._scrolled_photos_block(count=2)
+        self._scrolled_photos_block(count=1)
         time.sleep(1)
         photos = self._finds_photo_elements()
         photos = photos if photos else []

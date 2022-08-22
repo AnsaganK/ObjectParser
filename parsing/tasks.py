@@ -18,6 +18,8 @@ from pytils.translit import slugify
 from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, ReviewPart, UniqueReview, City, \
     CityService, WordAiCookie, Service, CityServiceFile
 from .parser.main import start_parsing
+from .parser.services.save_service import get_or_create_place, set_info, set_coordinate, set_photo_url, set_reviews, \
+    set_photos
 from .utils import save_image, deEmojify
 from .utils import city_service_create
 

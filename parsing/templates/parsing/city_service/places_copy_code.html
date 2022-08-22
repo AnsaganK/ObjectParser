@@ -168,11 +168,12 @@ window.onload = function () {
             display: inline !important;
         }
 
-        .rating_stars_copySite{
+        .rating_stars_copySite {
             display: none !important;
         }
     }
 </style>
+
 <div style="padding: 20px;">
     <div style="font-size: 16px">
         {#            <h4 style="text-align: center">Description</h4>#}
@@ -181,113 +182,112 @@ window.onload = function () {
         </div>
         <br>
         <div>
-        {% for tag in city_service.tags.all %}
-            <span style="margin: 3px; background-color: grey; color: white; padding: 3px; border-radius: 3px">
-            {{ tag.name }}</span>
-        {% endfor %}
+            {% for tag in city_service.tags.all %}
+                <span style="margin: 3px; background-color: grey; color: white; padding: 3px; border-radius: 3px">
+        {{ tag.name }}</span>
+            {% endfor %}
         </div>
     </div>
 </div>
 <div>
-        {% for place in top_places %}
-            <div style="padding: 10px; box-sizing: border-box;">
+    {% for place in top_places %}
+        <div style="padding: 10px; box-sizing: border-box;">
             <div class="box_copySite">
-            <div style="display: flex; " class="place_copySite">
-            <a href="{{ place.google_url }}" rel="nofollow">
-            <img src="{{ place.get_cloud_img.get_default_img }}" class="place_img_copySite"
-            alt="{{ place.name }}"
-            style="">
-            </a>
-            <div style="flex-grow: 1;">
-            <span style="color: black;
-            display: block;
-            border-bottom: 1px solid grey;margin: 0px;
-            ;">
-            <h2 style="font-size: 17px; text-align: center"><a class="link_copySite" href="{{ place.google_url }}"
-            rel="nofollow">{{ place.name }}</a></h2>
-            </span>
-            <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
-            <span><b>Address</b>: {{ place.address|isValue }}</span><br>
-            <span><b>Phone</b>: <a class="link_copySite"
-            href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
-            <span><b>Description</b>:
-            {% if place.description %}{{ place.description }}{% else %}
-                {{ place.get_meta_description }}{% endif %}</span><br>
-            </div>
-            </div>
-            {#                <span>Reviews: {{ place.reviews.count }}</span>#}
-            {% with place.get_more_text as review %}
-                {% if review %}
-                    <div style="margin: 20px auto;">
-                    <div>
-                    <div class="review-card_copySite"
-                    style="background-color: #FAFAFA; border-radius: 10px; padding: 10px 20px">
-                    <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between;
-                    margin-bottom: 3px; padding-bottom: 10px">
-                    <span style="display: flex; justify-content: center; align-items: center">
-                    <img src="
-
-
-
-
-                    {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No
-                        image
-                    {% endif %}"
-                    style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
-                    <span>
-                    <a class="link_copySite">{{ review.get_user_name }}</a>
-                    </span>
-                    </span></p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px
-                    solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
-                    <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
-                    {{ review.get_rating }}
-                    {{ review.get_rating|numberToStars }}
+                <div style="display: flex; " class="place_copySite">
+                    <a href="{{ place.google_url }}" rel="nofollow">
+                        <img src="{{ place.get_cloud_img.get_default_img }}" class="place_img_copySite"
+                             alt="{{ place.name }}"
+                             style="">
+                    </a>
+                    <div style="flex-grow: 1;">
+        <span style="color: black;
+        display: block;
+        border-bottom: 1px solid grey;margin: 0px;
+        ;">
+        <h2 style="font-size: 17px; text-align: center"><a class="link_copySite" href="{{ place.google_url }}"
+                                                           rel="nofollow">{{ place.name }}</a></h2>
+        </span>
+                        <span><b>Rating</b>: {{ place.rating }} ({{ place.rating_user_count }})</span><br>
+                        <span><b>Address</b>: {{ place.address|isValue }}</span><br>
+                        <span><b>Phone</b>: <a class="link_copySite"
+                                               href="tel:{{ place.phone_number }}">{{ place.phone_number|isValue }}</a></span><br>
+                        <span><b>Description</b>:
+        {% if place.description %}{{ place.description }}{% else %}
+            {{ place.get_meta_description }}{% endif %}</span><br>
                     </div>
-                    {% if review.parts.exists %}
+                </div>
+                {#                <span>Reviews: {{ place.reviews.count }}</span>#}
+                {% with place.get_more_text as review %}
+                    {% if review %}
+                        <div style="margin: 20px auto;">
+                            <div>
+                                <div class="review-card_copySite"
+                                     style="background-color: #FAFAFA; border-radius: 10px; padding: 10px 20px">
+                                    <p style="border-bottom: 1px solid lightgrey; display: flex; justify-content: space-between;
+                margin-bottom: 3px; padding-bottom: 10px">
+                <span style="display: flex; justify-content: center; align-items: center">
+                <img src="
 
-                        <div class="rating_parts_copySite">
-                        {% for part in review.parts.all %}
-                            <div class="rating_part_copySite">
-                            {{ part.review_type.name }}
-                            <div><span
-                            class="rating_stars_copySite">{{ part.rating|getRating|safe }}</span>
-                            <span class="rating_numbers_copySite">{{ part.rating }} / 5</span>
+
+
+
+                        {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
+                     style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
+                <span>
+                <a class="link_copySite">{{ review.get_user_name }}</a>
+                </span>
+                </span></p>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px
+                    solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
+                                        <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
+                                            {{ review.get_rating }}
+                                            {{ review.get_rating|numberToStars }}
+                                        </div>
+                                        {% if review.parts.exists %}
+
+                                            <div class="rating_parts_copySite">
+                                                {% for part in review.parts.all %}
+                                                    <div class="rating_part_copySite">
+                                                        {{ part.review_type.name }}
+                                                        <div><span
+                                                                class="rating_stars_copySite">{{ part.rating|getRating|safe }}</span>
+                                                            <span class="rating_numbers_copySite">{{ part.rating }} / 5</span>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+
+                                    </div>
+                                    <p>{{ review.text }}</p>
+                                </div>
                             </div>
-                            </div>
-                        {% endfor %}
                         </div>
                     {% endif %}
-
-                    </div>
-                    <p>{{ review.text }}</p>
-                    </div>
-                    </div>
-                    </div>
-                {% endif %}
-            {% endwith %}
+                {% endwith %}
             </div>
-            </div>
-        {% endfor %}
         </div>
+    {% endfor %}
+</div>
 <span class="hr_line_copySite"></span>
 
 <h4 class="block_title_copySite">All places</h4>
 <div style="display: flex; justify-content: space-between; flex-wrap: wrap">
-        {% for letter in letters %}
-            <div class="letter_copySite">
+    {% for letter in letters %}
+        <div class="letter_copySite">
             <span class="hr_line_copySite"></span>
             <span style="color: cornflowerblue">{{ letter }}</span>
             {% for place in places_letter|getValue:letter|getValue:'places' %}
                 <p><a href="{{ place.google_url }}" rel="nofollow" class="link_copySite">{{ place.name }}</a></p>
             {% endfor %}
-            </div>
-        {% endfor %}
         </div>
+    {% endfor %}
+</div>
 <span class="hr_line_copySite"></span>
 <div style="color: grey">
     <p>Total {{ places.count }} places</p>
 </div>
+
 </textarea>
 {% endspaceless %}
 <script>
