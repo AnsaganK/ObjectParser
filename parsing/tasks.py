@@ -20,6 +20,7 @@ from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, Re
 from .parser.main import start_parsing
 from .parser.services.save_service import get_or_create_place, set_info, set_coordinate, set_photo_url, set_reviews, \
     set_photos
+from .parser.services.start_driver_service import start_chrome
 from .utils import save_image, deEmojify
 from .utils import city_service_create
 
@@ -602,7 +603,7 @@ def word_ai(reviews, unique_review=None):
         from pyvirtualdisplay import Display
         display = Display(visible=False, size=(800, 600))
         display.start()
-    driver = startChrome(url=WORDAI_URL, path=CHROME_PATH)
+    driver = start_chrome(url=WORDAI_URL)
     driver = set_cookies(driver)
     if driver.current_url != REWRITE_URL:
         login(driver)
