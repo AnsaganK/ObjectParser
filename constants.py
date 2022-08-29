@@ -11,6 +11,7 @@ SERVER_NAME = 'http://170.130.40.103'
 CHROME_PATH = "/usr/local/bin/chromedriver"
 IS_LINUX = True
 IS_VPS_SERVER = False
+IS_SHORT = True
 
 STATE_NAME = 'Virginia'
 CLOUDFLARE_ACCOUNT_ID = 'b76a6d15b70ab0d6a5d4bfdde8ad6a44'

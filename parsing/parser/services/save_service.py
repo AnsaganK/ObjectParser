@@ -137,6 +137,7 @@ def set_photo_url(img_url, place_id, base=True):
         place = Place.objects.filter(id=place_id).first()
         if place and img_url:
             r = requests.get(img_url, timeout=10, headers={'User-Agent': ua.random})
+            print(r.status_code)
             if r.status_code == 200:
                 content = r.content
                 cloud_image = save_image(content)

@@ -193,7 +193,23 @@ window.onload = function () {
     {% for place in top_places %}
         <div style="padding: 10px; box-sizing: border-box;">
             <div class="box_copySite">
-                <div style="display: flex; " class="place_copySite">
+                <div style="display: flex; justify-content: right;
+                position:relative; margin-top: 0px; ">
+                    <span style="color:#fff;background: #ffa81e;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 22px;
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+}">{{ place.rating }}</span>
+                </div>
+                <div style="display: flex;" class="place_copySite">
                     <a href="{{ place.google_url }}" rel="nofollow">
                         <img src="{{ place.get_cloud_img.get_default_img }}" class="place_img_copySite"
                              alt="{{ place.name }}"
@@ -217,6 +233,7 @@ window.onload = function () {
                     </div>
                 </div>
                 {#                <span>Reviews: {{ place.reviews.count }}</span>#}
+
                 {% with place.get_more_text as review %}
                     {% if review %}
                         <div style="margin: 20px auto;">
@@ -228,9 +245,6 @@ window.onload = function () {
                 <span style="display: flex; justify-content: center; align-items: center">
                 <img src="
 
-
-
-
                         {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
                      style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
                 <span>
@@ -239,8 +253,8 @@ window.onload = function () {
                 </span></p>
                                     <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px
                     solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
-                                        <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
-                                            {{ review.get_rating }}
+                                        <div style="font-size: 12px; width: 100px;margin: 12px 0px; color: #FAA500; font-weight: 600;">
+                                            <span>Average rating</span>
                                             {{ review.get_rating|numberToStars }}
                                         </div>
                                         {% if review.parts.exists %}
@@ -287,7 +301,6 @@ window.onload = function () {
 <div style="color: grey">
     <p>Total {{ places.count }} places</p>
 </div>
-
 </textarea>
 {% endspaceless %}
 <script>

@@ -45,7 +45,7 @@ def start_parsing(search_text: str, city: str, service: str, pages: Optional[int
         from pyvirtualdisplay import Display
         display = Display(visible=False, size=(800, 600))
         display.start()
-    driver = start_chrome(url=SEARCH_URL.format(search_text))
+    driver = start_chrome(url=SEARCH_URL.format(search_text), is_vps=IS_VPS_SERVER)
     # city_service = _get_city_service(city_service_id)
     page = 1
     while page <= pages if pages else True:
@@ -147,7 +147,7 @@ def place_create_driver(cid: str, city: str, service: str):
     """ Открываем браузер для определенного Place по CID и получаем данные """
     start_time = datetime.now()
     url = PLACE_DETAIL_PAGE_URL.format(cid)
-    driver = start_chrome(url=url)
+    driver = start_chrome(url=url, is_vps=IS_VPS_SERVER)
 
     base_info = _get_base_info_from_place(driver)
     print(base_info)

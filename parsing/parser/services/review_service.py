@@ -4,7 +4,6 @@ import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from ..services.user_service import GenerateUser
 from ..utils import clicked_object, error_catching, function_error_catching, wait_and_get_element
 
 

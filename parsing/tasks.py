@@ -624,7 +624,7 @@ def word_ai(reviews, unique_review=None):
                 wait = WebDriverWait(driver, 30)
                 wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'enable-highlight')))
             except Exception as e:
-                print(e.__class__.__name__)
+                print(e.__class__.__name__, e)
 
             rewrite_output_block = driver.find_element('id', 'output_editor_wrapper')
             output_block = rewrite_output_block.find_element('class name', 'fr-element')
