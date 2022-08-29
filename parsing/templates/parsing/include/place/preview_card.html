@@ -2,11 +2,27 @@
 <div class="column is-10" style="padding: 10px; box-sizing: border-box">
 
     <div class="box place_little_card">
-        <span class="top_place_number">{{ forloop.counter }}</span>
-        <span class="top_place_number number_right" style="color:gold;">{{ place.rating }}</span>
+        <div style="display: flex; justify-content: right;
+                position:relative; margin-top: 0px; ">
+                    <span style="color:#fff;background: #ffa81e;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 22px;
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+">{{ place.rating }}</span>
+        </div>
         <div style="display: flex; " class="place">
             <a href="{{ place.get_absolute_url }}">
-                <img src="{% if place.get_cloud_img and place.get_cloud_img.get_default_img %}{{ place.get_cloud_img.get_default_img }}{% else %}{% static 'parsing/img/not_found_place.png' %}{% endif %}" alt="{{ place.name }}" class="place_img"
+                <img src="
+                        {% if place.get_cloud_img and place.get_cloud_img.get_default_img %}{{ place.get_cloud_img.get_default_img }}{% else %}{% static 'parsing/img/not_found_place.png' %}{% endif %}"
+                     alt="{{ place.name }}" class="place_img"
                      rel="nofollow">
             </a>
             <div class="place_preview_card_info" style="flex-grow: 1;">
@@ -29,7 +45,7 @@
             </div>
             {% if request.user|hasGroup:'SuperAdmin' %}
                 <a href="{% url 'parsing:place_edit_archive' place.pk %}?next={% url 'parsing:city_service_list' %}"
-                   style="position:absolute; right: 10%"
+                   style="position:absolute; right: 10%; margin-right: -10px"
                    class="{% if place.archive %}has-text-danger{% else %}has-text-success{% endif %}">
                     {% if place.archive %}
                         <i class="fa fa-lock"></i>

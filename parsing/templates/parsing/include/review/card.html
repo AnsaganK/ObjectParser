@@ -40,8 +40,8 @@
         </p>
 
         <div style="display: flex; justify-content: space-between; align-items: center;border-bottom: 1px solid lightgrey;padding: 0px 10px; margin-bottom: 10px">
-            <div style="font-size: 40px; width: 100px;margin-bottom: 12px; color: #FAA500; font-weight: 600;">
-                {{ review.get_rating }}
+            <div style="font-size: 12px; width: 100px;margin: 12px 0px;color: #FAA500; font-weight: 600;">
+                <span>Average rating</span>
                 {{ review.get_rating|numberToStars }}
             </div>
             {% if review.parts.exists %}
