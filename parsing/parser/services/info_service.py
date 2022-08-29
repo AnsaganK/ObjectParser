@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from constants import IS_SHORT
 from ..utils import wait_and_get_element, function_error_catching, error_catching, get_site
 from bs4 import BeautifulSoup as BS
 
@@ -33,14 +34,17 @@ def get_info(driver: webdriver) -> dict:
         if image_type:
             data[image_type] = i.get_attribute('innerText')
 
-    timetable_classes = ['eK4R0e', 'eK4R0e tfUnhc', 'y0skZc-jyrRxf-Tydcue']
-    timetable_class = timetable_classes[0]
-    timetable = function_error_catching(
-        func=lambda: wait_and_get_element(driver, class_name=timetable_class, second=3).get_attribute(
-            'innerHTML'),
-        value='',
-        message='Взятие расписания компании'
-    )
+    if IS_SHORT:
+        timetable = None
+    else:
+        timetable_classes = ['eK4R0e', 'eK4R0e tfUnhc', 'y0skZc-jyrRxf-Tydcue']
+        timetable_class = timetable_classes[0]
+        timetable = function_error_catching(
+            func=lambda: wait_and_get_element(driver, class_name=timetable_class, second=3).get_attribute(
+                'innerHTML'),
+            value='',
+            message='Взятие расписания компании'
+        )
     data['timetable'] = timetable
     return data
 

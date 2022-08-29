@@ -34,7 +34,7 @@ from bs4 import BeautifulSoup as BS
 from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, \
     NoSuchElementException, NoSuchAttributeException
 
-from constants import CHROME_PATH, IS_LINUX, IS_VPS_SERVER
+from constants import CHROME_PATH, IS_VPS_SERVER
 from datetime import datetime
 import re
 from selenium.webdriver.chrome.options import Options

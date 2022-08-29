@@ -4,7 +4,9 @@ import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from ..utils import clicked_object, error_catching, function_error_catching, wait_and_get_element
+from constants import IS_SHORT
+from ..utils import clicked_object, error_catching, function_error_catching
+from ..utils import wait_and_get_element
 
 
 class GetReviews:
@@ -46,9 +48,15 @@ class GetReviews:
     @error_catching('Ошибка при скролле по отзывам')
     def scrolled_driver(self):
         time.sleep(1)
-        self._scroll_review_block(count=2)
+        if IS_SHORT:
+            self._scroll_review_block(count=1)
+        else:
+            self._scroll_review_block(count=2)
         reviews = self._get_reviews_objects()
-        reviews = reviews[:random.randint(10, 20)]
+        if IS_SHORT:
+            reviews = reviews[:3]
+        else:
+            reviews = reviews[:random.randint(10, 20)]
         return reviews
 
     @error_catching('Скролл по отзывам')

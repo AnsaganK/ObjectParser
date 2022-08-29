@@ -7,7 +7,7 @@ from typing import Optional
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from constants import IS_VPS_SERVER
+from constants import IS_VPS_SERVER, IS_SHORT
 from .services.image_service import get_base_photo, GetPhotos
 from .services.info_service import get_info
 from .services.map_coordinates_service import get_coordinate
@@ -154,9 +154,15 @@ def place_create_driver(cid: str, city: str, service: str):
 
     full_info = get_info(driver)
     print(full_info)
+    address = full_info.get('address')
+    if not address or city not in address:
+        return None
 
-    coordinate = get_coordinate(driver)
-    print(coordinate)
+    if IS_SHORT:
+        coordinate = None
+    else:
+        coordinate = get_coordinate(driver)
+        print(coordinate)
 
     base_photo = get_base_photo(driver)
     print(base_photo)
@@ -164,8 +170,11 @@ def place_create_driver(cid: str, city: str, service: str):
     reviews = GetReviews(driver).get_reviews() if base_info.get('rating_user_count') else []
     print(reviews)
 
-    photos = GetPhotos(driver).get_photos()
-    print(photos)
+    if IS_SHORT:
+        photos = []
+    else:
+        photos = GetPhotos(driver).get_photos()
+        print(photos)
 
     print(datetime.now() - start_time)
     print()
