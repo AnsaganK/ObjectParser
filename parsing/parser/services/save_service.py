@@ -66,6 +66,8 @@ class GenerateUser():
         return user_data
 
     def get_or_create_user(self):
+        if User.objects.count() > 2000:
+            return User.objects.order_by('?').first()
         user_data = self.get_user()
         user = User.objects.get_or_create(username=user_data['username'])
         if not user[1]:

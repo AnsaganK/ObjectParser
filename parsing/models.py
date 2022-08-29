@@ -514,7 +514,12 @@ class UniqueReview(models.Model):
         if self.place:
             return f'{self.place.name}'
         else:
-            return f'{self.city_service.search_text} (places)' if self.city_service else ''
+            city_service = self.city_service
+            if city_service:
+                if city_service.search_text:
+                    return f'{self.city_service.search_text} (places)'
+                return f'{city_service.service.name} in {city_service.city.name}'
+            return ''
 
     class Meta:
         verbose_name = 'Unique review'
