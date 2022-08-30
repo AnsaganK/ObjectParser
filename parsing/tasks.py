@@ -603,7 +603,7 @@ def word_ai(reviews, unique_review=None):
         from pyvirtualdisplay import Display
         display = Display(visible=False, size=(800, 600))
         display.start()
-    driver = start_chrome(url=WORDAI_URL)
+    driver = start_chrome(url=WORDAI_URL, is_vps=IS_VPS_SERVER)
     driver = set_cookies(driver)
     if driver.current_url != REWRITE_URL:
         login(driver)
