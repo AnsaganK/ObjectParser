@@ -621,7 +621,7 @@ def word_ai(reviews, unique_review=None):
             button.click()
 
             try:
-                wait = WebDriverWait(driver, 30)
+                wait = WebDriverWait(driver, 60)
                 wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'enable-highlight')))
             except Exception as e:
                 print(e.__class__.__name__, e)
