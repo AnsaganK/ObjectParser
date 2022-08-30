@@ -104,7 +104,7 @@ def _get_places_for_next_page(driver: webdriver):
 
 
 @error_catching('Возврат списка CID со страницы списка компании')
-def _get_cids_from_page_places(driver: webdriver) -> list[int]:
+def _get_cids_from_page_places(driver: webdriver) -> list:
     """ Получить все CID компании с определенной страницы выдачи """
     cid_list = []
     time.sleep(1)
@@ -123,7 +123,7 @@ def _get_cids_from_page_places(driver: webdriver) -> list[int]:
 
 
 @error_catching('Массовое создание Place по их CID')
-def create_places(cids: list[str], city: str, service: str):
+def create_places(cids: list, city: str, service: str):
     """ Массовое создание Place по их CID """
     print(cids)
     for index, cid in enumerate(cids):

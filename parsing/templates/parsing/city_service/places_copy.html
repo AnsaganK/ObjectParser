@@ -43,7 +43,7 @@
                     <a href="{{ place.google_url }}" rel="nofollow">
                         <img src="{{ place.get_cloud_img.get_default_img }}" class="place_img_copySite"
                              alt="{{ place.name }}"
-                             style="">
+                             style="" rel="nofollow">
                     </a>
                     <div style="flex-grow: 1;">
         <span style="color: black;
@@ -76,7 +76,7 @@
                 <img src="
 
                         {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
-                     style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="">
+                     style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="" rel="nofollow">
                 <span>
                 <a class="link_copySite">{{ review.get_user_name }}</a>
                 </span>
