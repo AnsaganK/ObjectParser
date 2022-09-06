@@ -174,21 +174,6 @@ window.onload = function () {
     }
 </style>
 
-<div style="padding: 20px;">
-    <div style="font-size: 16px">
-        {#            <h4 style="text-align: center">Description</h4>#}
-        <div>
-            {{ city_service.content|default:''|safe }}
-        </div>
-        <br>
-        <div>
-            {% for tag in city_service.tags.all %}
-                <span style="margin: 3px; background-color: grey; color: white; padding: 3px; border-radius: 3px">
-        {{ tag.name }}</span>
-            {% endfor %}
-        </div>
-    </div>
-</div>
 <div>
     {% for place in top_places %}
         <div style="padding: 10px; box-sizing: border-box;">

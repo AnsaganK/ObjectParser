@@ -4,21 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="{% static 'parsing/css/copy_site.css' %}">
 
-<div style="padding: 20px;">
-    <div style="font-size: 16px">
-        {#            <h4 style="text-align: center">Description</h4>#}
-        <div>
-            {{ city_service.content|default:''|safe }}
-        </div>
-        <br>
-        <div>
-            {% for tag in city_service.tags.all %}
-                <span style="margin: 3px; background-color: grey; color: white; padding: 3px; border-radius: 3px">
-        {{ tag.name }}</span>
-            {% endfor %}
-        </div>
-    </div>
-</div>
+
 <div>
     {% for place in top_places %}
         <div style="padding: 10px; box-sizing: border-box;">
@@ -74,6 +60,7 @@
                 margin-bottom: 3px; padding-bottom: 10px">
                 <span style="display: flex; justify-content: center; align-items: center">
                 <img src="
+
 
                         {% if review.user.profile.cloud_img %}{{ review.user.profile.cloud_img.get_min_img }}{% else %}No image{% endif %}"
                      style="width: 30px; height: 30px; margin-right: 10px; border-radius: 100%" alt="" rel="nofollow">
