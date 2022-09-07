@@ -12,7 +12,8 @@ from .services.image_service import get_base_photo, GetPhotos
 from .services.info_service import get_info
 from .services.map_coordinates_service import get_coordinate
 from .services.review_service import GetReviews
-from .services.save_service import get_or_create_place, set_info, set_coordinate, set_photo_url, set_reviews, set_photos
+from .services.save_service import get_or_create_place, set_info, set_coordinate, set_photo_url, set_reviews, \
+    set_photos, create_place
 from .services.start_driver_service import start_firefox, start_chrome
 from .utils import error_catching, wait_and_get_element, function_error_catching
 from ..models import CityService
@@ -185,7 +186,7 @@ def place_create_driver(cid: str, city: str, service: str):
 
 
 def place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos):
-    place = get_or_create_place(
+    place = create_place(
         base_info.get('title'),
         base_info.get('rating'),
         base_info.get('rating_user_count'),

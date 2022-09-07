@@ -19,7 +19,7 @@ from .models import Place, Query, QueryPlace, PlacePhoto, Review, ReviewType, Re
     CityService, WordAiCookie, Service, CityServiceFile
 from .parser.main import start_parsing
 from .parser.services.save_service import get_or_create_place, set_info, set_coordinate, set_photo_url, set_reviews, \
-    set_photos
+    set_photos, create_place
 from .parser.services.start_driver_service import start_chrome
 from .utils import save_image, deEmojify
 from .utils import city_service_create
@@ -104,7 +104,7 @@ def startChrome(url=URL, path=None):
 
 
 def create_place_for_file(data: dict, city_service: CityService):
-    place = get_or_create_place(
+    place = create_place(
         name=data.get('base_info').get('title'),
         rating=data.get('base_info').get('rating'),
         rating_user_count=data.get('base_info').get('rating_user_count'),

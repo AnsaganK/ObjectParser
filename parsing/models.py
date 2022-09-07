@@ -284,7 +284,7 @@ class Place(models.Model):
     title = models.TextField(null=True, blank=True, default='', verbose_name='Title')
     name = models.CharField(max_length=1000, null=True, blank=True)
     slug = models.SlugField(max_length=1000, null=True, blank=True)
-    cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True, unique=True)
+    cid = models.TextField(verbose_name='CID в гугл картах', null=True, blank=True)
     cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
     address = models.CharField(max_length=500, null=True, blank=True)
     phone_number = models.CharField(max_length=500, null=True, blank=True)

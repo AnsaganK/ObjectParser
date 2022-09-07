@@ -110,6 +110,17 @@ def get_or_create_place(name, rating, rating_user_count, cid):
         print(e.__class__.__name__)
 
 
+def create_place(name, rating, rating_user_count, cid):
+    place = Place.objects.create(name=name,
+                                 rating=rating,
+                                 rating_user_count=rating_user_count,
+                                 cid=cid)
+    place.save()
+    place.slug = slugify(f'{place.name}-{str(place.id)}')
+    place.save()
+    return place
+
+
 def set_info(data, place):
     if not data:
         return None

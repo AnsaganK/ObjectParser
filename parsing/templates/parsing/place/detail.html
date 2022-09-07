@@ -108,7 +108,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="modal" id="modal" onclick="closeModal()">
+    <div class="modal" id="modal" onclick="closeModal(this)">
         <div class="modal-background"></div>
         <div class="modal-content">
             <p class="image is-4by3">
@@ -116,6 +116,22 @@
             </p>
         </div>
         <button class="modal-close is-large" aria-label="close" onclick=""></button>
+    </div>
+    <div class="modal" id="modal_delete" onclick="closeModal(this)">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">{{ place.name }}</p>
+                <button class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                Are you sure you want to delete?
+            </section>
+            <footer class="modal-card-foot">
+                <a href="#" class="button is-danger">Delete</a>
+                <button class="button">Cancel</button>
+            </footer>
+        </div>
     </div>
     {% include 'parsing/include/place/card.html' with place=place %}
     <hr>
@@ -137,8 +153,12 @@
             showImg();
         }
 
-        function closeModal() {
-            let modal = document.getElementById('modal');
+        function closeModal(elem) {
+            elem.classList.toggle('is-active');
+        }
+
+        function showModalDeleteForm() {
+            let modal = document.getElementById('modal_delete');
             modal.classList.toggle('is-active');
         }
     </script>
