@@ -671,6 +671,16 @@ def place_edit(request, pk):
     return render(request, 'parsing/place/edit.html', {'place': place})
 
 
+@login_required()
+def place_delete(request, slug):
+    place = get_object_or_404(Place, slug=slug)
+    name = place.name
+    city_service = place.city_service
+    place.delete()
+    messages.success(request, f'Place deleted: {name}')
+    return redirect(reverse('parsing:city_service_detail', args=[city_service.city.slug, city_service.service.slug]))
+
+
 def place_set_description(place):
     reviews = place.reviews.all()[:20]
     text = ''

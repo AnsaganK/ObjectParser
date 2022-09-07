@@ -104,6 +104,8 @@ def startChrome(url=URL, path=None):
 
 
 def create_place_for_file(data: dict, city_service: CityService):
+    if city_service.places.filter(cid=data.get('cid')).exists():
+        return None
     place = create_place(
         name=data.get('base_info').get('title'),
         rating=data.get('base_info').get('rating'),

@@ -180,19 +180,23 @@ def place_create_driver(cid: str, city: str, service: str):
     print(datetime.now() - start_time)
     print()
 
-    place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos)
+    city_service = CityService.objects.filter(city__name=city, service__name=service).first()
+
+    place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos, city_service)
 
     driver.close()
 
 
-def place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos):
+def place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos, city_service):
+    if city_service.places.filter(cid=cid).exists():
+        return None
     place = create_place(
         base_info.get('title'),
         base_info.get('rating'),
         base_info.get('rating_user_count'),
         cid
     )
-    place.city_service = CityService.objects.filter(city__name=city, service__name=service).first()
+    place.city_service = city_service
     place.save()
 
     print('base_photo: ', base_photo)

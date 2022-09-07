@@ -34,6 +34,7 @@ urlpatterns = [
     path('reviews/<slug:place_slug>', views.city_service_place_detail,
          name='city_service_place_detail'),
 
+    path('place/<slug:slug>/delete', views.place_delete, name="place_delete"),
     path('place/<slug:slug>', views.place_detail, name="place_detail"),
     path('place/<slug:place_slug>/review/create', views.review_create, name="review_create"),
     path('place/update/<int:pk>', views.place_update, name="place_update"),
