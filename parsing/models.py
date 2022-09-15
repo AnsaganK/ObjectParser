@@ -312,7 +312,7 @@ class Place(models.Model):
     is_redirect = models.BooleanField(default=False)
     redirect = models.TextField(null=True, blank=True, default='')
 
-    faq = models.OneToOneField('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='place')
+    faq = models.ForeignKey('FAQ', null=True, blank=True, on_delete=models.CASCADE, related_name='place')
 
     city_service = models.ForeignKey(CityService, null=True, blank=True, on_delete=models.CASCADE,
                                      related_name='places')
@@ -359,6 +359,18 @@ class Place(models.Model):
     def google_url(self):
         return 'https://maps.google.com/?cid={0}'.format(str(self.cid))
 
+    @property
+    def get_reviews(self):
+        return self.get_base_place.reviews.all()
+
+    @property
+    def get_photos(self):
+        return self.get_base_place.photos.all()
+
+    @property
+    def get_base_place(self):
+        return Place.objects.filter(cid=self.cid).order_by('pk').first()
+
     # @property
     # def get_img(self):
     #     url = '/static/parsing/img/not_found_place.png'
@@ -385,10 +397,11 @@ class Place(models.Model):
 
     @property
     def get_more_text(self):
-        base_review = self.reviews.filter(base=True)
+        base_review = self.get_reviews.filter(base=True)
         if base_review.exists():
             return base_review.first()
-        queries = self.reviews.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by(
+
+        queries = self.get_reviews.exclude(text=None).exclude(text='').annotate(text_len=Length('text')).order_by(
             '-text_len')
         if queries:
             return queries.first()
@@ -450,7 +463,7 @@ class ReviewPart(models.Model):
 
 class Review(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING, related_name='reviews')
-    place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews')
+    place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name='reviews', null=True, blank=True)
     base = models.BooleanField(default=False)
     text = models.TextField(null=True, blank=True)
     original_text = models.TextField(null=True, blank=True)

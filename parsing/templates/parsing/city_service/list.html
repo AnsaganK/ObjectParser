@@ -29,7 +29,7 @@
                             {% if city_service.status == 'error' %}{% static 'parsing/img/error.svg' %}{% endif %}
                             " alt="" width="20px" height="20px">
 
-                        <a href="{{ city_service.get_absolute_url }}">{{ city_service.search_text }}</a>
+                        <a href="{{ city_service.get_absolute_url }}">{{ city_service.get_title }}</a>
                     </td>
                     <td>
                         <a class="link"

@@ -55,7 +55,7 @@
                 </a>
             {% endif %}
         </div>
-        <span>Reviews: {{ place.reviews.count }}</span>
+        <span>Reviews: {{ place.get_reviews.count }}</span>
         {% with place.get_more_text as review %}
             {% if review %}
                 <div style="margin-top: 5px;">

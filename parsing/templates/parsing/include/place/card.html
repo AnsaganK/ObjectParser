@@ -49,6 +49,7 @@
 
 
 
+
                     {% if place.get_cloud_img and place.get_cloud_img.get_default_img %}{{ place.get_cloud_img.get_default_img }}{% else %}{% static 'parsing/img/not_found_place.png' %}{% endif %}"
                  alt="" class="place_base_img" rel="nofollow">
             <div class="place-info" style="padding: 10px">
@@ -92,7 +93,7 @@
             </article>
             <article>
                 <div style="display: flex; justify-content: space-between;flex-wrap: wrap; margin: 15px auto">
-                    {% if place.photos.count > 0 %}
+                    {% if place.get_photos.count > 0 %}
                         <div class="slider">
                             <div class="slider__wrapper">
                                 <div class="slider__items">

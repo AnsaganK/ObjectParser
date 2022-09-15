@@ -66,7 +66,7 @@ class GenerateUser():
         return user_data
 
     def get_or_create_user(self):
-        if User.objects.count() > 2000:
+        if User.objects.count() > 20:
             return User.objects.order_by('?').first()
         user_data = self.get_user()
         user = User.objects.get_or_create(username=user_data['username'])
@@ -90,21 +90,39 @@ class GenerateUser():
 
 def get_or_create_place(name, rating, rating_user_count, cid):
     try:
-        place = Place.objects.filter(cid=cid).first()
-        if place:
-            place.name = name
+        if Place.objects.filter(cid=cid).exists():
+            place = Place.objects.filter(cid=cid).order_by('pk').first()
+
+            photos = place.photos.all()
+            reviews = place.reviews.all()
+
+            print("PK: ", place.pk)
+            place.pk = None
+            place.city_service = None
+            place.save()
+            print(place.reviews)
             place.rating = rating
             place.rating_user_count = rating_user_count
+            place.slug = slugify(f'{place.name}-{str(place.id)}')
             place.save()
-            return place
-        place = Place.objects.create(name=name,
-                                     rating=rating,
-                                     rating_user_count=rating_user_count,
-                                     cid=cid)
-        place.save()
-        place.slug = slugify(f'{place.name}-{str(place.id)}')
-        place.save()
-        return place
+            if reviews:
+                for base_review in reviews:
+                    review = Review.objects.get(pk=base_review.pk)
+                    review.pk = None
+                    review.place = place
+                    review.save()
+
+            if photos:
+                for base_photo in photos:
+                    photo = PlacePhoto.objects.get(pk=base_photo.pk)
+                    photo.pk = None
+                    photo.place = place
+                    photo.save()
+
+            place.save()
+            return place, 0
+        place = create_place(name, rating, rating_user_count, cid)
+        return place, 1
     except Exception as e:
         print('Ошибка при создании или взятии palce')
         print(e.__class__.__name__)
@@ -145,7 +163,7 @@ def set_coordinate(data, place):
 def set_photo_url(img_url, place_id, base=True):
     ua = UserAgent()
     try:
-        print('img url: ', img_url)
+        # print('img url: ', img_url)
         print(Place.objects.filter(id=place_id).count())
         place = Place.objects.filter(id=place_id).first()
         if place and img_url:
@@ -155,13 +173,13 @@ def set_photo_url(img_url, place_id, base=True):
                 content = r.content
                 cloud_image = save_image(content)
                 if base:
-                    print('cloud image')
-                    print(place.cloud_img)
+                    # print('cloud image')
+                    # print(place.cloud_img)
                     place.cloud_img = cloud_image
-                    print(place.cloud_img)
+                    # print(place.cloud_img)
                     place.save()
-                    print(place.cloud_img)
-                    print('---- -----')
+                    # print(place.cloud_img)
+                    # print('---- -----')
                 else:
                     photo = PlacePhoto(place=place)
                     photo.cloud_img = cloud_image

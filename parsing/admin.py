@@ -12,7 +12,7 @@ class QueryAdmin(admin.ModelAdmin):
 
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
-    list_display = ['id', 'cid', 'name']
+    list_display = ['id', 'cid', 'name', 'city_service']
     list_display_links = ['id']
     exclude = ['city_service']
     # list_filter = ['query']

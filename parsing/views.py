@@ -8,7 +8,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 from django.db import IntegrityError
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -292,7 +292,7 @@ def query_list(request):
 
 @login_required()
 def city_service_list(request):
-    city_services = CityService.objects.exclude(status='not started').order_by('-date_parsing')
+    city_services = CityService.objects.filter(~Q(status='not started') | ~Q(files=None)).order_by('-date_parsing')
     city_services = get_paginator(request, city_services)
     return render(request, 'parsing/city_service/list.html', {
         'city_services': city_services,
@@ -606,13 +606,17 @@ def create_or_update_review_types(post, review):
 
 def get_place_reviews(request, place):
     my_review = False
+    reviews = place.get_reviews
+    print(reviews)
     if request.user.is_authenticated:
-        reviews = place.reviews.exclude(user=request.user)
-        my_review = Review.objects.filter(place=place).filter(user=request.user).first()
-    else:
-        reviews = place.reviews.all()
+        reviews = reviews.exclude(user=request.user)
+        my_review = reviews.filter(user=request.user).first()
+
     reviews = get_paginator(request, reviews, 10)
-    return {'my_review': my_review, 'reviews': reviews}
+    return {
+        'my_review': my_review,
+        'reviews': reviews
+    }
 
 
 def query_place_detail(request, query_slug, place_slug):
@@ -627,9 +631,18 @@ def query_place_detail(request, query_slug, place_slug):
 
 def place_detail(request, slug):
     place = get_object_or_404(Place, slug=slug)
-    reviews = get_place_reviews(request, place)
-    return render(request, 'parsing/place/detail.html',
-                  {'place': place, 'reviews': reviews['reviews'], 'my_review': reviews['my_review']})
+    print(Place.objects.filter(cid=place.cid).count())
+    if Place.objects.filter(cid=place.cid).count() > 1:
+        print('find')
+        base_place = Place.objects.filter(cid=place.cid).order_by('pk').first()
+        reviews = get_place_reviews(request, base_place)
+    else:
+        reviews = get_place_reviews(request, place)
+    return render(request, 'parsing/place/detail.html', {
+        'place': place,
+        'reviews': reviews['reviews'],
+        'my_review': reviews['my_review']
+    })
 
 
 @login_required()
@@ -1491,7 +1504,9 @@ def city_service_place_detail(request, place_slug):
     place = get_object_or_404(Place, slug=place_slug)
     if place.is_redirect and not has_group(request.user, 'Redactor'):
         return redirect(place.redirect)
+
     reviews = get_place_reviews(request, place)
+
     return render(request, 'parsing/place/detail.html', {
         'place': place,
         'reviews': reviews['reviews'],

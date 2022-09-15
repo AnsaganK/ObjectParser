@@ -58,12 +58,12 @@ def save_image(image):
         'file': image
     }
     r = requests.post(url, files=files, headers=headers)
-    print(r)
-    print(r.json())
+    # print(r)
+    # print(r.json())
     if r.status_code == 200:
         response = r.json()
-        print(response)
-        print('CloudFlare save image: ', response['success'])
+        # print(response)
+        # print('CloudFlare save image: ', response['success'])
         if response['success'] == True:
             cloud_image = CloudImage(image_id=response['result']['id'], image_response=response)
             cloud_image.save()

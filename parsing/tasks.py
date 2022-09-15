@@ -104,20 +104,35 @@ def startChrome(url=URL, path=None):
 
 
 def create_place_for_file(data: dict, city_service: CityService):
-    if city_service.places.filter(cid=data.get('cid')).exists():
+    if Place.objects.filter(cid=data.get('cid'), city_service=city_service).exists():
         return None
-    place = create_place(
+    place = get_or_create_place(
         name=data.get('base_info').get('title'),
         rating=data.get('base_info').get('rating'),
         rating_user_count=data.get('base_info').get('rating_user_count'),
         cid=data.get('cid')
     )
-    place.city_service = city_service
-    set_info(data.get('full_info'), place)
-    set_coordinate(data.get('coordinate'), place)
-    set_photo_url(data.get('base_photo'), place.id, base=True)
-    set_reviews(data.get('reviews'), place)
-    set_photos(data.get('photos'), place.id)
+
+    print(place)
+
+    if place[1]:
+        place = place[0]
+        place.city_service = city_service
+        print(1)
+        set_info(data.get('full_info'), place)
+        print(2)
+        set_coordinate(data.get('coordinate'), place)
+        print(3)
+        set_photo_url(data.get('base_photo'), place.id, base=True)
+        print(4)
+        set_reviews(data.get('reviews'), place)
+        print(5)
+        set_photos(data.get('photos'), place.id)
+        print(6)
+    else:
+        place = place[0]
+        place.city_service = city_service
+        place.save()
 
     return place
 

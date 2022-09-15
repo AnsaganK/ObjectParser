@@ -182,37 +182,36 @@ def place_create_driver(cid: str, city: str, service: str):
 
     city_service = CityService.objects.filter(city__name=city, service__name=service).first()
 
-    place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos, city_service)
+    place_save(cid, base_info, full_info, coordinate, base_photo, reviews, photos, city_service)
 
     driver.close()
 
 
-def place_save(cid, city, service, base_info, full_info, coordinate, base_photo, reviews, photos, city_service):
+def place_save(cid, base_info, full_info, coordinate, base_photo, reviews, photos, city_service):
     if city_service.places.filter(cid=cid).exists():
         return None
-    place = create_place(
+    place = get_or_create_place(
         base_info.get('title'),
         base_info.get('rating'),
         base_info.get('rating_user_count'),
         cid
     )
-    place.city_service = city_service
-    place.save()
 
-    print('base_photo: ', base_photo)
+    place[0].city_service = city_service
 
-    print('palce_id: ', place.id)
+    if place[1]:
+        place = place[0]
+        set_info(full_info, place)
 
-    set_info(full_info, place)
+        set_coordinate(coordinate, place)
 
-    set_coordinate(coordinate, place)
+        set_photo_url(base_photo, place.id, base=True)
 
-    set_photo_url(base_photo, place.id, base=True)
+        set_reviews(reviews, place)
 
-    set_reviews(reviews, place)
+        set_photos(photos, place.id)
+        print(photos)
 
-    set_photos(photos, place.id)
-    print(photos)
     print('Закрыто')
 
 
