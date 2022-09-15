@@ -197,10 +197,9 @@ def place_save(cid, base_info, full_info, coordinate, base_photo, reviews, photo
         cid
     )
 
-    place[0].city_service = city_service
-
     if place[1]:
         place = place[0]
+        place.city_service = city_service
         set_info(full_info, place)
 
         set_coordinate(coordinate, place)
@@ -211,6 +210,10 @@ def place_save(cid, base_info, full_info, coordinate, base_photo, reviews, photo
 
         set_photos(photos, place.id)
         print(photos)
+    else:
+        place = place[0]
+        place.city_service = city_service
+        place.save()
 
     print('Закрыто')
 
