@@ -3,3 +3,4 @@ chromedriver.exe
 geckodriver.exe
 venv
 media/
+**/__pycache__
