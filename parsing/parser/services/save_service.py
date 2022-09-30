@@ -93,8 +93,8 @@ def get_or_create_place(name, rating, rating_user_count, cid):
         if Place.objects.filter(cid=cid).exists():
             place = Place.objects.filter(cid=cid).order_by('pk').first()
 
-            photos = place.photos.all()
-            reviews = place.reviews.all()
+            # photos = place.photos.all()
+            # reviews = place.reviews.all()
 
             print("PK: ", place.pk)
             place.pk = None
@@ -105,19 +105,19 @@ def get_or_create_place(name, rating, rating_user_count, cid):
             place.rating_user_count = rating_user_count
             place.slug = slugify(f'{place.name}-{str(place.id)}')
             place.save()
-            if reviews:
-                for base_review in reviews:
-                    review = Review.objects.get(pk=base_review.pk)
-                    review.pk = None
-                    review.place = place
-                    review.save()
+            # if reviews:
+            #     for base_review in reviews:
+            #         review = Review.objects.get(pk=base_review.pk)
+            #         review.pk = None
+            #         review.place = place
+            #         review.save()
 
-            if photos:
-                for base_photo in photos:
-                    photo = PlacePhoto.objects.get(pk=base_photo.pk)
-                    photo.pk = None
-                    photo.place = place
-                    photo.save()
+            # if photos:
+            #     for base_photo in photos:
+            #         photo = PlacePhoto.objects.get(pk=base_photo.pk)
+            #         photo.pk = None
+            #         photo.place = place
+            #         photo.save()
             place.archive = False
             place.save()
             return place, 0
