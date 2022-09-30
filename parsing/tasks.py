@@ -667,7 +667,7 @@ def word_ai(reviews, unique_review=None):
 #                                           Uniqueize reviews
 #
 def uniqueize_place_reviews_task(place):
-    reviews = place.reviews.all()
+    reviews = place.get_reviews
     word_ai(reviews)
 
 
@@ -698,8 +698,11 @@ def uniqueize_text_task(city_service_id=None, place_id=None):
         reviews = place.reviews.all().order_by('-pk')
         unique_review = UniqueReview(reviews_count=reviews.count(), place=place)
     else:
+        reviews = []
         city_service = CityService.objects.filter(id=city_service_id).first()
-        reviews = Review.objects.filter(place__city_service=city_service).order_by('-pk')
+        # reviews = Review.objects.filter(place____city_service=city_service).order_by('-pk')
+        for place in city_service.places.all():
+            reviews += [review for review in place.get_reviews]
         if not reviews:
             return None
         unique_review = UniqueReview(reviews_count=reviews.count(), city_service=city_service)
