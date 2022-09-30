@@ -128,7 +128,6 @@ def create_place_for_file(data: dict, city_service: CityService):
         set_reviews(data.get('reviews'), place)
         print(5)
         set_photos(data.get('photos'), place.id)
-        place.archive = False
         print(6)
     else:
         place = place[0]

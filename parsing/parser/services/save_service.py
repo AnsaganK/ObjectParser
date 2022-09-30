@@ -118,7 +118,7 @@ def get_or_create_place(name, rating, rating_user_count, cid):
                     photo.pk = None
                     photo.place = place
                     photo.save()
-
+            place.archive = False
             place.save()
             return place, 0
         place = create_place(name, rating, rating_user_count, cid)
