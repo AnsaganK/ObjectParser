@@ -11,6 +11,7 @@ from django.core.files import File
 from django.core.files.base import ContentFile
 from django.core.files.temp import NamedTemporaryFile
 from django.http import StreamingHttpResponse
+from django.utils import timezone
 from mimesis import Person
 from mimesis.enums import Gender
 from pytils.translit import slugify
@@ -687,7 +688,7 @@ def preview_uniqueize_reviews_task(review_ids, unique_review_id):
 @shared_task
 def uniqueize_reviews_task(reviews, unique_review):
     word_ai(reviews, unique_review)
-    unique_review.date_end = datetime.now()
+    unique_review.date_end = timezone.now()
     unique_review.save()
 
 
@@ -695,7 +696,7 @@ def uniqueize_reviews_task(reviews, unique_review):
 def uniqueize_text_task(city_service_id=None, place_id=None):
     if place_id:
         place = Place.objects.filter(id=place_id).first()
-        reviews = place.reviews.all().order_by('-pk')
+        reviews = place.get_reviews.order_by('-pk')
         unique_review = UniqueReview(reviews_count=reviews.count(), place=place)
     else:
         reviews = []
