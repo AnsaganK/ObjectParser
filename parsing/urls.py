@@ -63,7 +63,7 @@ urlpatterns = [
 
     path('<slug:slug>', views.city_detail, name='city_detail'),
     path('<slug:slug>/edit', views.city_edit, name='city_edit'),
-    path('<slug:city_slug>/<slug:service_slug>', views.city_service_detail, name='city_service_detail'),
+    path('<slug:city_slug>/<slug:service_slug>/', views.city_service_detail, name='city_service_detail'),
     path('<slug:city_slug>/<slug:service_slug>/custom_parser', views.start_custom_parser, name='start_custom_parser'),
 
     path('city/service/<int:pk>', views.city_service_access, name='city_service_access'),

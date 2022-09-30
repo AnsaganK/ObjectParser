@@ -159,20 +159,26 @@ class City(models.Model):
 
     cloud_img = models.ForeignKey(CloudImage, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Image')
 
+    class Meta:
+        verbose_name = 'City'
+        verbose_name_plural = 'Cities'
+        ordering = ['name']
+
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('parsing:city_detail', args=[self.slug])
 
     @property
     def get_cities(self):
         return self.cities.all()
 
-    def get_absolute_url(self):
-        return reverse('parsing:city_detail', args=[self.slug])
-
-    class Meta:
-        verbose_name = 'City'
-        verbose_name_plural = 'Cities'
-        ordering = ['name']
+    @property
+    def get_zip_codes(self):
+        if not self.zip_codes:
+            return []
+        return ','.join([zip_code for zip_code in self.zip_codes[:7]])
 
 
 class Service(models.Model):
@@ -427,7 +433,7 @@ class PlacePhoto(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE, null=True, blank=True, related_name='photos')
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         verbose_name = 'Фотография'
