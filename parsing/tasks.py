@@ -706,7 +706,7 @@ def uniqueize_text_task(city_service_id=None, place_id=None):
             reviews += [review for review in place.get_reviews]
         if not reviews:
             return None
-        unique_review = UniqueReview(reviews_count=reviews.count(), city_service=city_service)
+        unique_review = UniqueReview(reviews_count=len(reviews), city_service=city_service)
     unique_review.save()
     uniqueize_reviews_task(reviews, unique_review)
 
