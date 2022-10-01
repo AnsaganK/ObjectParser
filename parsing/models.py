@@ -527,7 +527,7 @@ class UniqueReview(models.Model):
 
     @property
     def percent(self):
-        return round((self.reviews_checked / self.reviews_count) * 100)
+        return round((self.reviews_checked / self.reviews_count) * 100) if self.reviews_count > 0 else 100
 
     def get_name(self):
         if self.place:
